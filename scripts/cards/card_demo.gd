@@ -5,6 +5,7 @@ const PanelScene = preload("res://scenes/cards/card_panel.tscn")
 var card_panel: CardPanel
 var _finish_button: Button
 var _next_button: Button
+var _monster_button: Button
 var _output: Label
 var _turn: int = 0
 var hud: BattleHUD
@@ -49,13 +50,25 @@ func _ready() -> void:
 	_next_button.custom_minimum_size = Vector2(150, 44)
 	_next_button.pressed.connect(_start_turn)
 	actions.add_child(_next_button)
+	_monster_button = Button.new()
+	_monster_button.text = "怪物定式"
+	_monster_button.custom_minimum_size = Vector2(150, 44)
+	_monster_button.pressed.connect(_apply_monster_formula)
+	actions.add_child(_monster_button)
 	_output = Label.new()
 	_output.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	_output.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	actions.add_child(_output)
+	var symbol_lock: Array[FormulaSlot] = [
+		FormulaSlot.open_number(), FormulaSlot.locked_operator("÷"),
+		FormulaSlot.open_number(), FormulaSlot.locked_operator("-"),
+		FormulaSlot.open_number(), FormulaSlot.locked_operator("×"),
+		FormulaSlot.open_number(),
+	]
 	_cards = [
-		CardData.number_card(3), CardData.number_card(5),
-		CardData.operator_card("×"), CardData.operator_card("+"), CardData.number_card(2)
+		CardData.number_card(3), CardData.number_card(5), CardData.number_card(2), CardData.number_card(4),
+		CardData.operator_card("×"), CardData.operator_card("+"), CardData.operator_card("-"), CardData.operator_card("÷"),
+		CardData.special_card(symbol_lock),
 	]
 	_start_turn()
 
@@ -64,6 +77,7 @@ func _start_turn() -> void:
 	card_panel.start_player_turn(_cards)
 	_finish_button.disabled = false
 	_next_button.disabled = true
+	_monster_button.disabled = false
 	_output.text = "第 %d 回合" % _turn
 	hud.start_countdown(30.0)
 
@@ -77,3 +91,13 @@ func _finish_turn() -> void:
 	_output.text = "已结束"
 	_finish_button.disabled = true
 	_next_button.disabled = false
+	_monster_button.disabled = true
+
+func _apply_monster_formula() -> void:
+	var slots: Array[FormulaSlot] = [
+		FormulaSlot.locked_number(-1), FormulaSlot.open_operator(),
+		FormulaSlot.locked_number(2), FormulaSlot.open_operator(),
+		FormulaSlot.locked_number(6), FormulaSlot.open_operator(),
+		FormulaSlot.locked_number(-3),
+	]
+	card_panel.apply_formula_constraint(slots)

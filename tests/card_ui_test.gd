@@ -69,7 +69,7 @@ func _drag(view: Control, destination: Vector2, expected_insert: int = -1, scree
 func _view_for(panel: CardPanel, text: String, region: StringName = &"hand") -> Control:
 	var row := panel._hand_row if region == &"hand" else panel._expression_row
 	for view in row.get_children():
-		if not view is PanelContainer:
+		if not view is PanelContainer or view.card == null:
 			continue
 		if view.card.display_text() == text:
 			return view
@@ -117,19 +117,20 @@ func _run() -> void:
 	for frame in range(5):
 		await process_frame
 	var panel: CardPanel = demo.card_panel
-	_check(panel.get_hand_cards().size() == 5, "Demo must render five cards")
+	_check(panel.get_hand_cards().size() == 9, "Demo must render the full test hand")
 	await _drag(_view_for(panel, "3"), Vector2(8, 8))
-	_check(panel.get_hand_cards().size() == 5, "Outside drop must leave hand unchanged")
+	_check(panel.get_hand_cards().size() == 9, "Outside drop must leave hand unchanged")
 	for value in ["3", "×", "5", "+", "2"]:
 		await _drag(_view_for(panel, value), _blank(panel._expression_zone), panel.get_expression_cards().size())
-	_check(panel._result_label.text == "结果 17" and panel.get_hand_cards().is_empty(), "All cards must form 3 × 5 + 2")
+	_check(panel._result_label.text == "结果 17" and panel.get_expression_cards().size() == 5, "Dragged cards must form 3 × 5 + 2")
+	_check(panel.get_hand_cards().size() == 4, "Unplayed demo cards stay in hand")
 	await _drag(_view_for(panel, "5", &"expression"), Vector2(8, 8))
 	_check(panel.get_expression_cards().size() == 5, "Outside expression drag must preserve card")
 	await _drag(_view_for(panel, "5", &"expression"), _half(_view_for(panel, "3", &"expression"), true))
 	_check(panel._result_label.text == "结果 17", "Direct expression reordering must be rejected")
-	# Return a middle card into an EMPTY hand, then repair on an existing card face.
+	# Return a middle card to the end of the hand, then repair on an existing card face.
 	await _drag(_view_for(panel, "5", &"expression"), panel._hand_zone.get_global_rect().get_center())
-	_check(panel.get_hand_cards().size() == 1 and panel.get_hand_cards()[0].number == 5, "Only middle five must return to empty hand")
+	_check(panel.get_hand_cards().size() == 5 and panel.get_hand_cards().back().number == 5, "Middle five must return to the end of the hand")
 	_check(panel._result_label.text == "结果 0 · 未完成", "Removing middle number must show invalid result")
 	await _capture("card_demo_incomplete")
 	await _drag(_view_for(panel, "5"), _half(_view_for(panel, "+", &"expression"), true), 2, "card_demo_insertion")
@@ -139,7 +140,7 @@ func _run() -> void:
 	_check(panel._result_label.text.contains("未完成"), "Adjacent numbers must be shown as invalid")
 	await _drag(_view_for(panel, "2", &"expression"), _view_for(panel, "×").get_global_rect().get_center())
 	await _drag(_view_for(panel, "3", &"expression"), _blank(panel._hand_zone))
-	_check(panel.get_hand_cards().size() == 3 and panel.get_expression_cards().size() == 2, "Multiple returns must compact expression")
+	_check(panel.get_hand_cards().size() == 7 and panel.get_expression_cards().size() == 2, "Multiple returns must compact expression")
 	await _drag(_view_for(panel, "3"), _half(_view_for(panel, "5", &"expression"), true), 0)
 	await _drag(_view_for(panel, "×"), _half(_view_for(panel, "3", &"expression"), false), 1)
 	await _drag(_view_for(panel, "2"), _blank(panel._expression_zone), 4)
@@ -157,17 +158,17 @@ func _run() -> void:
 	await _check_locked(_view_for(panel, "2"))
 	await _check_locked(_view_for(panel, "5", &"expression"))
 	await _click(demo._next_button)
-	_check(panel.is_turn_active() and panel.get_expression_cards().is_empty() and panel.get_hand_cards().size() == 5, "Next button must restore fixed hand")
+	_check(panel.is_turn_active() and panel.get_expression_cards().is_empty() and panel.get_hand_cards().size() == 9, "Next button must restore fixed hand")
 	await _drag(_view_for(panel, "+"), panel._burn_zone.get_global_rect().get_center())
-	_check(panel.get_hand_cards().size() == 5 and panel.get_pending_heal() == 0, "Burn zone must reject operator")
+	_check(panel.get_hand_cards().size() == 9 and panel.get_pending_heal() == 0, "Burn zone must reject operator")
 	await _drag(_view_for(panel, "5"), panel._burn_zone.get_global_rect().get_center())
-	_check(panel.get_hand_cards().size() == 4 and panel.get_pending_heal() == 50, "Dragging number into burn zone must remove it and add heal")
+	_check(panel.get_hand_cards().size() == 8 and panel.get_pending_heal() == 50, "Dragging number into burn zone must remove it and add heal")
 	_check(demo._health == 70, "Burn heal must wait for settlement")
 	await _capture("card_demo_burn")
 	await _click(demo._finish_button)
 	_check(demo._health == 100, "Settlement must heal and cap HP")
 	await _click(demo._next_button)
-	_check(panel.get_hand_cards().size() == 4 and panel.get_pending_heal() == 0, "Burned card must not return next turn")
+	_check(panel.get_hand_cards().size() == 8 and panel.get_pending_heal() == 0, "Burned card must not return next turn")
 	await _capture("card_demo")
 	# A narrow standalone panel forces wrapped expression rows.
 	demo.hide()
@@ -200,6 +201,67 @@ func _run() -> void:
 		await _drag(_view_for(narrow, "9"), _half(narrow._expression_row.get_child(wrapped_index), false), wrapped_index + 1)
 		_check(narrow.get_expression_cards()[wrapped_index + 1] == cards[7], "Wrapped row right-half must insert after target")
 	await _capture("card_demo_wrapped")
+	narrow.hide()
+	await _run_formula_drag(demo)
 	if _failures == 0:
-		print("PASS: native drag/drop, middle insertion, burn zone, health settlement, wrapped rows and turn locking")
+		print("PASS: native drag/drop, middle insertion, burn zone, health settlement, wrapped rows, formula slots and turn locking")
 	quit(1 if _failures else 0)
+
+func _slot_template() -> Array[FormulaSlot]:
+	var slots: Array[FormulaSlot] = [
+		FormulaSlot.open_number(), FormulaSlot.locked_operator("÷"),
+		FormulaSlot.open_number(), FormulaSlot.locked_operator("-"),
+		FormulaSlot.open_number(), FormulaSlot.locked_operator("×"),
+		FormulaSlot.open_number(),
+	]
+	return slots
+
+func _run_formula_drag(demo) -> void:
+	var formula_panel: CardPanel = load("res://scenes/cards/card_panel.tscn").instantiate()
+	formula_panel.theme = demo.theme
+	formula_panel.position = Vector2(12, 8)
+	formula_panel.size = Vector2(1080, 560)
+	root.add_child(formula_panel)
+	var eight := CardData.number_card(8)
+	var two := CardData.number_card(2)
+	var plus := CardData.operator_card("+")
+	var special := CardData.special_card(_slot_template())
+	formula_panel.start_player_turn([eight, two, plus, special])
+	for frame in range(5):
+		await process_frame
+	var special_view := _view_for(formula_panel, "定式")
+	var special_style := special_view.get_theme_stylebox("panel") as StyleBoxFlat
+	_check(special_style != null and special_style.border_color != Color("72dfcb") and special_style.border_color != Color("d7a4f3"), "Special card must use its own color")
+	await _drag(special_view, _blank(formula_panel._expression_zone))
+	_check(formula_panel.has_formula_constraint(), "Dropping the special card must install its formula")
+	_check(formula_panel.get_hand_cards().find(special) == -1, "Played special card must leave the hand")
+	_check(formula_panel._result_label.text == "定式 □ ÷ □ - □ × □ · 结果 0 · 未完成", "Special formula must show open number slots")
+	_check(formula_panel._expression_row.get_child_count() == 7, "Formula must render every slot")
+	for frame in range(3):
+		await process_frame
+	var first_slot: Control = formula_panel._expression_row.get_child(0)
+	_check(first_slot.size.x > 40, "Formula slots must lay out")
+	var locked_slot: Control = formula_panel._expression_row.get_child(1)
+	var locked_style := locked_slot.get_theme_stylebox("panel") as StyleBoxFlat
+	_check(locked_slot.locked_face and not locked_slot.draggable, "Locked slot must not be draggable")
+	_check(locked_style != null and locked_style.border_color.r > 0.5 and locked_style.border_color.r > locked_style.border_color.b, "Locked slot must use a dim gold border")
+	_check(locked_slot.get_child(0).text == "÷" and formula_panel._expression_row.get_child(2).get_child(0).text == "□", "Locked and open slots must show their faces")
+	var hand_size := formula_panel.get_hand_cards().size()
+	await _drag(_view_for(formula_panel, "2"), _blank(formula_panel._expression_zone))
+	_check(formula_panel.get_hand_cards().size() == hand_size and formula_panel.get_expression_cards().is_empty(), "Blank formula area must reject a number")
+	await _drag(_view_for(formula_panel, "8"), first_slot.get_global_rect().get_center(), 0)
+	_check(formula_panel._result_label.text == "定式 8 ÷ □ - □ × □ · 结果 0 · 未完成", "Number must land in the chosen open slot")
+	_check(formula_panel.get_expression_cards() == [eight], "Only the targeted slot may hold the number")
+	var number_slot: Control = formula_panel._expression_row.get_child(2)
+	await _drag(_view_for(formula_panel, "+"), number_slot.get_global_rect().get_center())
+	_check(formula_panel.get_expression_cards() == [eight], "Operator drop onto a number slot must be rejected")
+	_check(formula_panel._result_label.text == "定式 8 ÷ □ - □ × □ · 结果 0 · 未完成", "Rejected operator drop must leave the formula unchanged")
+	await _drag(_view_for(formula_panel, "8", &"expression"), _blank(formula_panel._hand_zone))
+	_check(formula_panel.get_expression_cards().is_empty(), "A filled slot card must drag back to hand")
+	formula_panel.hide()
+	demo.show()
+	for frame in range(3):
+		await process_frame
+	await _click(demo._monster_button)
+	_check(demo.card_panel.has_formula_constraint(), "Monster button must apply the shared formula API")
+	_check(demo.card_panel._result_label.text == "定式 -1 □ 2 □ 6 □ -3 · 结果 0 · 未完成", "Monster formula must show locked numbers and open operators")

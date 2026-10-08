@@ -27,13 +27,33 @@ func can_accept_at(global_point: Vector2, data: Variant) -> bool:
 	if not card_panel.can_accept_drop(data, region):
 		clear_hint()
 		return false
+	if region == &"expression" and card_panel.has_formula_constraint():
+		var card_id: int = data["card_id"]
+		if card_panel.is_special_drop(card_id):
+			_hovering = true
+			insertion_index = -1
+			queue_redraw()
+			return true
+		var slot_index := _slot_at(global_point)
+		if not card_panel.can_fill_slot(card_id, slot_index):
+			clear_hint()
+			return false
+		_hovering = true
+		insertion_index = slot_index
+		queue_redraw()
+		return true
 	_hovering = true
 	insertion_index = insertion_at(global_point) if region == &"expression" else -1
 	queue_redraw()
 	return true
 
 func accept_at(global_point: Vector2, data: Variant) -> void:
-	var index := insertion_at(global_point) if region == &"expression" else -1
+	var index := -1
+	if region == &"expression":
+		if card_panel.has_formula_constraint() and data is Dictionary and not card_panel.is_special_drop(data["card_id"]):
+			index = _slot_at(global_point)
+		elif not card_panel.has_formula_constraint():
+			index = insertion_at(global_point)
 	card_panel.accept_drop(data, region, index)
 	clear_hint()
 
@@ -51,6 +71,15 @@ func insertion_at(global_point: Vector2) -> int:
 					return index
 	return count
 
+func _slot_at(global_point: Vector2) -> int:
+	if card_row == null:
+		return -1
+	for index in range(card_row.get_child_count()):
+		var child := card_row.get_child(index) as Control
+		if child != null and child.get_global_rect().has_point(global_point):
+			return index
+	return -1
+
 func clear_hint() -> void:
 	_hovering = false
 	insertion_index = -1
@@ -64,6 +93,14 @@ func _draw() -> void:
 		if region == &"burn":
 			accent = Color("ffb375")
 		draw_rect(Rect2(Vector2(3, 3), size - Vector2(6, 6)), accent, false, 2.0)
+		return
+	if card_panel.has_formula_constraint():
+		if insertion_index >= 0 and card_row != null and insertion_index < card_row.get_child_count():
+			var anchor: Control = card_row.get_child(insertion_index)
+			var rect := anchor.get_global_rect()
+			draw_rect(Rect2(rect.position - global_position, rect.size).grow(3.0), accent, false, 3.0)
+		else:
+			draw_rect(Rect2(Vector2(3, 3), size - Vector2(6, 6)), Color("e8a84a"), false, 2.0)
 		return
 	var count: int = card_panel.get_expression_cards().size()
 	var marker := Rect2(Vector2(10, 16), Vector2(3, 116))

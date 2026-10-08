@@ -1,8 +1,8 @@
 class_name CardPanel
 extends VBoxContainer
-## Battle owns timing and HP. This panel owns the current hand and expression.
+## Battle owns timing and HP. This panel owns the current hand, expression, and formula.
 
-signal preview_changed(result: int)
+signal preview_changed(result: float)
 signal card_burned(instance_id: int, heal: int)
 
 @export var burn_heal_multiplier: int = 10
@@ -12,9 +12,11 @@ const DropZone = preload("res://scripts/cards/expression_drop_zone.gd")
 
 var _hand: Array[CardData] = []
 var _expression: Array[CardData] = []
+var _constraint: Array[FormulaSlot] = []
 var _active: bool = false
 var _generation: int = 0
-var _settled_result: int = 0
+var _settled_result: float = 0.0
+var _settled_exact: Rational
 var _expression_row: HFlowContainer
 var _hand_row: HFlowContainer
 var _result_label: Label
@@ -37,18 +39,26 @@ func start_player_turn(cards: Array[CardData]) -> void:
 			_hand.append(card)
 	_pending_heal = 0
 	_expression.clear()
+	_constraint.clear()
 	_generation += 1
-	_settled_result = 0
+	_settled_result = 0.0
+	_settled_exact = Rational.from_int(0)
 	_active = true
 	_refresh()
 	preview_changed.emit(0)
 
-func finish_player_turn() -> int:
+func finish_player_turn() -> float:
 	if _active:
-		_settled_result = ExpressionEvaluator.evaluate(_expression)
+		_settled_exact = _current_outcome().result
+		_settled_result = _settled_exact.to_float()
 		_active = false
 		_refresh()
 	return _settled_result
+
+func get_exact_result() -> Rational:
+	if _active:
+		return _current_outcome().result
+	return _settled_exact if _settled_exact != null else Rational.from_int(0)
 
 func is_turn_active() -> bool:
 	return _active
@@ -61,11 +71,26 @@ func reset_battle() -> void:
 	_generation += 1
 	_hand.clear()
 	_expression.clear()
+	_constraint.clear()
 	_burned_ids.clear()
 	_pending_heal = 0
-	_settled_result = 0
+	_settled_result = 0.0
+	_settled_exact = Rational.from_int(0)
 	_refresh()
 	preview_changed.emit(0)
+
+func has_formula_constraint() -> bool:
+	return not _constraint.is_empty()
+
+func apply_formula_constraint(slots: Array[FormulaSlot]) -> bool:
+	if not _active or not FormulaSlot.is_valid_template(slots):
+		return false
+	var installed := FormulaSlot.clone_all(slots)
+	_release_expression_cards()
+	_constraint = installed
+	_expression.clear()
+	_expression_changed()
+	return true
 
 func burn_card(instance_id: int) -> bool:
 	var index := _find_card(_hand, instance_id)
@@ -92,11 +117,27 @@ func can_accept_drop(data: Variant, target: StringName = &"expression") -> bool:
 	if target == &"expression" and data.get("source") == &"hand":
 		return _find_card(_hand, data["card_id"]) >= 0
 	if target == &"hand" and data.get("source") == &"expression":
-		return _find_card(_expression, data["card_id"]) >= 0
+		return _find_expression_card(data["card_id"]) >= 0
 	if target == &"burn" and data.get("source") == &"hand":
 		var index := _find_card(_hand, data["card_id"])
 		return index >= 0 and _hand[index].kind == CardData.Kind.NUMBER
 	return false
+
+func is_special_drop(instance_id: int) -> bool:
+	var index := _find_card(_hand, instance_id)
+	if index < 0 or _hand[index].kind != CardData.Kind.SPECIAL:
+		return false
+	return FormulaSlot.is_valid_template(_hand[index].slots)
+
+func can_fill_slot(instance_id: int, slot_index: int) -> bool:
+	if not _active or _constraint.is_empty():
+		return false
+	if slot_index < 0 or slot_index >= _constraint.size():
+		return false
+	var hand_index := _find_card(_hand, instance_id)
+	if hand_index < 0:
+		return false
+	return _slot_accepts(_constraint[slot_index], _hand[hand_index])
 
 func accept_drop(data: Variant, target: StringName = &"expression", insertion_index: int = -1) -> bool:
 	if not can_accept_drop(data, target):
@@ -105,11 +146,26 @@ func accept_drop(data: Variant, target: StringName = &"expression", insertion_in
 		return return_card(data["card_id"])
 	if target == &"burn":
 		return burn_card(data["card_id"])
-	return insert_card(data["card_id"], _expression.size() if insertion_index == -1 else insertion_index)
+	var hand_index := _find_card(_hand, data["card_id"])
+	if hand_index >= 0 and _hand[hand_index].kind == CardData.Kind.SPECIAL:
+		return _play_special(_hand[hand_index])
+	if not _constraint.is_empty():
+		return insert_card(data["card_id"], insertion_index)
+	var index := _expression.size() if insertion_index == -1 else insertion_index
+	return insert_card(data["card_id"], index)
 
 func insert_card(instance_id: int, insertion_index: int) -> bool:
 	var index := _find_card(_hand, instance_id)
-	if not _active or index < 0 or insertion_index < 0 or insertion_index > _expression.size():
+	if not _active or index < 0 or _hand[index].kind == CardData.Kind.SPECIAL:
+		return false
+	if not _constraint.is_empty():
+		if not can_fill_slot(instance_id, insertion_index):
+			return false
+		_constraint[insertion_index].card = _hand[index]
+		_hand.remove_at(index)
+		_expression_changed()
+		return true
+	if insertion_index < 0 or insertion_index > _expression.size():
 		return false
 	_expression.insert(insertion_index, _hand[index])
 	_hand.remove_at(index)
@@ -117,22 +173,74 @@ func insert_card(instance_id: int, insertion_index: int) -> bool:
 	return true
 
 func return_card(instance_id: int) -> bool:
+	if not _active:
+		return false
+	if not _constraint.is_empty():
+		for slot in _constraint:
+			if slot.card != null and slot.card.instance_id == instance_id:
+				_hand.append(slot.card)
+				slot.card = null
+				_expression_changed()
+				return true
+		return false
 	var index := _find_card(_expression, instance_id)
-	if not _active or index < 0:
+	if index < 0:
 		return false
 	_hand.append(_expression[index])
 	_expression.remove_at(index)
 	_expression_changed()
 	return true
 
+func _play_special(card: CardData) -> bool:
+	if not FormulaSlot.is_valid_template(card.slots):
+		return false
+	var installed := FormulaSlot.clone_all(card.slots)
+	_release_expression_cards()
+	var index := _find_card(_hand, card.instance_id)
+	if index < 0:
+		return false
+	_hand.remove_at(index)
+	_constraint = installed
+	_expression.clear()
+	_expression_changed()
+	return true
+
+func _release_expression_cards() -> void:
+	if _constraint.is_empty():
+		for card in _expression:
+			_hand.append(card)
+		_expression.clear()
+		return
+	for slot in _constraint:
+		if slot.card != null:
+			_hand.append(slot.card)
+			slot.card = null
+	_constraint.clear()
+	_expression.clear()
+
+func _slot_accepts(slot: FormulaSlot, card: CardData) -> bool:
+	if slot.locked or slot.card != null:
+		return false
+	if card.kind == CardData.Kind.NUMBER:
+		return slot.kind == FormulaSlot.Kind.NUMBER
+	if card.kind == CardData.Kind.OPERATOR:
+		return slot.kind == FormulaSlot.Kind.OPERATOR
+	return false
+
 func _expression_changed() -> void:
 	_refresh()
-	preview_changed.emit(ExpressionEvaluator.evaluate(_expression))
+	preview_changed.emit(_current_outcome().result.to_float())
 
 func get_hand_cards() -> Array[CardData]:
 	return _hand.duplicate()
 
 func get_expression_cards() -> Array[CardData]:
+	if not _constraint.is_empty():
+		var filled: Array[CardData] = []
+		for slot in _constraint:
+			if slot.card != null:
+				filled.append(slot.card)
+		return filled
 	return _expression.duplicate()
 
 func _find_card(cards: Array[CardData], instance_id: int) -> int:
@@ -140,6 +248,45 @@ func _find_card(cards: Array[CardData], instance_id: int) -> int:
 		if cards[index].instance_id == instance_id:
 			return index
 	return -1
+
+func _find_expression_card(instance_id: int) -> int:
+	if not _constraint.is_empty():
+		var ordinal := 0
+		for slot in _constraint:
+			if slot.card != null:
+				if slot.card.instance_id == instance_id:
+					return ordinal
+				ordinal += 1
+		return -1
+	return _find_card(_expression, instance_id)
+
+func _current_outcome() -> ExpressionEvaluator.Outcome:
+	if not _constraint.is_empty():
+		return ExpressionEvaluator.inspect_slots(_constraint)
+	return ExpressionEvaluator.inspect_cards(_expression)
+
+func _formula_text() -> String:
+	var parts: PackedStringArray = []
+	for slot in _constraint:
+		parts.append(slot.display_text())
+	return " ".join(parts)
+
+func _result_text() -> String:
+	var outcome := _current_outcome()
+	var text := ""
+	if not _constraint.is_empty():
+		text = "定式 %s · " % _formula_text()
+	text += "结果 %s" % outcome.result.display_text()
+	if not _constraint.is_empty():
+		if not outcome.complete:
+			text += " · 未完成"
+		elif outcome.divided_by_zero:
+			text += " · 除以零"
+	elif not outcome.valid:
+		text += " · 未完成"
+	elif outcome.divided_by_zero:
+		text += " · 除以零"
+	return text
 
 func _build_ui() -> void:
 	_result_label = Label.new()
@@ -208,15 +355,15 @@ func _refresh() -> void:
 	_hand_zone.clear_hint()
 	_burn_zone.clear_hint()
 	_rebuild_cards(_hand_row, _hand, &"hand", _hand_zone)
-	_rebuild_cards(_expression_row, _expression, &"expression", _expression_zone)
-	if _expression.is_empty():
-		_add_placeholder(_expression_row, "算式")
+	if _constraint.is_empty():
+		_rebuild_cards(_expression_row, _expression, &"expression", _expression_zone)
+		if _expression.is_empty():
+			_add_placeholder(_expression_row, "算式")
+	else:
+		_rebuild_slots()
 	if _hand.is_empty():
 		_add_placeholder(_hand_row, "空")
-	var valid := ExpressionEvaluator.is_valid(_expression)
-	_result_label.text = "结果 %d" % ExpressionEvaluator.evaluate(_expression)
-	if not valid:
-		_result_label.text += " · 未完成"
+	_result_label.text = _result_text()
 	_heal_label.text = "回血 +%d" % _pending_heal
 
 func _add_placeholder(row: Container, text: String) -> void:
@@ -239,3 +386,21 @@ func _rebuild_cards(row: Container, cards: Array[CardData], region: StringName, 
 		view.source_region = region
 		view.drop_zone = zone
 		row.add_child(view)
+
+func _rebuild_slots() -> void:
+	for child in _expression_row.get_children():
+		_expression_row.remove_child(child)
+		child.queue_free()
+	for slot in _constraint:
+		var view := CardView.new()
+		view.card_panel = self
+		view.drop_zone = _expression_zone
+		view.source_region = &"expression"
+		if slot.card != null:
+			view.card = slot.card
+			view.draggable = _active
+		else:
+			view.locked_face = slot.locked
+			view.face_text = slot.display_text()
+			view.draggable = false
+		_expression_row.add_child(view)
