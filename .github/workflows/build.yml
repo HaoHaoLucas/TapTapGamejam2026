@@ -28,12 +28,10 @@ jobs:
         run: godot --headless --path . --editor --quit
       - name: Gameplay smoke test
         run: godot --headless --path . --script tests/smoke_test.gd
-      - name: Card module tests
-        run: godot --headless --path . --script tests/card_test.gd
-      - name: Card drag and drop UI test
-        run: godot --headless --path . --script tests/card_ui_test.gd
-      - name: Health and countdown integration test
-        run: godot --headless --path . --script tests/battle_hud_test.gd
+      - name: Combat engine tests
+        run: godot --headless --path . --script tests/combat_engine_test.gd
+      - name: Battle demo tests
+        run: godot --headless --path . --script tests/battle_demo_test.gd
       - name: Export Windows game
         run: |
           mkdir -p build/windows

@@ -1,8 +1,0 @@
-[gd_scene load_steps=2 format=3]
-
-[ext_resource type="Script" path="res://scripts/cards/card_panel.gd" id="1"]
-
-[node name="CardPanel" type="VBoxContainer"]
-offset_right = 1000.0
-offset_bottom = 460.0
-script = ExtResource("1")
