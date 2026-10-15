@@ -113,6 +113,7 @@ func _run() -> void:
 	_test_intent_and_burn_dot()
 	_test_timeout_and_pause()
 	_test_score_and_preview_rank()
+	_test_draw_keeps_operator_and_numbers()
 	await process_frame
 	if _failures == 0:
 		print("PASS: deck, RNG, invariant, fire, reactions, combo, burn, intent, timeout, pause, score")
@@ -408,3 +409,100 @@ func _test_score_and_preview_rank() -> void:
 	_check(engine.choose_card("n6") == false, "Victory must freeze further card choices")
 	engine.s.selected = ["missing"]
 	_check(not engine.invariant(), "Selected IDs that are not live number cards must fail the invariant")
+
+
+func _pool(engine: CombatEngine) -> Dictionary:
+	var numbers: Array = []
+	var operators: Array = []
+	for zone in [engine.s.hand, engine.s.draw, engine.s.discard, engine.s.burned]:
+		for card in zone:
+			if card == null:
+				continue
+			if card.type == "operator":
+				operators.append(card)
+			else:
+				numbers.append(card)
+	return {"numbers": numbers, "operators": operators}
+
+
+func _type_counts(cards: Array) -> Dictionary:
+	var ops := 0
+	var nums := 0
+	for card in cards:
+		if card == null:
+			continue
+		if card.type == "operator":
+			ops += 1
+		elif card.type == "number":
+			nums += 1
+	return {"ops": ops, "nums": nums}
+
+
+func _test_draw_keeps_operator_and_numbers() -> void:
+	var engine := CombatEngine.new()
+	engine.start()
+	var pool := _pool(engine)
+	var numbers: Array = pool.numbers
+	var operators: Array = pool.operators
+	var top: Array = [numbers[0], numbers[1], operators[0], numbers[2], numbers[3]]
+	var draw: Array = []
+	for i in range(1, operators.size()):
+		draw.append(operators[i])
+	for i in range(4, numbers.size()):
+		draw.append(numbers[i])
+	for i in range(top.size() - 1, -1, -1):
+		draw.append(top[i])
+	engine.s.hand = []
+	engine.s.discard = []
+	engine.s.burned = []
+	engine.s.draw = draw
+	engine.fill_hand()
+	_check(_ids(engine.s.hand) == _ids(top), "A draw that already has an operator and two numbers must stay in shuffle order")
+
+	draw = []
+	draw.append_array(operators)
+	draw.append_array(numbers)
+	engine.s.hand = []
+	engine.s.discard = []
+	engine.s.draw = draw
+	engine.fill_hand()
+	var mixed := _type_counts(engine.s.hand)
+	_check(engine.s.hand.size() == 5 and int(mixed.ops) >= 1 and int(mixed.nums) >= 2, "Five numbers on top must be repaired with an operator")
+	_check(engine.invariant(), "Repaired number-heavy draw must keep the zone invariant")
+
+	pool = _pool(engine)
+	numbers = pool.numbers
+	operators = pool.operators
+	draw = []
+	draw.append_array(numbers)
+	draw.append_array(operators)
+	engine.s.hand = []
+	engine.s.discard = []
+	engine.s.draw = draw
+	engine.fill_hand()
+	mixed = _type_counts(engine.s.hand)
+	_check(engine.s.hand.size() == 5 and int(mixed.ops) >= 1 and int(mixed.nums) >= 2, "Five operators on top must be repaired with two numbers")
+
+	pool = _pool(engine)
+	numbers = pool.numbers
+	operators = pool.operators
+	engine.s.hand = []
+	engine.s.burned = operators
+	engine.s.discard = []
+	engine.s.draw = numbers
+	engine.fill_hand()
+	mixed = _type_counts(engine.s.hand)
+	_check(int(mixed.ops) == 0 and int(mixed.nums) == 5, "A deck with no operators left must draw the numbers as shuffled")
+	_check(engine.invariant(), "Unrepairable draw must keep the zone invariant")
+
+	pool = _pool(engine)
+	numbers = pool.numbers
+	operators = pool.operators
+	engine.s.hand = []
+	engine.s.burned = []
+	engine.s.draw = numbers
+	engine.s.discard = operators
+	engine.fill_hand()
+	mixed = _type_counts(engine.s.hand)
+	_check(int(mixed.ops) >= 1 and int(mixed.nums) >= 2, "Operators left in discard must still fill the minimum")
+	_check(engine.invariant(), "Discard repair must keep the zone invariant")

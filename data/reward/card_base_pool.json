@@ -1,0 +1,31 @@
+{
+  "schema_version": 1,
+  "config_version": "jam_1.0.0",
+  "table": "card_base_pool",
+  "rows": [
+    {
+      "pool_id": "CP_STANDARD",
+      "kind_weights": {"NUM": 75, "ADD": 15, "MUL": 10},
+      "abs_values": [0, 1, 2, 3, 4, 5],
+      "abs_weights": [2, 10, 16, 22, 26, 24],
+      "sign_weights": {"NEG": 45, "POS": 55},
+      "fixed_def_ids": []
+    },
+    {
+      "pool_id": "CP_PIZZA",
+      "kind_weights": {"NUM": 95, "ADD": 3, "MUL": 2},
+      "abs_values": [0, 1, 2, 3, 4, 5],
+      "abs_weights": [0, 0, 5, 10, 35, 50],
+      "sign_weights": {"NEG": 20, "POS": 80},
+      "fixed_def_ids": []
+    },
+    {
+      "pool_id": "CP_CACHE",
+      "kind_weights": {"NUM": 1, "ADD": 1, "MUL": 1},
+      "abs_values": [],
+      "abs_weights": [],
+      "sign_weights": {},
+      "fixed_def_ids": ["CARD_N2", "CARD_ADD", "CARD_MUL"]
+    }
+  ]
+}

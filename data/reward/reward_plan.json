@@ -1,0 +1,82 @@
+{
+  "schema_version": 1,
+  "config_version": "jam_1.0.0",
+  "table": "reward_plan",
+  "rows": [
+    {
+      "reward_id": "RW_NORMAL",
+      "payload_kind": "CARD",
+      "ui_mode": "PICK",
+      "offer_count": 3,
+      "pick_count": 1,
+      "grant_count_values": [],
+      "grant_count_weights": [],
+      "quality_profile": "NORMAL",
+      "base_pool_id": "CP_STANDARD",
+      "mark_pool_id": "EP_SAFE",
+      "can_skip": true,
+      "pity_key": "COMMON_MARK",
+      "fallback_reward_id": ""
+    },
+    {
+      "reward_id": "RW_BOSS_CARD",
+      "payload_kind": "CARD",
+      "ui_mode": "PICK",
+      "offer_count": 3,
+      "pick_count": 1,
+      "grant_count_values": [],
+      "grant_count_weights": [],
+      "quality_profile": "BOSS",
+      "base_pool_id": "CP_STANDARD",
+      "mark_pool_id": "EP_SAFE",
+      "can_skip": true,
+      "pity_key": "",
+      "fallback_reward_id": ""
+    },
+    {
+      "reward_id": "RW_BOSS_MARK",
+      "payload_kind": "MARK",
+      "ui_mode": "PICK",
+      "offer_count": 3,
+      "pick_count": 1,
+      "grant_count_values": [],
+      "grant_count_weights": [],
+      "quality_profile": "NONE",
+      "base_pool_id": "",
+      "mark_pool_id": "EP_SMITH",
+      "can_skip": true,
+      "pity_key": "",
+      "fallback_reward_id": "RW_BOSS_CARD"
+    },
+    {
+      "reward_id": "RW_PIZZA",
+      "payload_kind": "CARD",
+      "ui_mode": "TAKE_ALL",
+      "offer_count": 0,
+      "pick_count": 0,
+      "grant_count_values": [3, 4, 5],
+      "grant_count_weights": [25, 50, 25],
+      "quality_profile": "PIZZA",
+      "base_pool_id": "CP_PIZZA",
+      "mark_pool_id": "EP_SAFE",
+      "can_skip": true,
+      "pity_key": "",
+      "fallback_reward_id": ""
+    },
+    {
+      "reward_id": "RW_CACHE",
+      "payload_kind": "CARD",
+      "ui_mode": "PICK",
+      "offer_count": 3,
+      "pick_count": 1,
+      "grant_count_values": [],
+      "grant_count_weights": [],
+      "quality_profile": "FIXED_0",
+      "base_pool_id": "CP_CACHE",
+      "mark_pool_id": "",
+      "can_skip": true,
+      "pity_key": "",
+      "fallback_reward_id": ""
+    }
+  ]
+}

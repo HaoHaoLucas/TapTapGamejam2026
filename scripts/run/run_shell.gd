@@ -1,0 +1,607 @@
+extends Control
+## Playable tower entry. F5 stays on the collection prototype.
+
+const DISPLAY := {
+	"ROOM_NORMAL": "战斗",
+	"ROOM_EVENT": "奇遇",
+	"ROOM_BOSS": "Boss",
+}
+
+var run: RunState
+var _session: CombatSession
+var _demo: BattleDemo
+var _battle_room := ""
+var _body: VBoxContainer
+var _header: Label
+var _status: Label
+var _selected_offer := ""
+var _selected_cards: Array = []
+var _pizza_done := false
+
+
+func _ready() -> void:
+	set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
+	var font := SystemFont.new()
+	font.font_names = PackedStringArray(["Microsoft YaHei UI", "Microsoft YaHei", "Noto Sans CJK SC", "Segoe UI"])
+	var ui := Theme.new()
+	ui.default_font = font
+	ui.default_font_size = 18
+	theme = ui
+	var backdrop := ColorRect.new()
+	backdrop.color = Color(0.035, 0.055, 0.09)
+	backdrop.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
+	backdrop.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	add_child(backdrop)
+	var margin := MarginContainer.new()
+	margin.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
+	margin.add_theme_constant_override("margin_left", 28)
+	margin.add_theme_constant_override("margin_right", 28)
+	margin.add_theme_constant_override("margin_top", 20)
+	margin.add_theme_constant_override("margin_bottom", 20)
+	add_child(margin)
+	var column := VBoxContainer.new()
+	column.add_theme_constant_override("separation", 12)
+	column.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
+	margin.add_child(column)
+	_header = Label.new()
+	_header.add_theme_font_size_override("font_size", 22)
+	_header.add_theme_color_override("font_color", Color(0.93, 0.86, 0.68))
+	column.add_child(_header)
+	_status = Label.new()
+	_status.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	_status.add_theme_color_override("font_color", Color(0.78, 0.82, 0.74))
+	column.add_child(_status)
+	var scroll := ScrollContainer.new()
+	scroll.size_flags_vertical = Control.SIZE_EXPAND_FILL
+	scroll.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	column.add_child(scroll)
+	_body = VBoxContainer.new()
+	_body.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	_body.add_theme_constant_override("separation", 8)
+	scroll.add_child(_body)
+	_demo = load(SceneRegistry.path_for("battle")).instantiate()
+	_demo.hosted = true
+	_demo.auto_advance = false
+	_demo.visible = false
+	_demo.returned_to_tower.connect(_on_return_to_tower)
+	add_child(_demo)
+	_start_run(str(Time.get_unix_time_from_system()))
+
+
+func _start_run(seed: String) -> void:
+	_battle_room = ""
+	_pizza_done = false
+	_selected_offer = ""
+	_selected_cards = []
+	if _demo != null:
+		_demo.auto_advance = false
+		_demo.visible = false
+	var created := RunService.new_run(seed)
+	if not created.get("ok", false):
+		run = null
+		_header.text = "无法开局"
+		var lines := PackedStringArray()
+		for err in created.get("errors", [created.get("error", "")]):
+			lines.append(str(err))
+		_status.text = "\n".join(lines)
+		_clear_body()
+		return
+	run = created.run
+	_show()
+
+
+func _show() -> void:
+	if run == null:
+		return
+	_header.text = "第 %d 层    生命 %d/%d    牌库 %d" % [run.depth, run.hp, run.max_hp, TowerDeck.deck_cards(run).size()]
+	var pizza := _active_pizza()
+	_status.text = "" if pizza.is_empty() else "披萨在第 %d 层的 Boss 之后到。" % int(pizza.get("target_depth", 0))
+	if run.phase == "ERROR":
+		_status.text = run.last_error
+		return
+	if run.phase == "DEAD":
+		_show_end("你倒下了，本局结束。")
+		return
+	if run.phase == "ENDED":
+		_show_end("本局已结束。")
+		return
+	if run.phase == "FLOOR_CLEAR":
+		_show_floor_clear()
+		return
+	if run.phase == "REWARD":
+		_show_reward()
+		return
+	if str(run.current_room.get("status", "")) == "ENTERED":
+		if str(run.current_room.get("scene_key", "")) == "battle":
+			_show_battle()
+		else:
+			_show_event()
+		return
+	_show_choices()
+
+
+func _show_choices() -> void:
+	_set_battle_visible(false)
+	_clear_body()
+	_selected_offer = ""
+	_selected_cards = []
+	if run.current_offers.is_empty():
+		_status.text = "前面没有路了。"
+		return
+	_status.text = "第 %d 间，选一条路。" % run.pending_slot
+	for offer in run.current_offers:
+		var label := str(DISPLAY.get(str(offer.get("display_key", "")), "房间"))
+		var button := _button(label)
+		var uid := str(offer.get("offer_uid", ""))
+		button.pressed.connect(_choose_offer.bind(uid))
+		_body.add_child(button)
+
+
+func _choose_offer(offer_uid: String) -> void:
+	var result := MapService.choose_room(run, offer_uid)
+	if not result.get("ok", false):
+		_status.text = str(result.get("error", "进不去。"))
+		return
+	_show()
+
+
+func _show_battle() -> void:
+	_clear_body()
+	var room_uid := str(run.current_room.get("room_uid", ""))
+	_set_battle_visible(true)
+	if _battle_room == room_uid:
+		return
+	_session = CombatSession.new()
+	_session.start(run)
+	_demo.adopt_engine(_session.engine)
+	_battle_room = room_uid
+
+
+func _on_return_to_tower(outcome: String) -> void:
+	if _session == null:
+		return
+	_set_battle_visible(false)
+	var phase := _session.write_back(run)
+	_battle_room = ""
+	_session = null
+	_selected_offer = ""
+	_selected_cards = []
+	if phase == "defeat" or outcome == "defeat" or run.hp <= 0:
+		RunService.finish_room(run, "defeat")
+	else:
+		RunService.finish_room(run, "victory")
+	_show()
+
+
+func _show_event() -> void:
+	_set_battle_visible(false)
+	_clear_body()
+	var room_uid := str(run.current_room.get("room_uid", ""))
+	var view := EventService.make_view(run, room_uid)
+	if not view.get("ok", false):
+		_status.text = str(view.get("error", "这个奇遇打不开。"))
+		return
+	var title := Label.new()
+	title.text = str(view.get("name", "奇遇"))
+	title.add_theme_font_size_override("font_size", 28)
+	title.add_theme_color_override("font_color", Color(0.93, 0.86, 0.68))
+	_body.add_child(title)
+	var blurb := str(view.get("text", ""))
+	if blurb != "":
+		_body.add_child(_hint(blurb))
+	if str(view.get("disabled_reason", "")) != "":
+		_body.add_child(_hint(str(view.disabled_reason)))
+	match str(view.get("input_mode", "")):
+		"CARD_ONE":
+			_show_card_choices(view, false)
+		"CARD_MULTI":
+			_show_card_choices(view, true)
+		"OFFER_ONE":
+			_show_offers(view)
+		"ACCEPT_OR_SKIP":
+			_show_accept(view)
+		_:
+			_body.add_child(_hint("这里没什么可做的。"))
+	if bool(view.get("can_skip", true)):
+		var leave := _button("离开")
+		leave.pressed.connect(_skip_event.bind(room_uid))
+		_body.add_child(leave)
+
+
+func _show_card_choices(view: Dictionary, multi: bool) -> void:
+	for card_uid in view.get("eligible_target_uids", []):
+		var card := run.find_card(str(card_uid))
+		if card == null:
+			continue
+		var button := _button(TowerDeck.describe_card(card))
+		button.pressed.connect(_select_card.bind(str(card_uid), multi, str(view.get("room_uid", ""))))
+		_body.add_child(button)
+	var confirm := _button("确认")
+	confirm.pressed.connect(_confirm_cards.bind(str(view.get("room_uid", "")), str(view.get("handler_id", "")), multi))
+	_body.add_child(confirm)
+
+
+func _select_card(card_uid: String, multi: bool, room_uid: String) -> void:
+	if multi:
+		if _selected_cards.has(card_uid):
+			_selected_cards.erase(card_uid)
+		elif _selected_cards.size() < 3:
+			_selected_cards.append(card_uid)
+		_status.text = "选了 %d 张。" % _selected_cards.size()
+		return
+	_selected_cards = [card_uid]
+	var view := EventService.make_view(run, room_uid)
+	if str(view.get("handler_id", "")) == "TRANSFORM_CARD":
+		var preview := EventService.freeze_preview(run, room_uid, card_uid)
+		if preview.get("ok", false):
+			_status.text = "会变成 %s" % str(preview.get("label", ""))
+		else:
+			_status.text = str(preview.get("error", "换不了。"))
+	else:
+		_status.text = "选好了这张牌。"
+
+
+func _confirm_cards(room_uid: String, handler_id: String, multi: bool) -> void:
+	var payload := {}
+	if multi:
+		payload = {"sacrifice_uids": _selected_cards.duplicate()}
+	elif handler_id == "TRANSFORM_CARD":
+		if _selected_cards.is_empty():
+			_status.text = "先选一张牌。"
+			return
+		var preview: Dictionary = EventService.make_view(run, room_uid).get("previews", {}).get(_selected_cards[0], {})
+		if preview.is_empty():
+			preview = EventService.freeze_preview(run, room_uid, _selected_cards[0])
+		if not preview.get("ok", false):
+			_status.text = str(preview.get("error", "换不了。"))
+			return
+		payload = {"target_uid": _selected_cards[0], "preview_uid": str(preview.get("preview_uid", ""))}
+	else:
+		if _selected_cards.is_empty():
+			_status.text = "先选一张牌。"
+			return
+		payload = {"target_uid": _selected_cards[0]}
+	_commit_event(room_uid, payload)
+
+
+func _show_offers(view: Dictionary) -> void:
+	var handler := str(view.get("handler_id", ""))
+	for offer in view.get("offers", []):
+		var label := str(offer.get("display_name", ""))
+		if str(offer.get("payload_kind", "")) == "CARD":
+			label = TowerDeck.describe_parts(str(offer.get("def_id", "")), offer.get("enhancement_ids", []), str(offer.get("display_name", "")))
+		var button := _button(label)
+		var uid := str(offer.get("offer_uid", ""))
+		button.pressed.connect(_select_offer.bind(uid, handler))
+		_body.add_child(button)
+	if handler == "MARK_OFFER" and _selected_offer != "":
+		_body.add_child(_hint("选一张牌，把刚才那项加上去。"))
+		var enh_id := ""
+		for offer in view.get("offers", []):
+			if str(offer.get("offer_uid", "")) == _selected_offer:
+				enh_id = str(offer.get("enh_id", ""))
+		for card_uid in TowerDeck.targets_for_mark(run, enh_id):
+			var card := run.find_card(card_uid)
+			var button := _button(TowerDeck.describe_card(card))
+			button.pressed.connect(_select_card.bind(card_uid, false, str(view.get("room_uid", ""))))
+			_body.add_child(button)
+	var confirm := _button("确认")
+	confirm.pressed.connect(_confirm_offer.bind(str(view.get("room_uid", "")), handler))
+	_body.add_child(confirm)
+
+
+func _select_offer(offer_uid: String, handler: String) -> void:
+	_selected_offer = offer_uid
+	_selected_cards = []
+	if handler == "MARK_OFFER":
+		call_deferred("_show_event")
+		return
+	_status.text = "选好了。"
+
+
+func _confirm_offer(room_uid: String, handler: String) -> void:
+	if _selected_offer == "":
+		_status.text = "先选一项。"
+		return
+	if handler == "MARK_OFFER":
+		if _selected_cards.is_empty():
+			_status.text = "再选一张牌。"
+			return
+		_commit_event(room_uid, {"offer_uid": _selected_offer, "target_uid": _selected_cards[0]})
+		return
+	_commit_event(room_uid, {"offer_uid": _selected_offer})
+
+
+func _show_accept(view: Dictionary) -> void:
+	if bool(view.get("repair", false)):
+		_body.add_child(_hint("这副牌已经打不出正数了。确认后拿走 +2、+3 和加号。"))
+		for offer in view.get("offers", []):
+			_body.add_child(_hint(TowerDeck.describe_parts(str(offer.get("def_id", "")), [], "")))
+		var take := _button("领取")
+		take.pressed.connect(_commit_event.bind(str(view.get("room_uid", "")), {"accept": true}))
+		_body.add_child(take)
+		return
+	var accept := _button("收下")
+	accept.pressed.connect(_commit_event.bind(str(view.get("room_uid", "")), {"accept": true}))
+	_body.add_child(accept)
+	var decline := _button("放弃")
+	decline.pressed.connect(_commit_event.bind(str(view.get("room_uid", "")), {"accept": false}))
+	_body.add_child(decline)
+
+
+func _skip_event(room_uid: String) -> void:
+	_commit_event(room_uid, {"skip": true})
+
+
+func _commit_event(room_uid: String, payload: Dictionary) -> void:
+	var txn := run.uid("T")
+	var result := EventService.commit(run, room_uid, payload, txn)
+	if not result.get("ok", false):
+		_status.text = str(result.get("error", "没做成。"))
+		call_deferred("_show_event")
+		return
+	_selected_offer = ""
+	_selected_cards = []
+	if str(run.current_room.get("status", "")) == "ENTERED" and str(run.current_room.get("room_uid", "")) == room_uid:
+		RunService.finish_room(run, "clear")
+	call_deferred("_show")
+
+
+func _show_reward() -> void:
+	_set_battle_visible(false)
+	_clear_body()
+	var session := _open_reward_session()
+	if session.is_empty():
+		_body.add_child(_hint("奖励已经拿完了。"))
+		var onward := _button("继续")
+		onward.pressed.connect(_finish_reward_step)
+		_body.add_child(onward)
+		return
+	var known := false
+	for offer in session.get("offers", []):
+		if str(offer.get("offer_uid", "")) == _selected_offer:
+			known = true
+			break
+	if not known:
+		_selected_offer = ""
+		_selected_cards = []
+	if _selected_offer == "" and _selected_cards.is_empty():
+		_status.text = "挑一份战利品。"
+	elif _selected_cards.is_empty():
+		_status.text = "选好了这一项。"
+	else:
+		_status.text = "选好了这张牌。"
+	var plan := GameData.reward(str(session.get("reward_id", "")))
+	if str(plan.get("payload_kind", "")) == "MARK":
+		_show_mark_reward(session)
+	else:
+		_show_card_reward(session)
+
+
+func _show_card_reward(session: Dictionary) -> void:
+	_body.add_child(_hint("选一张放进牌库，也可以不要。"))
+	var session_uid := str(session.get("reward_session_uid", ""))
+	for offer in session.get("offers", []):
+		var label := TowerDeck.describe_parts(str(offer.get("def_id", "")), offer.get("enhancement_ids", []), str(offer.get("display_name", "")))
+		var button := _button(label)
+		var uid := str(offer.get("offer_uid", ""))
+		button.pressed.connect(_select_reward_offer.bind(uid, false))
+		_body.add_child(button)
+	var confirm := _button("确认")
+	confirm.pressed.connect(_confirm_card_reward.bind(session_uid))
+	_body.add_child(confirm)
+	_add_reward_skip(session)
+
+
+func _show_mark_reward(session: Dictionary) -> void:
+	_body.add_child(_hint("先选一种变化，再选一张牌。也可以不要。"))
+	var session_uid := str(session.get("reward_session_uid", ""))
+	for offer in session.get("offers", []):
+		var button := _button(str(offer.get("display_name", "")))
+		var uid := str(offer.get("offer_uid", ""))
+		button.pressed.connect(_select_reward_offer.bind(uid, true))
+		_body.add_child(button)
+	if _selected_offer != "":
+		_body.add_child(_hint("选一张牌，把刚才那项加上去。"))
+		var targets: Array = []
+		for offer in session.get("offers", []):
+			if str(offer.get("offer_uid", "")) == _selected_offer:
+				targets = offer.get("eligible_target_uids", [])
+				break
+		for card_uid in targets:
+			var card := run.find_card(str(card_uid))
+			if card == null:
+				continue
+			var button := _button(TowerDeck.describe_card(card))
+			button.pressed.connect(_select_reward_card.bind(str(card_uid)))
+			_body.add_child(button)
+	var confirm := _button("确认")
+	confirm.pressed.connect(_confirm_mark_reward.bind(session_uid))
+	_body.add_child(confirm)
+	_add_reward_skip(session)
+
+
+func _add_reward_skip(session: Dictionary) -> void:
+	var plan := GameData.reward(str(session.get("reward_id", "")))
+	if not bool(plan.get("can_skip", true)):
+		return
+	var skip := _button("跳过")
+	skip.pressed.connect(_skip_reward.bind(str(session.get("reward_session_uid", ""))))
+	_body.add_child(skip)
+
+
+func _select_reward_offer(offer_uid: String, marks: bool) -> void:
+	_selected_offer = offer_uid
+	_selected_cards = []
+	if marks:
+		call_deferred("_show")
+		return
+	_status.text = "选好了。"
+
+
+func _select_reward_card(card_uid: String) -> void:
+	_selected_cards = [card_uid]
+	_status.text = "选好了这张牌。"
+
+
+func _confirm_card_reward(session_uid: String) -> void:
+	if _selected_offer == "":
+		_status.text = "先选一项。"
+		return
+	var result := RewardService.commit_cards(run, session_uid, _selected_offer, false, run.uid("T"))
+	if not result.get("ok", false):
+		_status.text = str(result.get("error", "没拿到牌。"))
+		return
+	_finish_reward_step()
+
+
+func _confirm_mark_reward(session_uid: String) -> void:
+	if _selected_offer == "":
+		_status.text = "先选一项。"
+		return
+	if _selected_cards.is_empty():
+		_status.text = "再选一张牌。"
+		return
+	var result := RewardService.commit_mark(run, session_uid, _selected_offer, str(_selected_cards[0]), run.uid("T"))
+	if not result.get("ok", false):
+		_status.text = str(result.get("error", "没加上去。"))
+		return
+	_finish_reward_step()
+
+
+func _skip_reward(session_uid: String) -> void:
+	RewardService.skip_session(run, session_uid, run.uid("T"))
+	_finish_reward_step()
+
+
+func _finish_reward_step() -> void:
+	_selected_offer = ""
+	_selected_cards = []
+	if _open_reward_session().is_empty() and run.phase == "REWARD":
+		var result := RunService.continue_after_rewards(run)
+		if not result.get("ok", false):
+			_status.text = str(result.get("error", "不能继续"))
+	call_deferred("_show")
+
+
+func _open_reward_session() -> Dictionary:
+	var room_uid := str(run.current_room.get("room_uid", ""))
+	for session in run.reward_sessions:
+		if str(session.get("source_uid", "")) != room_uid:
+			continue
+		if str(session.get("status", "")) == "OPEN":
+			return session
+	return {}
+
+
+func _show_floor_clear() -> void:
+	_set_battle_visible(false)
+	_clear_body()
+	var quest := _ready_pizza()
+	if not quest.is_empty() and not _pizza_done:
+		_show_pizza(quest)
+		return
+	_body.add_child(_hint("这层的 Boss 倒了。"))
+	var onward := _button("继续下一层")
+	onward.pressed.connect(_continue_floor.bind(true))
+	_body.add_child(onward)
+	var stop := _button("结束本局")
+	stop.pressed.connect(_continue_floor.bind(false))
+	_body.add_child(stop)
+
+
+func _show_pizza(quest: Dictionary) -> void:
+	_body.add_child(_hint("披萨到了。不想要的牌可以丢掉。"))
+	for offer in quest.get("reward_snapshot", []):
+		var offer_uid := str(offer.get("offer_uid", ""))
+		var verb := "丢掉\n" if _selected_cards.has(offer_uid) else "带走\n"
+		var button := _button(verb + TowerDeck.describe_parts(str(offer.get("def_id", "")), offer.get("enhancement_ids", []), ""))
+		button.pressed.connect(_toggle_discard.bind(offer_uid))
+		_body.add_child(button)
+	var claim := _button("确认领取")
+	claim.pressed.connect(_claim_pizza.bind(str(quest.get("quest_uid", ""))))
+	_body.add_child(claim)
+
+
+func _toggle_discard(offer_uid: String) -> void:
+	if _selected_cards.has(offer_uid):
+		_selected_cards.erase(offer_uid)
+	else:
+		_selected_cards.append(offer_uid)
+	call_deferred("_show_floor_clear")
+
+
+func _claim_pizza(quest_uid: String) -> void:
+	var result := RewardService.claim_pizza(run, quest_uid, run.uid("T"), _selected_cards.duplicate())
+	if not result.get("ok", false):
+		_status.text = str(result.get("error", "不能领取"))
+		return
+	_pizza_done = true
+	_selected_cards = []
+	_show()
+
+
+func _continue_floor(continue_run: bool) -> void:
+	_pizza_done = false
+	RunService.finish_floor(run, continue_run)
+	_show()
+
+
+func _show_end(message: String) -> void:
+	_set_battle_visible(false)
+	_clear_body()
+	_body.add_child(_hint(message))
+	var again := _button("新的一局")
+	again.pressed.connect(func() -> void: _start_run(str(Time.get_ticks_usec())))
+	_body.add_child(again)
+
+
+func _active_pizza() -> Dictionary:
+	for quest in run.quest_states:
+		if str(quest.get("quest_type", "")) == "PIZZA" and str(quest.get("status", "")) == "ACTIVE":
+			return quest
+	return {}
+
+
+func _ready_pizza() -> Dictionary:
+	for quest in run.quest_states:
+		if str(quest.get("quest_type", "")) == "PIZZA" and str(quest.get("status", "")) == "READY" and int(quest.get("target_depth", -1)) == run.depth:
+			return quest
+	return {}
+
+
+func _set_battle_visible(show_battle: bool) -> void:
+	_demo.visible = show_battle
+	_demo.auto_advance = show_battle
+	_body.visible = not show_battle
+	_header.visible = not show_battle
+	_status.visible = not show_battle
+	if show_battle:
+		_demo.call_deferred("_fit_scale")
+
+
+func _clear_body() -> void:
+	# The clicked room button is still emitting. free() is rejected while it is locked.
+	for child in _body.get_children():
+		_body.remove_child(child)
+		child.queue_free()
+
+
+func _button(text: String) -> Button:
+	var button := Button.new()
+	button.text = text
+	button.alignment = HORIZONTAL_ALIGNMENT_LEFT
+	button.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	button.clip_text = false
+	button.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	button.custom_minimum_size = Vector2(0, 44)
+	button.add_theme_font_size_override("font_size", 18)
+	return button
+
+
+func _hint(text: String) -> Label:
+	var label := Label.new()
+	label.text = text
+	label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	label.add_theme_color_override("font_color", Color(0.86, 0.84, 0.72))
+	return label

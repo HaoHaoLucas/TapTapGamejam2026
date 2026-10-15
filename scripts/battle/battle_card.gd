@@ -7,6 +7,8 @@ var type: String = ""
 var value: int = 0
 var elem: String = ""
 var op: String = ""
+var marks: Array = []
+var enhancement_ids: Array = []
 
 func is_number() -> bool:
 	return type == "number"
@@ -18,5 +20,5 @@ func is_operator() -> bool:
 
 func to_dict() -> Dictionary:
 	if type == "operator":
-		return {"id": id, "type": type, "op": op}
-	return {"id": id, "type": type, "value": value, "elem": elem}
+		return {"id": id, "type": type, "op": op, "enhancement_ids": enhancement_ids.duplicate()}
+	return {"id": id, "type": type, "value": value, "elem": elem, "enhancement_ids": enhancement_ids.duplicate()}

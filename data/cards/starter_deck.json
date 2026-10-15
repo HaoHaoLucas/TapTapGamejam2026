@@ -1,0 +1,20 @@
+{
+  "schema_version": 1,
+  "config_version": "jam_1.0.0",
+  "table": "starter_deck",
+  "rows": [
+    {"starter_id": "STARTER_JAM", "def_id": "CARD_NM5", "starter_count": 1},
+    {"starter_id": "STARTER_JAM", "def_id": "CARD_NM4", "starter_count": 1},
+    {"starter_id": "STARTER_JAM", "def_id": "CARD_NM3", "starter_count": 1},
+    {"starter_id": "STARTER_JAM", "def_id": "CARD_NM2", "starter_count": 1},
+    {"starter_id": "STARTER_JAM", "def_id": "CARD_NM1", "starter_count": 1},
+    {"starter_id": "STARTER_JAM", "def_id": "CARD_N0", "starter_count": 1},
+    {"starter_id": "STARTER_JAM", "def_id": "CARD_N1", "starter_count": 1},
+    {"starter_id": "STARTER_JAM", "def_id": "CARD_N2", "starter_count": 1},
+    {"starter_id": "STARTER_JAM", "def_id": "CARD_N3", "starter_count": 1},
+    {"starter_id": "STARTER_JAM", "def_id": "CARD_N4", "starter_count": 1},
+    {"starter_id": "STARTER_JAM", "def_id": "CARD_N5", "starter_count": 1},
+    {"starter_id": "STARTER_JAM", "def_id": "CARD_ADD", "starter_count": 2},
+    {"starter_id": "STARTER_JAM", "def_id": "CARD_MUL", "starter_count": 2}
+  ]
+}

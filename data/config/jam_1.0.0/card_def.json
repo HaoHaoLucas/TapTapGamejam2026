@@ -1,0 +1,20 @@
+{
+  "schema_version": 1,
+  "config_version": "jam_1.0.0",
+  "table": "card_def",
+  "rows": [
+    {"def_id": "CARD_NM5", "card_kind": "NUM", "base_value": -5, "operator_code": "NONE", "motif_id": "M_NUM_05", "name": "−5"},
+    {"def_id": "CARD_NM4", "card_kind": "NUM", "base_value": -4, "operator_code": "NONE", "motif_id": "M_NUM_04", "name": "−4"},
+    {"def_id": "CARD_NM3", "card_kind": "NUM", "base_value": -3, "operator_code": "NONE", "motif_id": "M_NUM_03", "name": "−3"},
+    {"def_id": "CARD_NM2", "card_kind": "NUM", "base_value": -2, "operator_code": "NONE", "motif_id": "M_NUM_02", "name": "−2"},
+    {"def_id": "CARD_NM1", "card_kind": "NUM", "base_value": -1, "operator_code": "NONE", "motif_id": "M_NUM_01", "name": "−1"},
+    {"def_id": "CARD_N0", "card_kind": "NUM", "base_value": 0, "operator_code": "NONE", "motif_id": "M_NUM_00", "name": "0"},
+    {"def_id": "CARD_N1", "card_kind": "NUM", "base_value": 1, "operator_code": "NONE", "motif_id": "M_NUM_01", "name": "1"},
+    {"def_id": "CARD_N2", "card_kind": "NUM", "base_value": 2, "operator_code": "NONE", "motif_id": "M_NUM_02", "name": "2"},
+    {"def_id": "CARD_N3", "card_kind": "NUM", "base_value": 3, "operator_code": "NONE", "motif_id": "M_NUM_03", "name": "3"},
+    {"def_id": "CARD_N4", "card_kind": "NUM", "base_value": 4, "operator_code": "NONE", "motif_id": "M_NUM_04", "name": "4"},
+    {"def_id": "CARD_N5", "card_kind": "NUM", "base_value": 5, "operator_code": "NONE", "motif_id": "M_NUM_05", "name": "5"},
+    {"def_id": "CARD_ADD", "card_kind": "OP", "base_value": 0, "operator_code": "ADD", "motif_id": "M_ADD", "name": "+"},
+    {"def_id": "CARD_MUL", "card_kind": "OP", "base_value": 0, "operator_code": "MUL", "motif_id": "M_MUL", "name": "×"}
+  ]
+}

@@ -1,0 +1,84 @@
+{
+  "schema_version": 1,
+  "config_version": "jam_1.0.0",
+  "table": "event_def",
+  "rows": [
+    {
+      "event_id": "EV_COPY",
+      "name": "复印机",
+      "text": "选一张牌，我照着再做一张，上面的变化也一起抄上。",
+      "handler_id": "COPY_CARD",
+      "condition_id": "CAN_COPY",
+      "input_mode": "CARD_ONE",
+      "params": {"copies": 1, "copy_flags": true},
+      "can_skip": true,
+      "failure_policy": "ROLLBACK"
+    },
+    {
+      "event_id": "EV_SAC",
+      "name": "祭坛",
+      "text": "交出 1 到 3 张牌。我从剩下的牌里挑同样的张数，各给一张加上变化。",
+      "handler_id": "SACRIFICE_MARK",
+      "condition_id": "CAN_SACRIFICE",
+      "input_mode": "CARD_MULTI",
+      "params": {"min": 1, "max": 3, "distinct_targets": true},
+      "can_skip": true,
+      "failure_policy": "ROLLBACK"
+    },
+    {
+      "event_id": "EV_MAGE",
+      "name": "魔导师",
+      "text": "三张特殊牌，挑一张带走。",
+      "handler_id": "SPECIAL_OFFER",
+      "condition_id": "ALWAYS",
+      "input_mode": "OFFER_ONE",
+      "params": {"pool_id": "SP_MAGE", "offers": 3, "choose": 1},
+      "can_skip": true,
+      "failure_policy": "ROLLBACK"
+    },
+    {
+      "event_id": "EV_SMITH",
+      "name": "铁匠",
+      "text": "先选要给牌加什么，再把牌递过来。",
+      "handler_id": "MARK_OFFER",
+      "condition_id": "HAS_MARK_TARGET",
+      "input_mode": "OFFER_ONE",
+      "params": {"pool_id": "EP_SMITH", "offers": 3, "choose": 1},
+      "can_skip": true,
+      "failure_policy": "ROLLBACK"
+    },
+    {
+      "event_id": "EV_PIZZA",
+      "name": "披萨师傅",
+      "text": "要一份披萨吗？之后 1 层或 2 层的 Boss 打完，盒子会送到。现在看不到里面有什么。",
+      "handler_id": "ACCEPT_PIZZA",
+      "condition_id": "NO_PIZZA",
+      "input_mode": "ACCEPT_OR_SKIP",
+      "params": {"offsets": [1, 2], "weights": [1, 1], "reward_id": "RW_PIZZA"},
+      "can_skip": true,
+      "failure_policy": "ROLLBACK"
+    },
+    {
+      "event_id": "EV_TRANS",
+      "name": "换牌",
+      "text": "选一张牌，我把它换成另一张同类的。能留住的变化会留着。换完之后，牌组还得打得出正数。",
+      "handler_id": "TRANSFORM_CARD",
+      "condition_id": "CAN_TRANSFORM",
+      "input_mode": "CARD_ONE",
+      "params": {"same_kind": true, "keep_marks": true, "exclude_original": true},
+      "can_skip": true,
+      "failure_policy": "ROLLBACK"
+    },
+    {
+      "event_id": "EV_CACHE",
+      "name": "应急物资",
+      "text": "这里有几张备用牌，挑一张。要是你的牌已经打不出正数，就直接给你 +2、+3 和加号。",
+      "handler_id": "BASIC_CACHE",
+      "condition_id": "ALWAYS",
+      "input_mode": "OFFER_ONE",
+      "params": {"repair_if_invalid": true, "reward_id": "RW_CACHE"},
+      "can_skip": true,
+      "failure_policy": "ROLLBACK"
+    }
+  ]
+}

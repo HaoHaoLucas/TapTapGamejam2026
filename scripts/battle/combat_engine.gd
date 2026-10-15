@@ -36,6 +36,10 @@ var on_tick: Callable = Callable()
 var seed: int = DEFAULT_SEED
 var clock: float = 0.0
 var s: Dictionary = {}
+var use_external_deck: bool = false
+var external_hp: int = 100
+var external_max_hp: int = 100
+var _external_template: Array = []
 
 var _rng: CombatRng
 var effects: Array = []
@@ -55,10 +59,17 @@ func reset(notify: bool = true) -> void:
 	clock = 0.0
 	effects = []
 	log_seq = 0
-	var deck: Array = CombatRng.create_deck()
+	var deck: Array = []
+	if use_external_deck:
+		for card in _external_template:
+			deck.append(_clone_battle_card(card))
+	else:
+		deck = CombatRng.create_deck()
 	var all_ids: Array = []
 	for card in deck:
 		all_ids.append(card.id)
+	var hp_value: int = external_hp if use_external_deck else int(CFG.initialHp)
+	var max_hp_value: int = external_max_hp if use_external_deck else int(CFG.maxHp)
 	s = {
 		"phase": "intro",
 		"paused": false,
@@ -66,8 +77,8 @@ func reset(notify: bool = true) -> void:
 		"showPreview": false,
 		"seed": seed,
 		"round": 1,
-		"hp": CFG.initialHp,
-		"maxHp": CFG.maxHp,
+		"hp": hp_value,
+		"maxHp": max_hp_value,
 		"draw": _rng.shuffle(deck),
 		"discard": [],
 		"hand": [],
@@ -165,6 +176,8 @@ func active() -> bool:
 
 
 func start(p_seed: Variant = null) -> void:
+	use_external_deck = false
+	_external_template = []
 	if p_seed == null:
 		p_seed = seed
 	seed = int(p_seed) & CombatRng.UINT32
@@ -174,6 +187,34 @@ func start(p_seed: Variant = null) -> void:
 	note("本局 %s 开始：15 张牌，每回合抽 5 张。" % seed)
 	fx("phase", {"text": "你的回合", "sub": "10 秒倒计时"})
 	notify()
+
+
+func start_with_deck(p_seed: int, cards: Array, hp: int, max_hp: int) -> void:
+	_external_template = []
+	for card in cards:
+		_external_template.append(_clone_battle_card(card))
+	use_external_deck = true
+	external_hp = hp
+	external_max_hp = max_hp
+	seed = int(p_seed) & CombatRng.UINT32
+	reset(false)
+	s.phase = "player"
+	fill_hand()
+	note("本局 %s 开始：%d 张牌，每回合抽 5 张。" % [seed, s.allIds.size()])
+	fx("phase", {"text": "你的回合", "sub": "10 秒倒计时"})
+	notify()
+
+
+func _clone_battle_card(card: BattleCard) -> BattleCard:
+	var copy := BattleCard.new()
+	copy.id = card.id
+	copy.type = card.type
+	copy.value = card.value
+	copy.elem = card.elem
+	copy.op = card.op
+	copy.marks = card.marks.duplicate()
+	copy.enhancement_ids = card.enhancement_ids.duplicate()
+	return copy
 
 
 func set_paused(value: bool) -> void:
@@ -206,6 +247,56 @@ func fill_hand() -> void:
 		var card = take_card()
 		if card != null:
 			s.hand.append(card)
+	_ensure_draw_minimums()
+
+
+## Keep a castable mix when the remaining deck can supply it.
+## One operator and two numbers; otherwise the shuffled draw stands.
+func _ensure_draw_minimums() -> void:
+	var guard := 0
+	while guard < int(CFG.handSize):
+		guard += 1
+		var ops := 0
+		var nums := 0
+		for card in s.hand:
+			if card == null:
+				continue
+			if card.type == "operator":
+				ops += 1
+			elif card.type == "number":
+				nums += 1
+		if ops >= 1 and nums >= 2:
+			return
+		var want := "operator" if ops < 1 else "number"
+		var donor := _find_draw_donor(want)
+		if donor.is_empty():
+			return
+		var spare := "number" if want == "operator" else "operator"
+		var spare_count := nums if spare == "number" else ops
+		var spare_floor := 2 if spare == "number" else 1
+		if spare_count - 1 < spare_floor:
+			return
+		var evict := -1
+		for i in range(s.hand.size() - 1, -1, -1):
+			var held: BattleCard = s.hand[i]
+			if held != null and held.type == spare:
+				evict = i
+				break
+		if evict < 0:
+			return
+		var pile: Array = donor.pile
+		var incoming: BattleCard = pile[int(donor.index)]
+		pile[int(donor.index)] = s.hand[evict]
+		s.hand[evict] = incoming
+
+
+func _find_draw_donor(card_type: String) -> Dictionary:
+	for pile in [s.draw, s.discard]:
+		for i in range(pile.size() - 1, -1, -1):
+			var card: BattleCard = pile[i]
+			if card != null and card.type == card_type:
+				return {"pile": pile, "index": i}
+	return {}
 
 
 func cards_selected() -> Array:
@@ -648,12 +739,13 @@ func invariant() -> bool:
 	var ids: Array = []
 	for card in cards:
 		ids.append(card.id)
-	if ids.size() != int(CFG.deckSize):
+	var expected: int = s.allIds.size() if use_external_deck else int(CFG.deckSize)
+	if ids.size() != expected:
 		return false
 	var unique := {}
 	for id in ids:
 		unique[id] = true
-	if unique.size() != int(CFG.deckSize):
+	if unique.size() != expected:
 		return false
 	for id in s.allIds:
 		if not ids.has(id):

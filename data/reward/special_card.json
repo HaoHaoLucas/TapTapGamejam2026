@@ -1,0 +1,13 @@
+{
+  "schema_version": 1,
+  "config_version": "jam_1.0.0",
+  "table": "special_card",
+  "rows": [
+    {"special_id": "SP_BURST", "pool_id": "SP_MAGE", "def_id": "CARD_N5", "enhancement_ids": ["EN_NUM3", "EN_FROZEN"], "weight": 15, "min_depth": 1, "max_depth": 0, "display_name": "冻结弹芯"},
+    {"special_id": "SP_MEMORY", "pool_id": "SP_MAGE", "def_id": "CARD_N3", "enhancement_ids": ["EN_RETURN", "EN_VANGUARD"], "weight": 20, "min_depth": 1, "max_depth": 0, "display_name": "记忆晶片"},
+    {"special_id": "SP_REACTOR", "pool_id": "SP_MAGE", "def_id": "CARD_N4", "enhancement_ids": ["EN_FLAMMABLE", "EN_FRAGILE"], "weight": 15, "min_depth": 1, "max_depth": 0, "display_name": "不稳定燃料"},
+    {"special_id": "SP_FIST", "pool_id": "SP_MAGE", "def_id": "CARD_ADD", "enhancement_ids": ["EN_COMBO", "EN_GHOST"], "weight": 20, "min_depth": 1, "max_depth": 0, "display_name": "连击组件"},
+    {"special_id": "SP_TWIN", "pool_id": "SP_MAGE", "def_id": "CARD_N2", "enhancement_ids": ["EN_ECHO", "EN_YINYANG"], "weight": 15, "min_depth": 1, "max_depth": 0, "display_name": "回响材料"},
+    {"special_id": "SP_LINK", "pool_id": "SP_MAGE", "def_id": "CARD_MUL", "enhancement_ids": ["EN_MAGNET", "EN_VANGUARD"], "weight": 15, "min_depth": 1, "max_depth": 0, "display_name": "磁性接头"}
+  ]
+}

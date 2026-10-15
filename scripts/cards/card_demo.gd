@@ -3,6 +3,17 @@ class_name BattleDemo
 ## 1440×900 timed-arithmetic battle UI driven by CombatEngine (HTML v0.3).
 
 const DESIGN := Vector2(1440, 900)
+const LAYOUT_TOP_LEFT := 0
+const LAYOUT_TOP_RIGHT := 1
+const LAYOUT_TOP_STRETCH := 2
+const LAYOUT_TOP_CENTER := 3
+const LAYOUT_BOTTOM_LEFT := 4
+const LAYOUT_BOTTOM_RIGHT := 5
+const LAYOUT_BOTTOM_STRETCH := 6
+const LAYOUT_BOTTOM_CENTER := 7
+const LAYOUT_STAGE_LEFT := 8
+const LAYOUT_STAGE_RIGHT := 9
+const LAYOUT_CENTER := 10
 const ZOOM_MIN := 0.7
 const ZOOM_MAX := 2.0
 const HERO_TEX := preload("res://assets/battle/hero.png")
@@ -25,7 +36,10 @@ const FX_COLORS := {
 	"hurt": Color(0.945, 0.631, 0.545),
 }
 
+signal returned_to_tower(outcome: String)
+
 var engine: CombatEngine
+var hosted: bool = false
 var auto_advance: bool = true
 var sound_on: bool = true
 var record_path: String = RECORD_PATH
@@ -111,6 +125,8 @@ var _toast_gen: int = 0
 var _reveal_gen: int = 0
 var _hero_origin: Vector2 = Vector2.ZERO
 var _enemy_origin: Vector2 = Vector2.ZERO
+var _layout_items: Array = []
+var _bar_right: Array = []
 var _ui_theme: Theme
 var _serif: SystemFont
 var _sans: SystemFont
@@ -122,16 +138,38 @@ func _ready() -> void:
 	_build_theme()
 	theme = _ui_theme
 	_build_ui()
-	engine = CombatEngine.new({
-		"seed": CombatEngine.DEFAULT_SEED,
-		"on_change": _on_engine_change,
-		"on_effect": _on_engine_effect,
-		"on_tick": _on_engine_tick,
-	})
+	if engine == null and not hosted:
+		engine = CombatEngine.new({
+			"seed": CombatEngine.DEFAULT_SEED,
+			"on_change": _on_engine_change,
+			"on_effect": _on_engine_effect,
+			"on_tick": _on_engine_tick,
+		})
+	elif engine != null:
+		_bind_engine_callbacks()
 	resized.connect(_fit_scale)
-	_configure_window()
+	if not hosted:
+		_configure_window()
 	_fit_scale()
+	if engine != null:
+		_refresh()
+
+
+func adopt_engine(next: CombatEngine) -> void:
+	engine = next
+	_bind_engine_callbacks()
+	user_modal = ""
+	_modal_signature = ""
+	_record_handled = false
 	_refresh()
+
+
+func _bind_engine_callbacks() -> void:
+	if engine == null:
+		return
+	engine.on_change = _on_engine_change
+	engine.on_effect = _on_engine_effect
+	engine.on_tick = _on_engine_tick
 
 
 func _process(delta: float) -> void:
@@ -179,13 +217,61 @@ func _unhandled_input(event: InputEvent) -> void:
 
 
 func _fit_scale() -> void:
-	if game == null:
+	if game == null or size.x < 1.0 or size.y < 1.0:
 		return
 	var s: float = minf(size.x / DESIGN.x, size.y / DESIGN.y)
 	s = maxf(s, 0.01)
+	var layout := Vector2(size.x / s, size.y / s)
 	game.scale = Vector2(s, s)
-	game.size = DESIGN
-	game.position = (size - DESIGN * s) * 0.5
+	game.size = layout
+	game.position = Vector2.ZERO
+	_apply_layout(layout)
+
+
+func _apply_layout(layout: Vector2) -> void:
+	var extra := Vector2(maxf(layout.x - DESIGN.x, 0.0), maxf(layout.y - DESIGN.y, 0.0))
+	for item in _layout_items:
+		var node: Control = item.node
+		if not is_instance_valid(node):
+			continue
+		var rect: Rect2 = item.rect
+		var pos := rect.position
+		var sz := rect.size
+		match int(item.pin):
+			LAYOUT_TOP_RIGHT:
+				pos.x += extra.x
+			LAYOUT_TOP_STRETCH:
+				sz.x += extra.x
+			LAYOUT_TOP_CENTER:
+				pos.x = (layout.x - sz.x) * 0.5
+			LAYOUT_BOTTOM_LEFT:
+				pos.y += extra.y
+			LAYOUT_BOTTOM_RIGHT:
+				pos.x += extra.x
+				pos.y += extra.y
+			LAYOUT_BOTTOM_STRETCH:
+				pos.y += extra.y
+				sz.x += extra.x
+			LAYOUT_BOTTOM_CENTER:
+				pos.x = (layout.x - sz.x) * 0.5
+				pos.y += extra.y
+			LAYOUT_STAGE_LEFT:
+				pos.y += extra.y * 0.5
+			LAYOUT_STAGE_RIGHT:
+				pos.x += extra.x
+				pos.y += extra.y * 0.5
+			LAYOUT_CENTER:
+				pos += extra * 0.5
+		node.position = pos
+		node.size = sz
+	for item in _bar_right:
+		var node: Control = item.node
+		if is_instance_valid(node):
+			node.position = item.origin + Vector2(extra.x, 0.0)
+	if hero_root != null:
+		_hero_origin = hero_root.position
+	if enemy_root != null:
+		_enemy_origin = enemy_root.position
 
 
 func _configure_window() -> void:
@@ -229,11 +315,20 @@ func start_challenge(p_seed: Variant = null) -> void:
 func act(action: String, extra: String = "") -> bool:
 	match action:
 		"start":
+			if hosted:
+				return false
 			start_challenge()
 			return true
 		"new-seed":
+			if hosted:
+				return false
 			start_challenge(_random_seed())
 			return true
+		"tower":
+			if hosted and engine != null:
+				returned_to_tower.emit(str(engine.s.phase))
+				return true
+			return false
 		"card":
 			return engine.choose_card(extra)
 		"fire":
@@ -333,6 +428,8 @@ func click_hand(index: int) -> void:
 
 
 func _handle_key(key: Key, unicode: int) -> bool:
+	if engine == null:
+		return false
 	var ch := String.chr(unicode) if unicode > 0 else ""
 	var overlay_key := current_overlay()
 	if overlay_key != "":
@@ -407,14 +504,14 @@ func _on_engine_effect(effect: Dictionary) -> void:
 			_nudge(hero_root, _hero_origin, "shoot")
 			_beep("shot" if str(effect.get("op", "")) == "+" else "magic")
 		"window":
-			_float_text(Vector2(1132, 550), "+1 追击窗口", FX_COLORS.gold, 16)
+			_float_text(combo_status.get_parent().position + Vector2(60, -12), "+1 追击窗口", FX_COLORS.gold, 16)
 			_beep("window")
 		"punch":
 			_nudge(hero_root, _hero_origin, "shoot")
 			_beep("punch")
 		"heal":
 			var heal: int = int(effect.get("amount", 0))
-			_float_text(Vector2(286, 368), "+%d" % heal, FX_COLORS.heal)
+			_float_text(hero_root.position + Vector2(133, 139), "+%d" % heal, FX_COLORS.heal)
 			_beep("heal")
 			var card: BattleCard = effect.get("card") as BattleCard
 			if card != null:
@@ -423,7 +520,7 @@ func _on_engine_effect(effect: Dictionary) -> void:
 		"enemyAttack":
 			_nudge(enemy_root, _enemy_origin, "attack")
 			_nudge(hero_root, _hero_origin, "hurt")
-			_float_text(Vector2(281, 357), "−%d" % int(effect.get("amount", 0)), FX_COLORS.hurt)
+			_float_text(hero_root.position + Vector2(128, 128), "−%d" % int(effect.get("amount", 0)), FX_COLORS.hurt)
 			_beep("hurt")
 		"phase":
 			_show_banner(str(effect.get("text", "")), str(effect.get("sub", "")))
@@ -451,7 +548,8 @@ func _refresh_top() -> void:
 	var s: Dictionary = engine.s
 	hp_label.text = "%s / %s" % [s.hp, s.maxHp]
 	_set_fill(hp_fill, float(s.hp) / maxf(float(s.maxHp), 1.0))
-	deck_label.text = "牌库 %s / 15" % (int(CombatEngine.CFG.deckSize) - s.burned.size())
+	var deck_total: int = s.allIds.size() if engine.use_external_deck else int(CombatEngine.CFG.deckSize)
+	deck_label.text = "牌库 %s / %s" % [deck_total - s.burned.size(), deck_total]
 	sound_button.text = "♪" if sound_on else "✕"
 	sound_button.tooltip_text = "音效：开" if sound_on else "音效：关"
 	var phase_text := "你的回合"
@@ -707,7 +805,7 @@ func _refresh_modal() -> void:
 
 
 func _maybe_save_best() -> void:
-	if _record_handled or engine.s.phase != "victory":
+	if hosted or _record_handled or engine.s.phase != "victory":
 		return
 	_record_handled = true
 	if not engine.s.ranked:
@@ -789,18 +887,18 @@ func _build_ui() -> void:
 	_build_overlay()
 	var hint := _label("1–5 选手牌　Enter / 空格 发射　E 结束回合　B 烧掉　P 暂停", 12, Color(0.62, 0.7, 0.66))
 	hint.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-	_place(game, hint, Rect2(270, 878, 900, 20))
+	_place(game, hint, Rect2(270, 878, 900, 20), LAYOUT_BOTTOM_CENTER)
 	var build := _label("v0.3", 11, Color(0.5, 0.58, 0.55))
-	_place(game, build, Rect2(20, 878, 240, 20))
+	_place(game, build, Rect2(20, 878, 240, 20), LAYOUT_BOTTOM_LEFT)
 	zoom_label = _label("显示 100%　Ctrl + 滚轮 / Ctrl ± 缩放", 11, Color(0.5, 0.58, 0.55))
 	zoom_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_RIGHT
-	_place(game, zoom_label, Rect2(1100, 878, 320, 20))
+	_place(game, zoom_label, Rect2(1100, 878, 320, 20), LAYOUT_BOTTOM_RIGHT)
 
 
 func _build_topbar() -> void:
 	var bar := Panel.new()
 	bar.z_index = 8
-	_place(game, bar, Rect2(0, 0, 1440, 68))
+	_place(game, bar, Rect2(0, 0, 1440, 68), LAYOUT_TOP_STRETCH)
 	bar.add_theme_stylebox_override("panel", _sb(Color(0.043, 0.086, 0.125, 0.96), Color(0.55, 0.58, 0.45, 0.35), 1, 0))
 	var brand := _label("涌现", 24, Color(0.91, 0.86, 0.72), true)
 	_place(bar, brand, Rect2(30, 10, 160, 30))
@@ -834,27 +932,28 @@ func _build_topbar() -> void:
 	_place(bar, _icon_button("暂停", "pause"), Rect2(1090, 16, 70, 36))
 	_place(bar, _icon_button("规则", "help"), Rect2(1170, 16, 70, 36))
 	_place(bar, _icon_button("全屏", "fullscreen"), Rect2(1250, 16, 70, 36))
+	_pin_bar_right(bar)
 
 
 func _build_race() -> void:
 	race_time_label = _metric("用时", "0.0s")
-	_place(game, race_time_label.get_parent(), Rect2(36, 78, 110, 56))
+	_place(game, race_time_label.get_parent(), Rect2(36, 78, 110, 56), LAYOUT_TOP_LEFT)
 	race_decision_label = _metric("最近出手", "—")
-	_place(game, race_decision_label.get_parent(), Rect2(160, 78, 110, 56))
+	_place(game, race_decision_label.get_parent(), Rect2(160, 78, 110, 56), LAYOUT_TOP_LEFT)
 	race_equations_label = _metric("完成算式", "00")
-	_place(game, race_equations_label.get_parent(), Rect2(284, 78, 110, 56))
+	_place(game, race_equations_label.get_parent(), Rect2(284, 78, 110, 56), LAYOUT_TOP_LEFT)
 	race_rank_label = _label("计分中", 10, Color(0.737, 0.651, 0.431))
-	_place(game, race_rank_label, Rect2(36, 142, 220, 16))
+	_place(game, race_rank_label, Rect2(36, 142, 220, 16), LAYOUT_TOP_LEFT)
 	var deadline := ColorRect.new()
 	deadline.color = Color(0.22, 0.28, 0.27)
-	_place(game, deadline, Rect2(36, 160, 360, 3))
+	_place(game, deadline, Rect2(36, 160, 360, 3), LAYOUT_TOP_LEFT)
 	deadline_fill = ColorRect.new()
 	deadline_fill.color = Color(0.831, 0.718, 0.463)
 	deadline_fill.set_anchors_preset(Control.PRESET_FULL_RECT)
 	deadline.add_child(deadline_fill)
 	var caption := VBoxContainer.new()
 	caption.alignment = BoxContainer.ALIGNMENT_CENTER
-	_place(game, caption, Rect2(430, 86, 580, 78))
+	_place(game, caption, Rect2(430, 86, 580, 78), LAYOUT_TOP_CENTER)
 	caption.add_child(_label("每回合 10 秒", 12, Color(0.51, 0.6, 0.565)))
 	var title := _label("用算式击败观测者", 18, Color(0.824, 0.816, 0.722), true)
 	title.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
@@ -864,7 +963,7 @@ func _build_race() -> void:
 	round_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	caption.add_child(round_label)
 	var feed := VBoxContainer.new()
-	_place(game, feed, Rect2(1146, 78, 261, 90))
+	_place(game, feed, Rect2(1146, 78, 261, 90), LAYOUT_TOP_RIGHT)
 	var feed_head := HBoxContainer.new()
 	feed.add_child(feed_head)
 	var feed_title := _label("现场记录", 12, Color(0.56, 0.65, 0.62))
@@ -881,7 +980,7 @@ func _build_race() -> void:
 func _build_stage() -> void:
 	hero_root = Control.new()
 	hero_root.name = "Hero"
-	_place(game, hero_root, Rect2(153, 229, 289, 342))
+	_place(game, hero_root, Rect2(153, 229, 289, 342), LAYOUT_STAGE_LEFT)
 	_hero_origin = hero_root.position
 	var hero := TextureRect.new()
 	hero.texture = HERO_TEX
@@ -892,13 +991,13 @@ func _build_stage() -> void:
 	hero_root.add_child(hero)
 	var nameplate := _label("实验员", 14, Color(0.784, 0.8, 0.718), true)
 	nameplate.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-	_place(game, nameplate, Rect2(170, 541, 232, 20))
+	_place(game, nameplate, Rect2(170, 541, 232, 20), LAYOUT_STAGE_LEFT)
 	var motto := _label("不靠魔法，只靠算式。", 13, Color(0.541, 0.655, 0.647))
 	motto.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-	_place(game, motto, Rect2(170, 561, 232, 16))
+	_place(game, motto, Rect2(170, 561, 232, 16), LAYOUT_STAGE_LEFT)
 	enemy_root = Control.new()
 	enemy_root.name = "Enemy"
-	_place(game, enemy_root, Rect2(820, 200, 292, 360))
+	_place(game, enemy_root, Rect2(820, 200, 292, 360), LAYOUT_STAGE_RIGHT)
 	_enemy_origin = enemy_root.position
 	intent_label = _label("回合结束后  裂隙冲击  8", 13, Color(0.91, 0.86, 0.72), true)
 	intent_label.name = "IntentLabel"
@@ -933,7 +1032,7 @@ func _build_stage() -> void:
 
 func _build_controls() -> void:
 	timer_block = Control.new()
-	_place(game, timer_block, Rect2(36, 556, 133, 136))
+	_place(game, timer_block, Rect2(36, 556, 133, 136), LAYOUT_BOTTOM_LEFT)
 	timer_ring = TimerRing.new()
 	timer_ring.position = Vector2(17, 4)
 	timer_ring.size = Vector2(98, 98)
@@ -951,17 +1050,17 @@ func _build_controls() -> void:
 	_place(timer_block, timer_extra, Rect2(0, 118, 133, 16))
 	burn_button = _action_button("烧掉回血\n|点数| × 10", "burn")
 	burn_button.name = "BurnButton"
-	_place(game, burn_button, Rect2(176, 588, 180, 64))
+	_place(game, burn_button, Rect2(176, 588, 180, 64), LAYOUT_BOTTOM_LEFT)
 	burn_count_label = _label("已烧掉 0 · 查看", 11, Color(0.7, 0.76, 0.68))
 	burn_count_label.mouse_filter = Control.MOUSE_FILTER_STOP
 	burn_count_label.gui_input.connect(func(event: InputEvent) -> void:
 		if event is InputEventMouseButton and event.pressed and event.button_index == MOUSE_BUTTON_LEFT:
 			act("pile", "burned")
 	)
-	_place(game, burn_count_label, Rect2(176, 654, 180, 18))
+	_place(game, burn_count_label, Rect2(176, 654, 180, 18), LAYOUT_BOTTOM_LEFT)
 	var eq := PanelContainer.new()
 	eq.name = "EquationPanel"
-	_place(game, eq, Rect2(389, 566, 668, 120))
+	_place(game, eq, Rect2(389, 566, 668, 120), LAYOUT_BOTTOM_STRETCH)
 	var eq_inner := MarginContainer.new()
 	eq_inner.add_theme_constant_override("margin_left", 14)
 	eq_inner.add_theme_constant_override("margin_right", 12)
@@ -1013,7 +1112,7 @@ func _build_controls() -> void:
 	eq_reaction.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	eq_box.add_child(eq_reaction)
 	var combo := VBoxContainer.new()
-	_place(game, combo, Rect2(1072, 562, 150, 112))
+	_place(game, combo, Rect2(1072, 562, 150, 112), LAYOUT_BOTTOM_RIGHT)
 	combo.add_child(_label("加法追击", 12, Color(0.64, 0.71, 0.65)))
 	var dots := HBoxContainer.new()
 	dots.alignment = BoxContainer.ALIGNMENT_CENTER
@@ -1027,16 +1126,16 @@ func _build_controls() -> void:
 	combo.add_child(combo_status)
 	end_turn_button = _action_button("结束回合\n可提前结束 · E", "endturn")
 	end_turn_button.name = "EndTurnButton"
-	_place(game, end_turn_button, Rect2(1234, 576, 178, 60))
+	_place(game, end_turn_button, Rect2(1234, 576, 178, 60), LAYOUT_BOTTOM_RIGHT)
 	incoming_label = _label("敌方即将造成 8 伤害", 11, Color(0.78, 0.7, 0.58))
 	incoming_label.name = "IncomingLabel"
 	incoming_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-	_place(game, incoming_label, Rect2(1234, 640, 178, 18))
+	_place(game, incoming_label, Rect2(1234, 640, 178, 18), LAYOUT_BOTTOM_RIGHT)
 
 
 func _build_hand() -> void:
 	var caption := HBoxContainer.new()
-	_place(game, caption, Rect2(177, 686, 1086, 20))
+	_place(game, caption, Rect2(177, 686, 1086, 20), LAYOUT_BOTTOM_STRETCH)
 	hand_mode_label = _label("手牌 0 / 5", 12, Color(0.82, 0.86, 0.78))
 	hand_mode_label.name = "HandModeLabel"
 	hand_mode_label.size_flags_horizontal = Control.SIZE_EXPAND_FILL
@@ -1048,7 +1147,7 @@ func _build_hand() -> void:
 	zone.name = "HandZone"
 	zone.alignment = BoxContainer.ALIGNMENT_CENTER
 	zone.add_theme_constant_override("separation", 10)
-	_place(game, zone, Rect2(177, 708, 1086, 178))
+	_place(game, zone, Rect2(177, 708, 1086, 178), LAYOUT_BOTTOM_STRETCH)
 	hand_buttons.clear()
 	for i in 5:
 		var btn := Button.new()
@@ -1060,9 +1159,9 @@ func _build_hand() -> void:
 		hand_buttons.append(btn)
 		_paint_card(btn, null, i)
 	draw_pile_label = _pile_button("抽牌堆", "draw")
-	_place(game, draw_pile_label, Rect2(34, 746, 95, 112))
+	_place(game, draw_pile_label, Rect2(34, 746, 95, 112), LAYOUT_BOTTOM_LEFT)
 	discard_pile_label = _pile_button("弃牌堆", "discard")
-	_place(game, discard_pile_label, Rect2(1310, 746, 95, 112))
+	_place(game, discard_pile_label, Rect2(1310, 746, 95, 112), LAYOUT_BOTTOM_RIGHT)
 
 
 func _build_burst() -> void:
@@ -1070,7 +1169,7 @@ func _build_burst() -> void:
 	burst_panel.name = "BurstPanel"
 	burst_panel.visible = false
 	burst_panel.z_index = 12
-	_place(game, burst_panel, Rect2(570, 288, 300, 210))
+	_place(game, burst_panel, Rect2(570, 288, 300, 210), LAYOUT_CENTER)
 	var box := VBoxContainer.new()
 	var pad := MarginContainer.new()
 	pad.add_theme_constant_override("margin_left", 16)
@@ -1115,14 +1214,14 @@ func _build_toast_and_banner() -> void:
 	toast_label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	toast_label.visible = false
 	toast_label.z_index = 28
-	_place(game, toast_label, Rect2(340, 500, 760, 40))
+	_place(game, toast_label, Rect2(340, 500, 760, 40), LAYOUT_CENTER)
 	var toast_bg := _sb(Color(0.063, 0.141, 0.176, 0.96), Color(0.71, 0.63, 0.43, 0.53), 1, 4)
 	toast_label.add_theme_stylebox_override("normal", toast_bg)
 	banner = VBoxContainer.new()
 	banner.visible = false
 	banner.z_index = 20
 	banner.mouse_filter = Control.MOUSE_FILTER_IGNORE
-	_place(game, banner, Rect2(470, 250, 500, 70))
+	_place(game, banner, Rect2(470, 250, 500, 70), LAYOUT_CENTER)
 	banner_title = _label("", 26, Color(0.93, 0.86, 0.68), true)
 	banner_title.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	banner.add_child(banner_title)
@@ -1133,7 +1232,7 @@ func _build_toast_and_banner() -> void:
 	formula_reveal.visible = false
 	formula_reveal.z_index = 18
 	formula_reveal.mouse_filter = Control.MOUSE_FILTER_IGNORE
-	_place(game, formula_reveal, Rect2(470, 430, 500, 54))
+	_place(game, formula_reveal, Rect2(470, 430, 500, 54), LAYOUT_CENTER)
 	formula_reveal_main = _label("", 20, Color(0.93, 0.85, 0.62), true)
 	formula_reveal_main.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	formula_reveal.add_child(formula_reveal_main)
@@ -1192,7 +1291,7 @@ func _fill_intro(body: VBoxContainer) -> void:
 	overlay_title.name = "OverlayTitle"
 	body.add_child(overlay_title)
 	body.add_child(_label("用数字和符号组成算式，打退观测者。", 16, Color(0.9, 0.84, 0.68), true))
-	var copy := _label("每回合抽 5 张牌。点两张数字和一张符号后发射。\n结果默认打出后才显示，可在规则里提前查看。", 14, Color(0.78, 0.82, 0.74))
+	var copy := _label("每回合抽 5 张，尽量带上至少一张符号和两张数字。点两张数字和一张符号后发射。\n结果默认打出后才显示，可在规则里提前查看。", 14, Color(0.78, 0.82, 0.74))
 	copy.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	body.add_child(copy)
 	var row := HBoxContainer.new()
@@ -1223,7 +1322,7 @@ func _fill_help(body: VBoxContainer) -> void:
 	body.add_child(overlay_title)
 	body.add_child(_label("默认不提前显示答案。发射后才公布算式结果。", 14, Color(0.78, 0.82, 0.74)))
 	var help := _label(
-		"回合\n每回合 10 秒，时间到敌方出手。可按 E 提前结束。没有能量，出手次数不限。\n每回合抽 5 张。一次攻击用两张数字和一张符号，三张都进弃牌，当回合不补牌。\n\n牌库\n数字 −5 到 +5 各一张，＋ 和 × 各两张，共 15 张。新回合先弃掉手里剩下的牌再抽。抽牌堆空了会把弃牌洗回。烧掉的牌不会回来。\n\n加法追击\n正数加法打伤害。连续两次正数加法，回合结束后有 3 秒追击，连点空格每下 2 伤害。可跨回合累计。乘法或非正结果会打断。\n\n烧掉回血\n按 B 再点数字牌，回复 |点数| × 10，该牌本局移除。符号牌、0、满血不能烧。系统会留下至少两张还能打出正数攻击的数字牌。\n\n乘法元素\n只有结果为正才触发伤害和元素。非正结果仍消耗三张牌，伤害为 0。\n火×火 叠燃 灼烧 4　　冰×冰 冻结 下次攻击减半　　雷×雷 电弧 额外 6\n火×冰 蒸汽 额外 8　　火×雷 过载 额外 4 且灼烧 2　　冰×雷 超导 后两次正数伤害 +50%\n灼烧在敌方出手前结算，再减半向下取整。\n\n1–5 选手牌　　Enter / 空格 发射　　E 结束　　B 烧掉　　Esc 取消　　P 暂停　　A / X 选 ＋ / ×",
+		"回合\n每回合 10 秒，时间到敌方出手。可按 E 提前结束。没有能量，出手次数不限。\n每回合抽 5 张。抽到的牌里至少有一张符号和两张数字；牌堆里已经不够时，就按实际剩下的抽。一次攻击用两张数字和一张符号，三张都进弃牌，当回合不补牌。\n\n牌库\n数字 −5 到 +5 各一张，＋ 和 × 各两张，共 15 张。新回合先弃掉手里剩下的牌再抽。抽牌堆空了会把弃牌洗回。烧掉的牌不会回来。\n\n加法追击\n正数加法打伤害。连续两次正数加法，回合结束后有 3 秒追击，连点空格每下 2 伤害。可跨回合累计。乘法或非正结果会打断。\n\n烧掉回血\n按 B 再点数字牌，回复 |点数| × 10，该牌本局移除。符号牌、0、满血不能烧。系统会留下至少两张还能打出正数攻击的数字牌。\n\n乘法元素\n只有结果为正才触发伤害和元素。非正结果仍消耗三张牌，伤害为 0。\n火×火 叠燃 灼烧 4　　冰×冰 冻结 下次攻击减半　　雷×雷 电弧 额外 6\n火×冰 蒸汽 额外 8　　火×雷 过载 额外 4 且灼烧 2　　冰×雷 超导 后两次正数伤害 +50%\n灼烧在敌方出手前结算，再减半向下取整。\n\n1–5 选手牌　　Enter / 空格 发射　　E 结束　　B 烧掉　　Esc 取消　　P 暂停　　A / X 选 ＋ / ×",
 		13, Color(0.78, 0.82, 0.74)
 	)
 	help.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
@@ -1331,7 +1430,10 @@ func _fill_outcome(body: VBoxContainer, win: bool) -> void:
 	var s: Dictionary = engine.s
 	overlay_title = _label("挑战完成" if win else "挑战失败", 26, Color(0.93, 0.86, 0.68), true)
 	body.add_child(overlay_title)
-	body.add_child(_label("观测者已被击败。可以用同一副牌再打一次。" if win else "可以再试。烧掉回血或负负得正，结果会不一样。", 13, Color(0.78, 0.82, 0.74)))
+	var outcome_copy := "观测者已被击败。可以用同一副牌再打一次。" if win else "可以再试。烧掉回血或负负得正，结果会不一样。"
+	if hosted:
+		outcome_copy = "返回爬塔。" if win else "返回爬塔，本局结束。"
+	body.add_child(_label(outcome_copy, 13, Color(0.78, 0.82, 0.74)))
 	var grid := HBoxContainer.new()
 	grid.add_theme_constant_override("separation", 24)
 	body.add_child(grid)
@@ -1347,9 +1449,12 @@ func _fill_outcome(body: VBoxContainer, win: bool) -> void:
 	var row := HBoxContainer.new()
 	row.add_theme_constant_override("separation", 12)
 	body.add_child(row)
-	row.add_child(_action_button("同样洗牌再打", "start"))
-	row.add_child(_text_button("换一副牌", "new-seed"))
-	row.add_child(_text_button("导出记录", "export"))
+	if hosted:
+		row.add_child(_action_button("返回爬塔", "tower"))
+	else:
+		row.add_child(_action_button("同样洗牌再打", "start"))
+		row.add_child(_text_button("换一副牌", "new-seed"))
+		row.add_child(_text_button("导出记录", "export"))
 	var footer := _label("通关得分 = 向下取整［1200 + 6000 ÷（用时秒数 + 10）+ 剩余生命 × 5 −（回合数 − 1）× 15］。只记在本机。", 10, Color(0.55, 0.62, 0.58))
 	footer.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	body.add_child(footer)
@@ -1478,7 +1583,12 @@ func _paint_card(btn: Button, card: Variant, index: int) -> void:
 	desc.add_theme_font_size_override("font_size", 12)
 	desc.add_theme_color_override("font_color", ink.darkened(0.15))
 	desc.mouse_filter = Control.MOUSE_FILTER_IGNORE
-	if card.type == "operator":
+	if not card.marks.is_empty():
+		var mark_names := PackedStringArray()
+		for mark in card.marks:
+			mark_names.append(str(mark))
+		desc.text = "、".join(mark_names)
+	elif card.type == "operator":
 		desc.text = "两次正数加法可追击" if card.op == "+" else "正数乘法触发元素"
 	else:
 		desc.text = "%s · 烧掉回 %s 血" % [ELEM_META[card.elem].name, absi(card.value) * 10]
@@ -1527,12 +1637,18 @@ func _card_label(card: BattleCard) -> String:
 
 
 func _card_tip(card: BattleCard) -> String:
+	var lines := PackedStringArray()
 	if card.type == "operator":
 		if card.op == "+":
-			return "加法牌\n两数相加。连续两次正数加法可在回合结束后追击。\n发射后与两张数字一起进弃牌。不能烧掉。"
-		return "乘法牌\n两数相乘。结果为正才触发元素。\n发射后与两张数字一起进弃牌。不能烧掉。"
-	var elem: Dictionary = ELEM_META[card.elem]
-	return "数字牌 %s · %s\n再选一张数字和一张符号组成算式。\n发射后进弃牌，本回合不补。\n烧掉最多回复 %s 生命。" % [_card_label(card), elem.name, absi(card.value) * int(CombatEngine.CFG.healPerValue)]
+			lines.append("加法牌。两数相加。连续两次正数加法，回合结束后可以追击。打出后和两张数字一起进弃牌。不能烧掉。")
+		else:
+			lines.append("乘法牌。两数相乘。结果是正数才触发元素。打出后和两张数字一起进弃牌。不能烧掉。")
+	else:
+		var elem: Dictionary = ELEM_META[card.elem]
+		lines.append("数字牌 %s，%s。再选一张数字和一张符号。打出后进弃牌，这个回合不补牌。烧掉最多回复 %s 生命。" % [_card_label(card), elem.name, absi(card.value) * int(CombatEngine.CFG.healPerValue)])
+	for enh_id in card.enhancement_ids:
+		lines.append(TowerDeck.mark_line(str(enh_id)))
+	return "\n".join(lines)
 
 
 func _fill_eq_slot(slot: PanelContainer, card: Variant, placeholder: String) -> void:
@@ -1647,10 +1763,18 @@ func _label(text: String, size_px: int, color: Color, serif: bool = false) -> La
 	return lab
 
 
-func _place(parent: Control, node: Control, rect: Rect2) -> void:
+func _place(parent: Control, node: Control, rect: Rect2, pin: int = -1) -> void:
 	node.position = rect.position
 	node.size = rect.size
 	parent.add_child(node)
+	if pin >= 0:
+		_layout_items.append({"node": node, "rect": rect, "pin": pin})
+
+
+func _pin_bar_right(bar: Control) -> void:
+	for child in bar.get_children():
+		if child is Control and (child as Control).position.x >= 740.0:
+			_bar_right.append({"node": child, "origin": (child as Control).position})
 
 
 func _set_fill(fill: Control, ratio: float) -> void:

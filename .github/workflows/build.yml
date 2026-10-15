@@ -32,6 +32,20 @@ jobs:
         run: godot --headless --path . --script tests/combat_engine_test.gd
       - name: Battle demo tests
         run: godot --headless --path . --script tests/battle_demo_test.gd
+      - name: Card rules tests
+        run: godot --headless --path . --script tests/card_rules_test.gd
+      - name: Reward rules tests
+        run: godot --headless --path . --script tests/reward_rules_test.gd
+      - name: Map service tests
+        run: godot --headless --path . --script tests/map_service_test.gd
+      - name: Event reward tests
+        run: godot --headless --path . --script tests/event_reward_test.gd
+      - name: Combat session tests
+        run: godot --headless --path . --script tests/combat_session_test.gd
+      - name: Run shell tests
+        run: godot --headless --path . --script tests/run_shell_test.gd
+      - name: Main menu tests
+        run: godot --headless --path . --script tests/main_menu_test.gd
       - name: Export Windows game
         run: |
           mkdir -p build/windows

@@ -1,0 +1,13 @@
+{
+  "schema_version": 1,
+  "config_version": "jam_1.0.0",
+  "table": "collection_def",
+  "rows": [
+    {
+      "collection_id": "COL_SAMPLE",
+      "name": "藏品",
+      "behavior": "DISPLAY_ONLY",
+      "value_source": "INSTANCE_SNAPSHOT"
+    }
+  ]
+}

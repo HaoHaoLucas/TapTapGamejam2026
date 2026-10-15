@@ -41,6 +41,7 @@ func _run() -> void:
 	await _test_intro_and_start()
 	await _test_select_fire_and_ui()
 	await _test_burn_end_turn_and_timeout()
+	await _test_layout_fills_window()
 	await process_frame
 	if _failures == 0:
 		print("PASS: battle demo intro, hand fire, burn, end turn, countdown, UI/engine sync")
@@ -157,4 +158,28 @@ func _test_burn_end_turn_and_timeout() -> void:
 	await _await_ui()
 	_check(timeout.current_overlay() == "" and not timeout.engine.s.paused, "Closing pause must resume the battle overlay")
 	timeout.queue_free()
+	await process_frame
+
+
+func _test_layout_fills_window() -> void:
+	var demo := _make_demo()
+	await _await_ui()
+	root.size = Vector2i(1920, 900)
+	await _await_ui()
+	demo._fit_scale()
+	var filled: Vector2 = demo.game.size * demo.game.scale
+	_check(demo.game.position.is_equal_approx(Vector2.ZERO), "Battle layout must sit at the window origin")
+	_check(demo.game.size.x > 1600.0, "A wider window must widen the battle layout, got %s" % demo.game.size)
+	_check(is_equal_approx(demo.game.scale.x, demo.game.scale.y), "Battle scale stays uniform")
+	_check(absf(filled.x - demo.size.x) < 2.0 and absf(filled.y - demo.size.y) < 2.0, "Battle must fill the window, got %s inside %s" % [filled, demo.size])
+	_check(demo.end_turn_button.position.x > 1400.0, "End turn stays on the right edge")
+	_check(demo.discard_pile_label.position.x > 1500.0, "Discard pile stays on the right edge")
+	var zone := demo.game.get_node("HandZone") as Control
+	_check(zone != null and zone.size.x > 1400.0, "Hand row must use the extra width")
+	root.size = Vector2i(1440, 1200)
+	await _await_ui()
+	demo._fit_scale()
+	_check(demo.game.size.y > 1100.0, "A taller window must lengthen the battle layout, got %s" % demo.game.size)
+	_check(demo.end_turn_button.position.y > 700.0, "Bottom controls follow the extra height")
+	demo.queue_free()
 	await process_frame
