@@ -1,0 +1,32 @@
+{
+  "schema_version": 1,
+  "config_version": "jam_1.0.0",
+  "table": "enhancement_pool",
+  "rows": [
+    {"entry_id": "EP_SAFE_VALUE", "pool_id": "EP_SAFE", "family_id": "VALUE", "weight": 30, "variant_profile_id": "VAR_DEPTH"},
+    {"entry_id": "EP_SAFE_ECHO", "pool_id": "EP_SAFE", "family_id": "ECHO", "weight": 8, "variant_profile_id": "SINGLE"},
+    {"entry_id": "EP_SAFE_RETURN", "pool_id": "EP_SAFE", "family_id": "RETURN", "weight": 8, "variant_profile_id": "SINGLE"},
+    {"entry_id": "EP_SAFE_FRAGILE", "pool_id": "EP_SAFE", "family_id": "FRAGILE", "weight": 6, "variant_profile_id": "SINGLE"},
+    {"entry_id": "EP_SAFE_MAGNET", "pool_id": "EP_SAFE", "family_id": "MAGNET", "weight": 8, "variant_profile_id": "SINGLE"},
+    {"entry_id": "EP_SAFE_YINYANG", "pool_id": "EP_SAFE", "family_id": "YINYANG", "weight": 8, "variant_profile_id": "SINGLE"},
+    {"entry_id": "EP_SAFE_FLAMMABLE", "pool_id": "EP_SAFE", "family_id": "FLAMMABLE", "weight": 6, "variant_profile_id": "SINGLE"},
+    {"entry_id": "EP_SAFE_SMOLDER", "pool_id": "EP_SAFE", "family_id": "SMOLDER", "weight": 5, "variant_profile_id": "SINGLE"},
+    {"entry_id": "EP_SAFE_COMBO", "pool_id": "EP_SAFE", "family_id": "COMBO", "weight": 6, "variant_profile_id": "SINGLE"},
+    {"entry_id": "EP_SAFE_PRICE", "pool_id": "EP_SAFE", "family_id": "PRICE", "weight": 4, "variant_profile_id": "SINGLE"},
+    {"entry_id": "EP_SAFE_GHOST", "pool_id": "EP_SAFE", "family_id": "GHOST", "weight": 6, "variant_profile_id": "SINGLE"},
+    {"entry_id": "EP_SAFE_VANGUARD", "pool_id": "EP_SAFE", "family_id": "VANGUARD", "weight": 5, "variant_profile_id": "SINGLE"},
+    {"entry_id": "EP_SMITH_VALUE", "pool_id": "EP_SMITH", "family_id": "VALUE", "weight": 30, "variant_profile_id": "VAR_DEPTH"},
+    {"entry_id": "EP_SMITH_ECHO", "pool_id": "EP_SMITH", "family_id": "ECHO", "weight": 8, "variant_profile_id": "SINGLE"},
+    {"entry_id": "EP_SMITH_RETURN", "pool_id": "EP_SMITH", "family_id": "RETURN", "weight": 8, "variant_profile_id": "SINGLE"},
+    {"entry_id": "EP_SMITH_FRAGILE", "pool_id": "EP_SMITH", "family_id": "FRAGILE", "weight": 6, "variant_profile_id": "SINGLE"},
+    {"entry_id": "EP_SMITH_MAGNET", "pool_id": "EP_SMITH", "family_id": "MAGNET", "weight": 8, "variant_profile_id": "SINGLE"},
+    {"entry_id": "EP_SMITH_YINYANG", "pool_id": "EP_SMITH", "family_id": "YINYANG", "weight": 8, "variant_profile_id": "SINGLE"},
+    {"entry_id": "EP_SMITH_FLAMMABLE", "pool_id": "EP_SMITH", "family_id": "FLAMMABLE", "weight": 6, "variant_profile_id": "SINGLE"},
+    {"entry_id": "EP_SMITH_SMOLDER", "pool_id": "EP_SMITH", "family_id": "SMOLDER", "weight": 5, "variant_profile_id": "SINGLE"},
+    {"entry_id": "EP_SMITH_COMBO", "pool_id": "EP_SMITH", "family_id": "COMBO", "weight": 6, "variant_profile_id": "SINGLE"},
+    {"entry_id": "EP_SMITH_PRICE", "pool_id": "EP_SMITH", "family_id": "PRICE", "weight": 4, "variant_profile_id": "SINGLE"},
+    {"entry_id": "EP_SMITH_GHOST", "pool_id": "EP_SMITH", "family_id": "GHOST", "weight": 6, "variant_profile_id": "SINGLE"},
+    {"entry_id": "EP_SMITH_VANGUARD", "pool_id": "EP_SMITH", "family_id": "VANGUARD", "weight": 5, "variant_profile_id": "SINGLE"},
+    {"entry_id": "EP_SMITH_ALCHEMY", "pool_id": "EP_SMITH", "family_id": "ALCHEMY", "weight": 5, "variant_profile_id": "SINGLE"}
+  ]
+}

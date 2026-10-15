@@ -1,0 +1,11 @@
+{
+  "schema_version": 1,
+  "config_version": "jam_1.0.0",
+  "table": "variant_profile",
+  "rows": [
+    {"entry_id": "VP_D12", "profile_id": "VAR_DEPTH", "min_depth": 1, "max_depth": 2, "enh_ids": ["EN_NUM1", "EN_NUM2", "EN_NUM3"], "weights": [70, 25, 5]},
+    {"entry_id": "VP_D35", "profile_id": "VAR_DEPTH", "min_depth": 3, "max_depth": 5, "enh_ids": ["EN_NUM1", "EN_NUM2", "EN_NUM3"], "weights": [50, 35, 15]},
+    {"entry_id": "VP_D6", "profile_id": "VAR_DEPTH", "min_depth": 6, "max_depth": 0, "enh_ids": ["EN_NUM1", "EN_NUM2", "EN_NUM3"], "weights": [30, 40, 30]},
+    {"entry_id": "VP_PIZZA", "profile_id": "VAR_PIZZA", "min_depth": 1, "max_depth": 0, "enh_ids": ["EN_NUM1", "EN_NUM2", "EN_NUM3"], "weights": [10, 25, 65]}
+  ]
+}

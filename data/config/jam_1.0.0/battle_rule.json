@@ -1,0 +1,24 @@
+{
+  "schema_version": 1,
+  "config_version": "jam_1.0.0",
+  "table": "battle_rule",
+  "rows": [
+    {
+      "ruleset_id": "RULE_JAM_10S",
+      "turn_seconds": 10.0,
+      "hand_target": 6,
+      "initial_deck_size": 15,
+      "max_hp": 100,
+      "damage_scale": 2.0,
+      "burn_heal_per_abs": 10,
+      "allow_operator_burn": true,
+      "max_marks_per_card": 2,
+      "max_formula_tokens": 11,
+      "max_equation_damage": 2000000,
+      "combo_base_s": 2.0,
+      "combo_cap_s": 8.0,
+      "combo_click_damage": 1,
+      "combo_click_rate_cap": 5
+    }
+  ]
+}

@@ -1,0 +1,20 @@
+{
+  "schema_version": 1,
+  "config_version": "jam_1.0.0",
+  "table": "room_def",
+  "rows": [
+    {"room_id": "RM_RUST", "room_kind": "NORMAL", "content_kind": "ENCOUNTER", "content_id": "ENC_RUST", "display_key": "ROOM_NORMAL", "scene_key": "battle", "reward_bundle_id": "RB_NORMAL"},
+    {"room_id": "RM_PARITY", "room_kind": "NORMAL", "content_kind": "ENCOUNTER", "content_id": "ENC_PARITY", "display_key": "ROOM_NORMAL", "scene_key": "battle", "reward_bundle_id": "RB_NORMAL"},
+    {"room_id": "RM_INK", "room_kind": "NORMAL", "content_kind": "ENCOUNTER", "content_id": "ENC_INK", "display_key": "ROOM_NORMAL", "scene_key": "battle", "reward_bundle_id": "RB_NORMAL"},
+    {"room_id": "RM_PRIEST", "room_kind": "NORMAL", "content_kind": "ENCOUNTER", "content_id": "ENC_PRIEST", "display_key": "ROOM_NORMAL", "scene_key": "battle", "reward_bundle_id": "RB_NORMAL"},
+    {"room_id": "RM_THIEF", "room_kind": "NORMAL", "content_kind": "ENCOUNTER", "content_id": "ENC_THIEF", "display_key": "ROOM_NORMAL", "scene_key": "battle", "reward_bundle_id": "RB_NORMAL"},
+    {"room_id": "RM_SWORD", "room_kind": "BOSS", "content_kind": "ENCOUNTER", "content_id": "ENC_SWORD", "display_key": "ROOM_BOSS", "scene_key": "battle", "reward_bundle_id": "RB_BOSS"},
+    {"room_id": "RM_COPY", "room_kind": "EVENT", "content_kind": "EVENT", "content_id": "EV_COPY", "display_key": "ROOM_EVENT", "scene_key": "event", "reward_bundle_id": ""},
+    {"room_id": "RM_SAC", "room_kind": "EVENT", "content_kind": "EVENT", "content_id": "EV_SAC", "display_key": "ROOM_EVENT", "scene_key": "event", "reward_bundle_id": ""},
+    {"room_id": "RM_MAGE", "room_kind": "EVENT", "content_kind": "EVENT", "content_id": "EV_MAGE", "display_key": "ROOM_EVENT", "scene_key": "event", "reward_bundle_id": ""},
+    {"room_id": "RM_SMITH", "room_kind": "EVENT", "content_kind": "EVENT", "content_id": "EV_SMITH", "display_key": "ROOM_EVENT", "scene_key": "event", "reward_bundle_id": ""},
+    {"room_id": "RM_PIZZA", "room_kind": "EVENT", "content_kind": "EVENT", "content_id": "EV_PIZZA", "display_key": "ROOM_EVENT", "scene_key": "event", "reward_bundle_id": ""},
+    {"room_id": "RM_TRANS", "room_kind": "EVENT", "content_kind": "EVENT", "content_id": "EV_TRANS", "display_key": "ROOM_EVENT", "scene_key": "event", "reward_bundle_id": ""},
+    {"room_id": "RM_CACHE", "room_kind": "EVENT", "content_kind": "EVENT", "content_id": "EV_CACHE", "display_key": "ROOM_EVENT", "scene_key": "event", "reward_bundle_id": ""}
+  ]
+}

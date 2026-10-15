@@ -1,0 +1,19 @@
+{
+  "schema_version": 1,
+  "config_version": "jam_1.0.0",
+  "table": "room_pool_entry",
+  "rows": [
+    {"entry_id": "PN01", "pool_id": "POOL_NORMAL", "room_id": "RM_RUST", "weight": 40, "min_depth": 1, "max_depth": 0},
+    {"entry_id": "PN02", "pool_id": "POOL_NORMAL", "room_id": "RM_PARITY", "weight": 30, "min_depth": 1, "max_depth": 0},
+    {"entry_id": "PN03", "pool_id": "POOL_NORMAL", "room_id": "RM_INK", "weight": 30, "min_depth": 1, "max_depth": 0},
+    {"entry_id": "PN04", "pool_id": "POOL_NORMAL", "room_id": "RM_PRIEST", "weight": 20, "min_depth": 2, "max_depth": 0},
+    {"entry_id": "PN05", "pool_id": "POOL_NORMAL", "room_id": "RM_THIEF", "weight": 15, "min_depth": 3, "max_depth": 0},
+    {"entry_id": "PE01", "pool_id": "POOL_EVENT", "room_id": "RM_COPY", "weight": 20, "min_depth": 1, "max_depth": 0},
+    {"entry_id": "PE02", "pool_id": "POOL_EVENT", "room_id": "RM_SAC", "weight": 18, "min_depth": 1, "max_depth": 0},
+    {"entry_id": "PE03", "pool_id": "POOL_EVENT", "room_id": "RM_MAGE", "weight": 18, "min_depth": 1, "max_depth": 0},
+    {"entry_id": "PE04", "pool_id": "POOL_EVENT", "room_id": "RM_SMITH", "weight": 22, "min_depth": 1, "max_depth": 0},
+    {"entry_id": "PE05", "pool_id": "POOL_EVENT", "room_id": "RM_PIZZA", "weight": 10, "min_depth": 1, "max_depth": 0},
+    {"entry_id": "PE06", "pool_id": "POOL_EVENT", "room_id": "RM_TRANS", "weight": 12, "min_depth": 1, "max_depth": 0},
+    {"entry_id": "PB01", "pool_id": "POOL_BOSS", "room_id": "RM_SWORD", "weight": 100, "min_depth": 1, "max_depth": 0}
+  ]
+}

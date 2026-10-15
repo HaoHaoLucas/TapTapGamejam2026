@@ -1,0 +1,9 @@
+{
+  "schema_version": 1,
+  "config_version": "jam_1.0.0",
+  "table": "reward_bundle",
+  "rows": [
+    {"bundle_id": "RB_NORMAL", "ordered_reward_ids": ["RW_NORMAL"]},
+    {"bundle_id": "RB_BOSS", "ordered_reward_ids": ["RW_BOSS_CARD", "RW_BOSS_MARK"]}
+  ]
+}
