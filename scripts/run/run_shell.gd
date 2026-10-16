@@ -9,7 +9,7 @@ const DISPLAY := {
 
 var run: RunState
 var _session: CombatSession
-var _demo: BattleDemo
+var _battle: RunBattle
 var _battle_room := ""
 var _body: VBoxContainer
 var _header: Label
@@ -59,12 +59,10 @@ func _ready() -> void:
 	_body.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	_body.add_theme_constant_override("separation", 8)
 	scroll.add_child(_body)
-	_demo = load(SceneRegistry.path_for("battle")).instantiate()
-	_demo.hosted = true
-	_demo.auto_advance = false
-	_demo.visible = false
-	_demo.returned_to_tower.connect(_on_return_to_tower)
-	add_child(_demo)
+	_battle = load(SceneRegistry.path_for("battle")).instantiate() as RunBattle
+	_battle.visible = false
+	_battle.returned_to_tower.connect(_on_return_to_tower)
+	add_child(_battle)
 	_start_run(str(Time.get_unix_time_from_system()))
 
 
@@ -73,9 +71,8 @@ func _start_run(seed: String) -> void:
 	_pizza_done = false
 	_selected_offer = ""
 	_selected_cards = []
-	if _demo != null:
-		_demo.auto_advance = false
-		_demo.visible = false
+	if _battle != null:
+		_battle.visible = false
 	var created := RunService.new_run(seed)
 	if not created.get("ok", false):
 		run = null
@@ -148,13 +145,16 @@ func _choose_offer(offer_uid: String) -> void:
 func _show_battle() -> void:
 	_clear_body()
 	var room_uid := str(run.current_room.get("room_uid", ""))
-	_set_battle_visible(true)
-	if _battle_room == room_uid:
+	if _battle_room == room_uid and _session != null:
+		_set_battle_visible(true)
 		return
+	_set_battle_visible(false)
 	_session = CombatSession.new()
 	_session.start(run)
-	_demo.adopt_engine(_session.engine)
+	if _battle != null:
+		_battle.adopt(_session)
 	_battle_room = room_uid
+	_set_battle_visible(true)
 
 
 func _on_return_to_tower(outcome: String) -> void:
@@ -166,11 +166,15 @@ func _on_return_to_tower(outcome: String) -> void:
 	_session = null
 	_selected_offer = ""
 	_selected_cards = []
-	if phase == "defeat" or outcome == "defeat" or run.hp <= 0:
+	if _is_battle_loss(phase) or _is_battle_loss(outcome) or run.hp <= 0:
 		RunService.finish_room(run, "defeat")
 	else:
 		RunService.finish_room(run, "victory")
 	_show()
+
+
+func _is_battle_loss(phase: String) -> bool:
+	return phase == "defeat" or phase == "DEFEAT" or phase == "DECK_EXHAUSTED"
 
 
 func _show_event() -> void:
@@ -571,13 +575,12 @@ func _ready_pizza() -> Dictionary:
 
 
 func _set_battle_visible(show_battle: bool) -> void:
-	_demo.visible = show_battle
-	_demo.auto_advance = show_battle
+	if _battle == null:
+		return
+	_battle.visible = show_battle
 	_body.visible = not show_battle
 	_header.visible = not show_battle
 	_status.visible = not show_battle
-	if show_battle:
-		_demo.call_deferred("_fit_scale")
 
 
 func _clear_body() -> void:

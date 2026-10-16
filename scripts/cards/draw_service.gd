@@ -1,6 +1,6 @@
 class_name DrawService
 extends RefCounted
-## Hand refill, magnet, ghost weight, freeze-on-draw, and vanguard opening.
+## Fixed-count draws, one magnet partner, freeze-on-draw, and vanguard opening.
 
 var _run: WeakRef
 
@@ -9,28 +9,25 @@ func _init(ctx: RunContext) -> void:
 	_run = weakref(ctx)
 
 
-func refill(battle_uid: String, draw_reason: String, txn_id: String = "") -> Dictionary:
+func draw_count(count: int, battle_uid: String, draw_reason: String, txn_id: String = "") -> Dictionary:
 	var ctx := _ctx()
 	var txn := txn_id if txn_id != "" else battle_uid
 	var events: Array = []
 	var drawn := {}
-	var target := int(ctx.catalog.rule().hand_target)
-	var guard := 0
-	var limit := ctx.library.card_count() + 2
-	while ctx.library.normal_hand_count() < target and guard < limit:
-		guard += 1
+	var limit := int(ctx.catalog.rule().get("hand_limit", 0))
+	var wanted := maxi(0, count)
+	var base_drawn := 0
+	while base_drawn < wanted:
+		if limit > 0 and ctx.library.pile(CardInstance.HAND).size() >= limit:
+			break
 		var card_uid := _pull(true, drawn, txn)
 		if card_uid == "":
 			break
 		var card := ctx.library.get_card(card_uid)
 		_enter(card, "NORMAL_DRAW", txn, drawn, events)
+		base_drawn += 1
 		if card.has_mark("EN_MAGNET"):
-			var extras := int(ctx.catalog.enh("EN_MAGNET").params.extra_draw)
-			for _extra in extras:
-				var partner_uid := _pick_magnet(drawn)
-				if partner_uid == "":
-					break
-				_enter(ctx.library.get_card(partner_uid), "MAGNET", txn, drawn, events)
+			_attach_magnet(drawn, txn, events, limit)
 	return {
 		"ok": true,
 		"battle_uid": battle_uid,
@@ -44,8 +41,6 @@ func opening_deal(battle_uid: String) -> Dictionary:
 	var split: Dictionary = ctx.library.collect_opening()
 	var vanguards: Array = split.vanguards
 	vanguards.sort_custom(func(a, b) -> bool:
-		if int(a.opening_priority) != int(b.opening_priority):
-			return int(a.opening_priority) > int(b.opening_priority)
 		return str(a.card_uid) < str(b.card_uid)
 	)
 	var rest_uids: Array = []
@@ -58,8 +53,9 @@ func opening_deal(battle_uid: String) -> Dictionary:
 	var drawn := {}
 	for card in vanguards:
 		_enter(card, "VANGUARD", battle_uid, drawn, opening)
-	var filled := refill(battle_uid, "BATTLE_START", battle_uid)
-	return {"opening": opening, "refill": filled.events}
+	var start_draw := int(ctx.catalog.rule().get("turn_start_draw", 5))
+	var filled := draw_count(maxi(0, start_draw - vanguards.size()), battle_uid, "BATTLE_START", battle_uid)
+	return {"opening": opening, "draws": filled.events}
 
 
 func _pull(allow_reshuffle: bool, drawn: Dictionary, txn_id: String) -> String:
@@ -83,6 +79,16 @@ func _reshuffle_discard(drawn: Dictionary, txn_id: String) -> void:
 	var shuffled: Array = ctx.rng_of("COMBAT").shuffle(pending)
 	for card_uid in shuffled:
 		ctx.library.move(ctx.library.get_card(str(card_uid)), CardInstance.DRAW, "SHUFFLE", txn_id, ctx)
+
+
+func _attach_magnet(drawn: Dictionary, txn_id: String, events: Array, hand_limit: int) -> void:
+	var ctx := _ctx()
+	if hand_limit > 0 and ctx.library.pile(CardInstance.HAND).size() >= hand_limit:
+		return
+	var partner_uid := _pick_magnet(drawn)
+	if partner_uid == "":
+		return
+	_enter(ctx.library.get_card(partner_uid), "MAGNET", txn_id, drawn, events)
 
 
 func _pick_magnet(drawn: Dictionary) -> String:

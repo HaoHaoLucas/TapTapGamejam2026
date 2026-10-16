@@ -1,8 +1,8 @@
 class_name GameData
 extends RefCounted
-## Loads jam_1.0.0 JSON tables and refuses to start when keys or enums are wrong.
+## Loads jam_1.2.0 JSON tables and refuses to start when keys or enums are wrong.
 
-const CONFIG_VERSION := "jam_1.0.0"
+const CONFIG_VERSION := "jam_1.2.0"
 const HANDLERS: PackedStringArray = [
 	"COPY_CARD", "SACRIFICE_MARK", "SPECIAL_OFFER", "MARK_OFFER",
 	"ACCEPT_PIZZA", "TRANSFORM_CARD", "BASIC_CACHE",
@@ -30,6 +30,8 @@ static func ensure_loaded() -> bool:
 	tables = {}
 	index = {}
 	_load_table("res://data/run/floor_rule.json", "floor_rule")
+	_load_table("res://data/run/floor_config.json", "floor_config")
+	_load_table("res://data/run/monster_config.json", "monster_config")
 	_load_table("res://data/run/room_def.json", "room_def")
 	_load_table("res://data/run/room_pool_entry.json", "room_pool_entry")
 	_load_table("res://data/run/event_def.json", "event_def")
@@ -66,6 +68,34 @@ static func row(table: String, id) -> Dictionary:
 
 static func floor_rule() -> Dictionary:
 	return row("floor_rule", "FL_STANDARD")
+
+
+static func floor_config(floor: int) -> Dictionary:
+	return row("floor_config", floor)
+
+
+static func monster(monster_id: String) -> Dictionary:
+	return row("monster_config", monster_id)
+
+
+static func monster_for_encounter(encounter_id: String) -> Dictionary:
+	var bucket: Dictionary = index.get("encounter_monster", {})
+	var found = bucket.get(str(encounter_id), null)
+	return found if found is Dictionary else {}
+
+
+static func mark_pool_rows(pool_id: String, depth: int) -> Array:
+	var found: Array = []
+	for item in rows("enhancement_pool"):
+		if str(item.get("pool_id", "")) != pool_id:
+			continue
+		if float(item.get("weight", 0)) <= 0.0:
+			continue
+		var min_depth := int(item.get("min_depth", 1))
+		var max_depth := int(item.get("max_depth", 0))
+		if depth >= min_depth and (max_depth == 0 or depth <= max_depth):
+			found.append(item)
+	return found
 
 
 static func room(room_id: String) -> Dictionary:
@@ -123,6 +153,7 @@ static func _load_table(path: String, expected: String) -> void:
 
 static func _index_all() -> void:
 	_index("floor_rule", "rule_id")
+	_index("monster_config", "monster_id")
 	_index("room_def", "room_id")
 	_index("room_pool_entry", "entry_id")
 	_index("event_def", "event_id")
@@ -149,6 +180,23 @@ static func _index_all() -> void:
 			errors.append("quality_curve 深度重复 %s" % key)
 		depths[key] = item
 	index["quality_curve"] = depths
+	var floors := {}
+	for item in rows("floor_config"):
+		var key := str(int(item.get("floor", -1)))
+		if floors.has(key):
+			errors.append("floor_config 层数重复 %s" % key)
+		floors[key] = item
+	index["floor_config"] = floors
+	var encounters := {}
+	for item in rows("monster_config"):
+		var key := str(item.get("encounter_id", ""))
+		if key.is_empty():
+			errors.append("怪物缺少 encounter_id %s" % item.get("monster_id", ""))
+			continue
+		if encounters.has(key):
+			errors.append("遭遇重复映射 %s" % key)
+		encounters[key] = item
+	index["encounter_monster"] = encounters
 
 
 static func _index(table: String, pk: String) -> void:
@@ -166,6 +214,8 @@ static func _index(table: String, pk: String) -> void:
 
 static func _validate() -> void:
 	_validate_floor()
+	_validate_floors()
+	_validate_monsters()
 	_validate_rooms()
 	_validate_events()
 	_validate_cards()
@@ -218,6 +268,15 @@ static func _validate_rooms() -> void:
 			errors.append("事件外键缺失 %s -> %s" % [item.get("room_id", ""), content_id])
 		elif content_kind == "ENCOUNTER" and not content_id.begins_with("ENC_"):
 			errors.append("遭遇 ID 必须以 ENC_ 开头 %s" % content_id)
+		if content_kind == "ENCOUNTER":
+			var monster_id := str(item.get("monster_id", ""))
+			var mon := monster(monster_id)
+			if mon.is_empty():
+				errors.append("遭遇缺少怪物 %s -> %s" % [item.get("room_id", ""), content_id])
+			elif str(mon.get("encounter_id", "")) != content_id:
+				errors.append("遭遇与怪物不一致 %s" % content_id)
+		elif str(item.get("monster_id", "")) != "":
+			errors.append("非遭遇房不能绑定怪物 %s" % item.get("room_id", ""))
 		if str(item.get("display_key", "")) != str(display[kind]):
 			errors.append("display_key 与房型不一致 %s" % item.get("room_id", ""))
 		if str(item.get("scene_key", "")) != str(scene[kind]):
@@ -271,6 +330,17 @@ static func _validate_events() -> void:
 		_validate_event_params(item)
 		if str(item.get("name", "")).is_empty():
 			errors.append("事件缺少名称 %s" % item.get("event_id", ""))
+		var display_names := {
+			"EV_COPY": "终极复制机",
+			"EV_SAC": "无言的祭祀",
+			"EV_MAGE": "大魔导师",
+			"EV_SMITH": "铁匠",
+			"EV_PIZZA": "披萨饼师傅",
+			"EV_TRANS": "无机转化",
+		}
+		var event_id := str(item.get("event_id", ""))
+		if display_names.has(event_id) and str(item.get("name", "")) != str(display_names[event_id]):
+			errors.append("事件显示名不正确 %s" % event_id)
 	for handler in HANDLERS:
 		if not seen.has(handler):
 			errors.append("首包缺少处理器 %s" % handler)
@@ -477,36 +547,110 @@ static func _validate_card_pools() -> void:
 
 
 static func _validate_mark_pools() -> void:
-	var totals := {"EP_SAFE": 0, "EP_SMITH": 0}
 	var families := {}
 	for item in rows("enhancement_def"):
 		families[str(item.get("family_id", ""))] = true
+	var by_pool := {"EP_SAFE": [], "EP_SMITH": []}
 	for item in rows("enhancement_pool"):
 		var pool_id := str(item.get("pool_id", ""))
 		var family := str(item.get("family_id", ""))
-		var weight := int(item.get("weight", 0))
-		if weight <= 0:
-			errors.append("印记池不导出 0 权重 %s" % item.get("entry_id", ""))
+		var enh_id := str(item.get("enh_id", ""))
+		var entry_id := str(item.get("entry_id", ""))
+		if not by_pool.has(pool_id):
+			errors.append("未知印记池 %s" % pool_id)
+			continue
 		if not families.has(family):
 			errors.append("印记家族外键缺失 %s" % family)
-		if pool_id == "EP_SAFE" and family in ["ALCHEMY", "FROZEN"]:
-			errors.append("普通印记池不能包含点金手或冻结")
-		if family == "FROZEN":
+		if family == "FROZEN" or enh_id == "EN_FROZEN":
 			errors.append("冻结只出现在特殊牌，不进入印记池")
-		if not totals.has(pool_id):
-			errors.append("未知印记池 %s" % pool_id)
-		else:
-			totals[pool_id] = int(totals[pool_id]) + weight
-		var profile := str(item.get("variant_profile_id", ""))
-		if family == "VALUE" and profile != "VAR_DEPTH":
-			errors.append("数值增长必须使用 VAR_DEPTH")
-		if family != "VALUE" and profile != "SINGLE":
-			errors.append("非数值家族必须使用 SINGLE %s" % item.get("entry_id", ""))
-	if int(totals.EP_SAFE) != 100 or int(totals.EP_SMITH) != 105:
-		errors.append("印记池总权重应为 EP_SAFE 100、EP_SMITH 105")
+		if pool_id == "EP_SAFE" and (family == "ALCHEMY" or enh_id == "EN_ALCHEMY"):
+			errors.append("普通印记池不能包含点金手或冻结")
+		var enh_row := enh(enh_id)
+		if enh_row.is_empty():
+			errors.append("印记池强化外键缺失 %s" % entry_id)
+		elif str(enh_row.get("family_id", "")) != family:
+			errors.append("印记池家族与强化不一致 %s" % entry_id)
+		if not _number(item.get("weight", null)) or float(item.get("weight", -1)) < 0.0:
+			errors.append("印记池权重不能为负 %s" % entry_id)
+		if str(item.get("variant_profile_id", "")) == "VAR_DEPTH":
+			errors.append("数值增长必须直接抽取，不能再走 VAR_DEPTH %s" % entry_id)
+		by_pool[pool_id].append(item)
+	for pool_id in by_pool.keys():
+		_expect_mark_pool_shape(pool_id, by_pool[pool_id])
+
+
+static func _expect_mark_pool_shape(pool_id: String, entries: Array) -> void:
+	var bands: Array = [
+		{"min": 1, "max": 2, "EN_NUM1": 21.0, "EN_NUM2": 7.5, "EN_NUM3": 1.5},
+		{"min": 3, "max": 5, "EN_NUM1": 15.0, "EN_NUM2": 10.5, "EN_NUM3": 4.5},
+		{"min": 6, "max": 0, "EN_NUM1": 9.0, "EN_NUM2": 12.0, "EN_NUM3": 9.0},
+	]
+	var expected := {}
+	for enh_id in ["EN_NUM1", "EN_NUM2", "EN_NUM3"]:
+		expected[enh_id] = []
+		for band in bands:
+			expected[enh_id].append({"min": int(band["min"]), "max": int(band["max"]), "weight": float(band[enh_id])})
+	var flat := {
+		"EN_ECHO": 8.0,
+		"EN_RETURN": 8.0,
+		"EN_FRAGILE": 6.0,
+		"EN_MAGNET": 8.0,
+		"EN_YINYANG": 8.0,
+		"EN_FLAMMABLE": 6.0,
+		"EN_SMOLDER": 5.0,
+		"EN_COMBO": 6.0,
+		"EN_PRICE": 4.0,
+		"EN_GHOST": 0.0,
+		"EN_VANGUARD": 5.0,
+	}
+	if pool_id == "EP_SMITH":
+		flat["EN_ALCHEMY"] = 5.0
+	for enh_id in flat.keys():
+		expected[enh_id] = [{"min": 1, "max": 0, "weight": float(flat[enh_id])}]
+	var seen := {}
+	for item in entries:
+		var enh_id := str(item.get("enh_id", ""))
+		if not expected.has(enh_id):
+			errors.append("印记池出现未登记强化 %s %s" % [pool_id, enh_id])
+			continue
+		if not seen.has(enh_id):
+			seen[enh_id] = []
+		seen[enh_id].append(item)
+	for enh_id in expected.keys():
+		var want: Array = expected[enh_id]
+		var got: Array = seen.get(enh_id, [])
+		if got.size() != want.size():
+			errors.append("%s 的 %s 行数应为 %s" % [pool_id, enh_id, want.size()])
+			continue
+		var used := {}
+		for spec in want:
+			var matched := false
+			for i in got.size():
+				if used.has(i):
+					continue
+				var entry: Dictionary = got[i]
+				var same_depth := int(entry.get("min_depth", -1)) == int(spec["min"]) and int(entry.get("max_depth", -2)) == int(spec["max"])
+				var same_weight := is_equal_approx(float(entry.get("weight", -1)), float(spec.weight))
+				if same_depth and same_weight:
+					used[i] = true
+					matched = true
+					break
+			if not matched:
+				errors.append("%s 的 %s 缺少权重 %s（%s-%s 层）" % [pool_id, enh_id, spec.weight, spec.min, spec.max])
+	for depth in [1, 3, 6]:
+		var total := 0.0
+		for item in entries:
+			var min_depth := int(item.get("min_depth", 1))
+			var max_depth := int(item.get("max_depth", 0))
+			if depth >= min_depth and (max_depth == 0 or depth <= max_depth):
+				total += float(item.get("weight", 0))
+		var want_total := 99.0 if pool_id == "EP_SMITH" else 94.0
+		if not is_equal_approx(total, want_total):
+			errors.append("%s 在第 %s 层的权重合计应为 %s，幽灵空出的 6 点不摊回" % [pool_id, depth, want_total])
 
 
 static func _validate_variants() -> void:
+	var saw_pizza := false
 	for item in rows("variant_profile"):
 		var ids: Array = item.get("enh_ids", [])
 		var weights: Array = item.get("weights", [])
@@ -520,14 +664,44 @@ static func _validate_variants() -> void:
 		for weight in weights:
 			if not _whole(weight) or int(weight) <= 0:
 				errors.append("变体权重必须为正 %s" % item.get("entry_id", ""))
+		if str(item.get("profile_id", "")) == "VAR_PIZZA":
+			saw_pizza = true
+			var want := [10, 25, 65]
+			var same := weights.size() == want.size()
+			if same:
+				for i in want.size():
+					same = same and int(weights[i]) == int(want[i])
+			if not same:
+				errors.append("披萨数值偏向必须为 10/25/65")
+	if not saw_pizza:
+		errors.append("缺少披萨数值偏向 VAR_PIZZA")
 
 
 static func _validate_specials() -> void:
-	var total := 0
+	var expected_weights := {
+		"SP_BURST": 15.0,
+		"SP_MEMORY": 20.0,
+		"SP_REACTOR": 15.0,
+		"SP_FIST": 0.0,
+		"SP_TWIN": 15.0,
+		"SP_LINK": 15.0,
+	}
+	var total := 0.0
 	for item in rows("special_card"):
-		total += int(item.get("weight", 0))
-		if int(item.get("weight", 0)) <= 0:
-			errors.append("特殊牌权重必须为正 %s" % item.get("special_id", ""))
+		var special_id := str(item.get("special_id", ""))
+		var weight = item.get("weight", null)
+		if not expected_weights.has(special_id):
+			errors.append("未知特殊牌 %s" % special_id)
+		elif not _number(weight) or float(weight) < 0.0 or not is_equal_approx(float(weight), float(expected_weights[special_id])):
+			errors.append("特殊牌权重不符合停投表 %s" % special_id)
+		else:
+			total += float(weight)
+		if special_id == "SP_FIST":
+			var fist_marks: Array = item.get("enhancement_ids", [])
+			var fist_ok := str(item.get("def_id", "")) == "CARD_ADD" and fist_marks.size() == 2
+			fist_ok = fist_ok and str(fist_marks[0]) == "EN_COMBO" and str(fist_marks[1]) == "EN_GHOST"
+			if not fist_ok:
+				errors.append("SP_FIST 必须保留 CARD_ADD + EN_COMBO + EN_GHOST")
 		var def := card(str(item.get("def_id", "")))
 		if def.is_empty():
 			errors.append("特殊牌基础牌缺失 %s" % item.get("special_id", ""))
@@ -552,8 +726,8 @@ static func _validate_specials() -> void:
 			slots += int(enh_row.get("slot_cost", 1))
 		if slots > 2:
 			errors.append("特殊牌强化位超过 2 %s" % item.get("special_id", ""))
-	if total != 100:
-		errors.append("特殊牌总权重必须为 100")
+	if not is_equal_approx(total, 80.0):
+		errors.append("特殊牌总权重必须为 80，SP_FIST 停投后不把 20 点摊回")
 
 
 static func _validate_pools_cover_depth() -> void:
@@ -570,10 +744,93 @@ static func _validate_pools_cover_depth() -> void:
 					break
 			if not covered:
 				errors.append("%s 不能覆盖深度 %s" % [pool_id, depth])
-	if _pool_entries("EP_SAFE").is_empty() or _pool_entries("EP_SMITH").is_empty():
+	if mark_pool_rows("EP_SAFE", 1).is_empty() or mark_pool_rows("EP_SMITH", 1).is_empty():
 		errors.append("印记池不能为空")
-	if _specials("SP_MAGE").size() < 3:
+	if _rollable_specials("SP_MAGE").size() < 3:
 		errors.append("魔导师特殊牌不足以三选一")
+
+
+static func _validate_floors() -> void:
+	var expected: Array = [
+		[1, 1.0, 1.0, 24, 1],
+		[2, 1.215, 1.085, 32, 3],
+		[3, 1.5, 1.19, 38, 7],
+		[4, 1.855, 1.315, 42, 13],
+		[5, 2.28, 1.46, 44, 20],
+		[6, 2.775, 1.625, 44, 28],
+		[7, 3.34, 1.81, 42, 36],
+		[8, 3.975, 2.015, 40, 43],
+		[9, 4.68, 2.24, 37, 50],
+		[10, 5.455, 2.485, 35, 55],
+	]
+	if rows("floor_config").size() != expected.size():
+		errors.append("floor_config 必须覆盖第 1—10 层")
+	for spec in expected:
+		var floor_no := int(spec[0])
+		var floor_row := floor_config(floor_no)
+		if floor_row.is_empty():
+			errors.append("缺少层数倍率 %s" % floor_no)
+			continue
+		if not is_equal_approx(float(floor_row.get("hp_mul", -1)), float(spec[1])):
+			errors.append("floor_config.%s hp_mul 不正确" % floor_no)
+		if not is_equal_approx(float(floor_row.get("atk_mul", -1)), float(spec[2])):
+			errors.append("floor_config.%s atk_mul 不正确" % floor_no)
+		if not _whole(floor_row.get("p1", null)) or not _whole(floor_row.get("p2", null)):
+			errors.append("floor_config.%s 的 p1/p2 必须是百分数" % floor_no)
+			continue
+		var p1 := int(floor_row.get("p1", -1))
+		var p2 := int(floor_row.get("p2", -1))
+		if p1 != int(spec[3]) or p2 != int(spec[4]) or p1 < 0 or p2 < 0 or p1 + p2 > 100:
+			errors.append("floor_config.%s 的 p1/p2 不正确" % floor_no)
+			continue
+		var curve := row("quality_curve", floor_no)
+		if curve.is_empty():
+			errors.append("品质曲线缺少深度 %s" % floor_no)
+			continue
+		var p0 := (100.0 - float(p1) - float(p2)) / 100.0
+		if absf(p0 - float(curve.get("p0", -1))) > 0.000001:
+			errors.append("floor_config 与 quality_curve 的 p0 不一致 层 %s" % floor_no)
+		if absf(float(p1) / 100.0 - float(curve.get("p1", -1))) > 0.000001:
+			errors.append("floor_config 与 quality_curve 的 p1 不一致 层 %s" % floor_no)
+		if absf(float(p2) / 100.0 - float(curve.get("p2", -1))) > 0.000001:
+			errors.append("floor_config 与 quality_curve 的 p2 不一致 层 %s" % floor_no)
+
+
+static func _validate_monsters() -> void:
+	var expected: Array = [
+		{"monster_id": "MON_RUST", "encounter_id": "ENC_RUST", "name": "锈刃哥布林", "kind": "NORMAL", "base_hp": 60, "base_atk": 10, "min_floor": 1, "weight": 40},
+		{"monster_id": "MON_PARITY", "encounter_id": "ENC_PARITY", "name": "单目哥布林", "kind": "NORMAL", "base_hp": 70, "base_atk": 11, "min_floor": 1, "weight": 30},
+		{"monster_id": "MON_INK", "encounter_id": "ENC_INK", "name": "墨罐哥布林", "kind": "NORMAL", "base_hp": 66, "base_atk": 10, "min_floor": 1, "weight": 30},
+		{"monster_id": "MON_PRIEST", "encounter_id": "ENC_PRIEST", "name": "深渊牧师", "kind": "NORMAL", "base_hp": 86, "base_atk": 10, "min_floor": 2, "weight": 20},
+		{"monster_id": "MON_THIEF", "encounter_id": "ENC_THIEF", "name": "拾荒盗贼", "kind": "NORMAL", "base_hp": 78, "base_atk": 12, "min_floor": 3, "weight": 15},
+		{"monster_id": "MON_SWORD", "encounter_id": "ENC_SWORD", "name": "守门剑士", "kind": "BOSS", "base_hp": 160, "base_atk": 16, "min_floor": 1, "weight": 100},
+	]
+	if rows("monster_config").size() != expected.size():
+		errors.append("怪物表必须是 6 行")
+	for spec in expected:
+		var monster_id := str(spec["monster_id"])
+		var mon := monster(monster_id)
+		if mon.is_empty():
+			errors.append("缺少怪物 %s" % monster_id)
+			continue
+		if str(mon.get("kind", "")) not in ["NORMAL", "BOSS"]:
+			errors.append("怪物种类必须是 NORMAL 或 BOSS %s" % monster_id)
+		for key in ["encounter_id", "name", "kind"]:
+			if str(mon.get(key, "")) != str(spec[key]):
+				errors.append("怪物 %s 的 %s 不正确" % [monster_id, key])
+		for key in ["base_hp", "base_atk", "min_floor", "weight"]:
+			if not _whole(mon.get(key, null)) or int(mon.get(key, -1)) != int(spec[key]):
+				errors.append("怪物 %s 的 %s 不正确" % [monster_id, key])
+		var linked_pool := {}
+		for entry in rows("room_pool_entry"):
+			var linked := room(str(entry.get("room_id", "")))
+			if str(linked.get("monster_id", "")) == monster_id:
+				linked_pool = entry
+				break
+		if linked_pool.is_empty():
+			errors.append("怪物没有对应房间池 %s" % monster_id)
+		elif int(linked_pool.get("weight", -1)) != int(spec["weight"]) or int(linked_pool.get("min_depth", -1)) != int(spec["min_floor"]):
+			errors.append("怪物权重或解锁层与房间池不一致 %s" % monster_id)
 
 
 static func _pool_entries(pool_id: String) -> Array:
@@ -592,6 +849,14 @@ static func _specials(pool_id: String) -> Array:
 	return found
 
 
+static func _rollable_specials(pool_id: String) -> Array:
+	var found: Array = []
+	for item in _specials(pool_id):
+		if float(item.get("weight", 0)) > 0.0:
+			found.append(item)
+	return found
+
+
 static func _expect_int(row_data: Dictionary, key: String, expected: int, label: String) -> void:
 	if not _whole(row_data.get(key, null)) or int(row_data.get(key, 0)) != expected:
 		errors.append("%s.%s 必须为 %s" % [label, key, expected])
@@ -599,3 +864,7 @@ static func _expect_int(row_data: Dictionary, key: String, expected: int, label:
 
 static func _whole(value) -> bool:
 	return (value is int) or (value is float and is_finite(float(value)) and float(value) == floor(float(value)))
+
+
+static func _number(value) -> bool:
+	return (value is int) or (value is float and is_finite(float(value)))

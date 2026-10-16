@@ -96,7 +96,8 @@ func normal_hand_count() -> int:
 func is_fighting_exhausted() -> bool:
 	var numbers := 0
 	var operators := 0
-	for zone in CardInstance.FIGHTING_ZONES:
+	# STOLEN is withheld and does not count. RUN_DECK is outside the fight.
+	for zone in [CardInstance.HAND, CardInstance.DRAW, CardInstance.DISCARD, CardInstance.RESOLVING]:
 		for card_uid in _piles[zone]:
 			var card: CardInstance = _cards[card_uid]
 			var def := catalog.card(card.def_id)

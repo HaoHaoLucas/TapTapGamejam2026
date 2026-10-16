@@ -1,12 +1,15 @@
 {
   "schema_version": 1,
-  "config_version": "jam_1.0.0",
+  "config_version": "jam_1.2.0",
   "table": "battle_rule",
   "rows": [
     {
       "ruleset_id": "RULE_JAM_10S",
       "turn_seconds": 10.0,
-      "hand_target": 6,
+      "turn_start_draw": 5,
+      "delayed_draw_at": 7.5,
+      "delayed_draw_count": 1,
+      "hand_limit": 0,
       "initial_deck_size": 15,
       "max_hp": 100,
       "damage_scale": 2.0,
@@ -18,7 +21,10 @@
       "combo_base_s": 2.0,
       "combo_cap_s": 8.0,
       "combo_click_damage": 1,
-      "combo_click_rate_cap": 5
+      "combo_click_rate_cap": 5,
+      "normal_2_hp": 1.1,
+      "normal_2_atk": 1.05,
+      "boss_phase2_atk": 1.15
     }
   ]
 }

@@ -356,7 +356,7 @@ static func _sacrifice_plan_ok(run: RunState, cards: Array, chosen: Array) -> bo
 static func _marks_for_card(run: RunState, card: CardInstance, pool_id: String) -> Array:
 	var found: Array = []
 	for entry in GameData.rows("enhancement_pool"):
-		if str(entry.get("pool_id", "")) != pool_id or int(entry.get("weight", 0)) <= 0:
+		if str(entry.get("pool_id", "")) != pool_id or float(entry.get("weight", 0)) <= 0.0:
 			continue
 		var family := str(entry.get("family_id", ""))
 		for enh_id in _family_enh_ids(family):

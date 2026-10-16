@@ -18,8 +18,9 @@ func _check(condition: bool, message: String) -> void:
 func _run() -> void:
 	root.size = Vector2i(1440, 900)
 	await _test_battle_choice_opens_combat()
+	await _test_battle_losses()
 	if _failures == 0:
-		print("PASS: clicking a battle room opens combat")
+		print("PASS: a battle room opens the jam fight and writes zones back")
 	quit(1 if _failures else 0)
 
 
@@ -56,12 +57,107 @@ func _test_battle_choice_opens_combat() -> void:
 	await process_frame
 	_check(str(shell.run.current_room.get("status", "")) == "ENTERED", "Choosing a room must enter it")
 	_check(str(shell.run.current_room.get("scene_key", "")) == "battle", "The battle button must enter a battle")
-	_check(shell._demo.visible, "The battle view must be shown")
-	_check(shell._demo.engine != null and str(shell._demo.engine.s.phase) == "player", "Combat must be in the player turn")
-	_check(shell._demo.hand_buttons.size() == 5, "The battle hand must be on screen")
+	_check(SceneRegistry.path_for("battle") == "res://scenes/run/run_battle.tscn", "Battle uses the jam equation scene")
+	_check(shell._battle != null and shell._battle.visible and shell._battle is RunBattle, "The jam battle view must be shown")
+	_check(shell._session != null and shell._session.ctx != null and shell._session.ctx.battle.phase == "PLAYER_ACTIVE", "Combat must be in the player turn")
+	if shell._session == null or shell._session.ctx == null:
+		shell.queue_free()
+		await process_frame
+		return
+	_check(_hand_views(shell) == 5, "The battle hand must show five cards")
 	_check(shell._header.visible == false, "The room list must step aside for the battle")
+	var uids: Array = shell._session.projected_uids.duplicate()
+	var burned := _burn_hand_number(shell)
+	_check(burned != "", "A hand number can be burned")
+	shell._session.ctx.battle.phase = "VICTORY"
+	shell._on_return_to_tower("VICTORY")
+	_check(shell.run.phase == "REWARD", "VICTORY returns to the tower as a win, got %s" % shell.run.phase)
+	for card_uid in uids:
+		var inst = shell.run.find_card(str(card_uid))
+		if str(card_uid) == burned:
+			_check(inst != null and inst.zone == "REMOVED", "A burned card stays removed")
+		else:
+			_check(inst != null and inst.zone == "RUN_DECK", "Write-back restores the other cards to the run deck")
 	shell.queue_free()
 	await process_frame
+
+
+func _test_battle_losses() -> void:
+	var defeat = await _open_battle()
+	if defeat == null:
+		return
+	defeat._session.ctx.battle.phase = "DEFEAT"
+	defeat._on_return_to_tower("DEFEAT")
+	_check(defeat.run.phase == "DEAD" and defeat.run.outcome == "defeat", "DEFEAT is a loss")
+	defeat.queue_free()
+	await process_frame
+	var exhausted = await _open_battle()
+	if exhausted == null:
+		return
+	exhausted._session.ctx.battle.phase = "DECK_EXHAUSTED"
+	exhausted._on_return_to_tower("DECK_EXHAUSTED")
+	_check(exhausted.run.phase == "DEAD" and exhausted.run.outcome == "defeat", "DECK_EXHAUSTED is a loss")
+	exhausted.queue_free()
+	await process_frame
+
+
+func _open_battle():
+	var shell = load("res://scenes/run/run_shell.tscn").instantiate()
+	root.add_child(shell)
+	await process_frame
+	await process_frame
+	if shell.run == null or not _reach_choice(shell):
+		_check(false, "Could not open a battle from the tower")
+		shell.queue_free()
+		await process_frame
+		return null
+	shell._show()
+	await process_frame
+	var battle_button: Button = null
+	for child in shell._body.get_children():
+		if child is Button and str(child.text) == "战斗":
+			battle_button = child
+			break
+	if battle_button == null:
+		_check(false, "A battle choice must be on screen")
+		shell.queue_free()
+		await process_frame
+		return null
+	battle_button.pressed.emit()
+	await process_frame
+	await process_frame
+	if shell._session == null or shell._session.ctx == null:
+		_check(false, "The battle session did not open")
+		shell.queue_free()
+		await process_frame
+		return null
+	return shell
+
+
+func _hand_views(shell) -> int:
+	var count := 0
+	if shell._battle == null or shell._battle._hand_box == null:
+		return 0
+	for child in shell._battle._hand_box.get_children():
+		if child is CardView:
+			count += 1
+	return count
+
+
+func _burn_hand_number(shell) -> String:
+	var ctx = shell._session.ctx
+	ctx.battle.player_hp = 40
+	for card_uid in ctx.library.pile(CardInstance.HAND):
+		var card = ctx.library.get_card(str(card_uid))
+		if card == null:
+			continue
+		var kind := str(ctx.catalog.card(card.def_id).get("card_kind", ""))
+		if kind != "NUM" or card.printed_value(ctx.catalog) == 0:
+			continue
+		var result = ctx.card_service.burn(card.card_uid, "shell-burn")
+		if result.get("ok", false) and result.get("removed", false):
+			return card.card_uid
+	return ""
 
 
 func _reach_choice(shell) -> bool:

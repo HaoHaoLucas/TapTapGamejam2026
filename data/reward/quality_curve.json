@@ -1,6 +1,6 @@
 {
   "schema_version": 1,
-  "config_version": "jam_1.0.0",
+  "config_version": "jam_1.2.0",
   "table": "quality_curve",
   "rows": [
     {"depth": 1, "p0": 0.75, "p1": 0.24, "p2": 0.01, "tail_start_depth": 11},

@@ -40,10 +40,11 @@ func _run() -> void:
 		_test_e07_alchemy_price()
 		_test_e08_preview_rng()
 		_test_combo_and_vanguard()
+		_test_draw_clock()
 		await _test_card_view_and_lab()
 	await process_frame
 	if _failures == 0:
-		print("PASS: card rules C01-C12, E01-E08, starter, preview RNG")
+		print("PASS: card rules C01-C12, E01-E08, 5+1 draw, starter, preview RNG")
 	else:
 		push_error("card rules failures: %s" % _failures)
 	quit(1 if _failures else 0)
@@ -85,9 +86,14 @@ func _fragile_break_seed() -> int:
 
 
 func _test_config_and_starter() -> void:
-	_check(_catalog.config_version == "jam_1.0.0", "Config version must be jam_1.0.0")
+	_check(_catalog.config_version == "jam_1.2.0", "Config version must be jam_1.2.0")
+	_check(str(_catalog.rule().get("ruleset_id", "")) == "RULE_JAM_10S", "Ruleset stays RULE_JAM_10S")
 	_check(_catalog.rows("enhancement_def").size() == 16, "Enhancement table must have 16 rows")
-	_check(int(_catalog.rule().hand_target) == 6, "Hand target must be 6")
+	_check(not _catalog.rule().has("hand_target"), "hand_target is gone")
+	_check(int(_catalog.rule().get("turn_start_draw", 0)) == 5, "Turn start draws 5")
+	_check(is_equal_approx(float(_catalog.rule().get("delayed_draw_at", 0.0)), 7.5), "Delayed draw is at 7.5s")
+	_check(int(_catalog.rule().get("delayed_draw_count", 0)) == 1, "Delayed draw count is 1")
+	_check(int(_catalog.rule().get("hand_limit", -1)) == 0, "Hand limit is 0")
 	_check(is_equal_approx(float(_catalog.rule().damage_scale), 2.0), "Damage scale must be 2")
 	_check(int(_catalog.rule().max_equation_damage) == 2000000, "Damage cap must be 2000000")
 	_check(int(_catalog.enh("EN_NUM1").params.add) == 1, "EN_NUM1 adds 1")
@@ -146,8 +152,9 @@ func _test_c01_plain_add() -> void:
 	_check(result.ok and result.raw_result == 7 and result.effective_result == 7 and result.damage == 14, "C01 must be 7 and 14 damage, got %s" % result)
 	_check(result.primary_op == "ADD", "C01 primary op is ADD")
 	_check(left.zone == CardInstance.DISCARD and op.zone == CardInstance.DISCARD and right.zone == CardInstance.DISCARD, "C01 played cards go to discard")
-	_check(result.draws.size() == 3, "C01 refills the three played cards")
-	_check(run.library.pile(CardInstance.HAND).size() == 6, "C01 hand returns to the target of 6")
+	_check(result.draws.is_empty(), "C01 does not refill the played cards")
+	_check(run.library.pile(CardInstance.HAND).size() == 3, "C01 leaves the three unplayed cards")
+	_check(run.library.pile(CardInstance.DRAW).size() == 3, "C01 leaves the draw pile alone")
 	_check(run.rng_of("COMBAT").state() == state, "C01 does not roll combat RNG")
 	_check(heard.size() == 1 and heard[0].damage == 14 and heard[0].kind == "EQUATION", "C01 emits equation_committed once")
 	var replay := _commit(run, [left, op, right], "c01")
@@ -314,7 +321,7 @@ func _test_return_zero_is_not_draw() -> void:
 		reasons.append(event.draw_reason)
 	_check(result.damage == 0 and returned.zone == CardInstance.HAND and returned.return_used_run, "Zero damage still returns once, got %s" % result)
 	_check(returned.locked_until_turn == -1, "Return must not refresh the lock")
-	_check(not reasons.has("MAGNET") and partner.zone == CardInstance.HAND, "Return must not pull a magnet partner, reasons %s" % str(reasons))
+	_check(result.draws.is_empty() and not reasons.has("MAGNET") and partner.zone == CardInstance.DRAW, "Return must not pull a magnet partner, reasons %s" % str(reasons))
 	var frozen_run := _fresh(13, "ret_frozen")
 	frozen_run.library.turn_index = 1
 	var frozen_return := _make(frozen_run, "CARD_N0", ["EN_RETURN", "EN_FROZEN"], CardInstance.HAND)
@@ -360,24 +367,29 @@ func _test_e01_magnet() -> void:
 	var first := _make(run, "CARD_N1", ["EN_MAGNET"], CardInstance.DRAW)
 	var second := _make(run, "CARD_N2", ["EN_MAGNET"], CardInstance.DRAW)
 	var third := _make(run, "CARD_N3", ["EN_MAGNET"], CardInstance.DRAW)
-	var result := run.draw_service.refill(run.battle.battle_uid, "TEST")
+	var result := run.draw_service.draw_count(1, run.battle.battle_uid, "TEST")
 	var reasons: Array = []
 	for event in result.events:
 		reasons.append(event.draw_reason)
-	_check(reasons == ["NORMAL_DRAW", "MAGNET", "NORMAL_DRAW"], "E01 each normal magnet draw brings one partner, got %s" % str(reasons))
-	_check(reasons.count("MAGNET") == 1, "E01 magnet draw does not chain")
+	_check(reasons == ["NORMAL_DRAW", "MAGNET"], "E01 one base draw pulls one magnet and does not chain, got %s" % str(reasons))
+	_check(reasons.count("NORMAL_DRAW") == 1 and run.library.pile(CardInstance.HAND).size() == 2, "E01 the extra magnet does not consume the base draw")
+	_check(run.library.pile(CardInstance.DRAW).size() == 1, "E01 one magnet stays for a later base draw")
 	var uids := {}
 	for event in result.events:
 		_check(not uids.has(event.card_uid), "E01 draws each uid once")
 		uids[event.card_uid] = true
-	_check(uids.has(first.card_uid) and uids.has(second.card_uid) and uids.has(third.card_uid), "E01 draws all three magnets")
+	_check(uids.has(first.card_uid), "E01 the first pile card is the base draw")
+	var follow := run.draw_service.draw_count(1, run.battle.battle_uid, "TEST2")
+	var follow_reasons: Array = []
+	for event in follow.events:
+		follow_reasons.append(event.draw_reason)
+	_check(follow_reasons == ["NORMAL_DRAW"], "E01 a magnet partner does not pull the last card, got %s" % str(follow_reasons))
+	_check(first.zone == CardInstance.HAND and second.zone == CardInstance.HAND and third.zone == CardInstance.HAND, "E01 two base draws bring all three magnets")
 	var parked := _fresh(16, "e01b")
 	parked.start_battle(50, 1, false)
-	for _pad in 5:
-		_make(parked, "CARD_N0", [], CardInstance.HAND)
 	_make(parked, "CARD_N1", ["EN_MAGNET"], CardInstance.DRAW)
 	var buried := _make(parked, "CARD_N2", ["EN_MAGNET"], CardInstance.DISCARD)
-	var parked_result := parked.draw_service.refill(parked.battle.battle_uid, "TEST")
+	var parked_result := parked.draw_service.draw_count(1, parked.battle.battle_uid, "TEST")
 	var parked_reasons: Array = []
 	for event in parked_result.events:
 		parked_reasons.append(event.draw_reason)
@@ -391,17 +403,30 @@ func _test_e02_ghosts() -> void:
 	var ghosts: Array = []
 	for def_id in ["CARD_N1", "CARD_N2", "CARD_N3"]:
 		ghosts.append(_make(run, def_id, ["EN_GHOST"], CardInstance.DRAW))
-	var result := run.draw_service.refill(run.battle.battle_uid, "TEST")
-	_check(result.events.size() == 3, "E02 draws each ghost once, got %s" % result.events.size())
-	_check(run.library.pile(CardInstance.HAND).size() == 3, "E02 stops when the source is empty")
-	_check(run.library.normal_hand_count() == 0, "Ghosts do not fill the hand target")
+	for _plain in 6:
+		_make(run, "CARD_N4", [], CardInstance.DRAW)
+	var result := run.draw_service.draw_count(5, run.battle.battle_uid, "TEST")
+	_check(result.events.size() == 5, "E02 a draw of 5 stays 5 when ghosts are in the pile, got %s" % result.events.size())
+	_check(run.library.pile(CardInstance.HAND).size() == 5, "E02 puts those five cards in hand")
+	_check(run.library.pile(CardInstance.DRAW).size() == 4, "E02 does not keep drawing to skip ghosts")
+	_check(run.library.normal_hand_count() == 2, "E02 ghosts sit in the five and do not add draws")
 	var seen := {}
 	for event in result.events:
 		_check(not seen.has(event.card_uid), "E02 never draws the same uid twice")
 		seen[event.card_uid] = true
-	var again := run.draw_service.refill(run.battle.battle_uid, "TEST2")
-	_check(again.events.is_empty(), "E02 does not loop after the deck is exhausted")
-	_check(ghosts.size() == 3, "E02 keeps the three ghost entities")
+	for ghost in ghosts:
+		_check(ghost.zone == CardInstance.HAND, "E02 still draws an existing ghost card")
+	var again := run.draw_service.draw_count(0, run.battle.battle_uid, "TEST2")
+	_check(again.events.is_empty(), "E02 a zero count does not draw")
+	_check(GameData.ensure_loaded(), "E02 reward tables load")
+	var offered := false
+	for row in GameData.mark_pool_rows("EP_SAFE", 1):
+		if str(row.get("enh_id", "")) == "EN_GHOST":
+			offered = true
+	_check(not offered, "E02 weight 0 keeps EN_GHOST out of the roll")
+	for row in GameData.rows("enhancement_pool"):
+		if str(row.get("enh_id", "")) == "EN_GHOST":
+			_check(is_equal_approx(float(row.get("weight", -1.0)), 0.0), "E02 EN_GHOST weight stays 0")
 
 
 func _test_e03_frozen() -> void:
@@ -411,8 +436,9 @@ func _test_e03_frozen() -> void:
 	var low := _make(run, "CARD_N1", [], CardInstance.HAND)
 	var high := _make(run, "CARD_N2", [], CardInstance.HAND)
 	var frozen := _make(run, "CARD_N3", ["EN_FROZEN"], CardInstance.DRAW)
-	var other := _make(run, "CARD_N4", [], CardInstance.DRAW)
-	run.draw_service.refill(run.battle.battle_uid, "OPENING")
+	for _filler in 8:
+		_make(run, "CARD_N4", [], CardInstance.DRAW)
+	run.draw_service.draw_count(1, run.battle.battle_uid, "OPENING")
 	_check(frozen.zone == CardInstance.HAND and frozen.is_frozen(run.battle.turn_index), "E03 frozen card is locked on turn 1")
 	var state := run.rng_of("COMBAT").state()
 	var blocked := _commit(run, [frozen, op, low], "e03block")
@@ -421,8 +447,11 @@ func _test_e03_frozen() -> void:
 	run.battle.end_player_turn()
 	_check(frozen.zone == CardInstance.HAND, "E03 frozen card stays through the enemy turn")
 	_check(run.battle.turn_index == 2 and not frozen.is_frozen(run.battle.turn_index), "E03 unlocks on the next player turn")
-	_check(op.zone == CardInstance.HAND and low.zone == CardInstance.HAND and high.zone == CardInstance.HAND and other.zone == CardInstance.HAND, "The other cards are redrawn")
-	var played := _commit(run, [frozen, op, low], "e03play")
+	_check(run.library.pile(CardInstance.HAND).size() == 6, "E03 keeps the frozen card and still draws 5")
+	_check(op.zone == CardInstance.DISCARD and low.zone == CardInstance.DISCARD and high.zone == CardInstance.DISCARD, "E03 discards the unfrozen hand")
+	var play_op := _make(run, "CARD_ADD", [], CardInstance.HAND)
+	var play_low := _make(run, "CARD_N1", [], CardInstance.HAND)
+	var played := _commit(run, [frozen, play_op, play_low], "e03play")
 	_check(played.ok and played.damage == 8, "E03 plays the unlocked card, got %s" % played)
 
 
@@ -645,7 +674,7 @@ func _test_combo_and_vanguard() -> void:
 	for event in deal.opening:
 		opening_reasons.append(event.draw_reason)
 	var refill_reasons: Array = []
-	for event in deal.refill:
+	for event in deal.draws:
 		refill_reasons.append(event.draw_reason)
 	var expected: Array = [vanguard_a, vanguard_b]
 	expected.sort_custom(func(a, b) -> bool: return str(a.card_uid) < str(b.card_uid))
@@ -655,6 +684,121 @@ func _test_combo_and_vanguard() -> void:
 	_check(vanguard_b.is_frozen(van.battle.turn_index) and not vanguard_a.is_frozen(van.battle.turn_index), "Vanguard freezes, and a card without the mark does not")
 	_check(not opening_reasons.has("MAGNET") and not refill_reasons.has("MAGNET"), "Vanguard does not magnet")
 	_check(plain.zone == CardInstance.HAND, "The remaining card is a normal draw")
+	var quota := _fresh(271, "van_quota")
+	quota.start_battle(80, 1, false, 100)
+	for _g in 2:
+		_make(quota, "CARD_N1", ["EN_VANGUARD"], CardInstance.RUN_DECK)
+	for _plain_card in 4:
+		_make(quota, "CARD_N3", [], CardInstance.RUN_DECK)
+	var quota_deal := quota.draw_service.opening_deal(quota.battle.battle_uid)
+	_check(quota_deal.opening.size() == 2 and quota_deal.draws.size() == 3, "Two vanguards leave max(0, 5-G) normal draws, got %s" % quota_deal.draws.size())
+	_check(quota.library.pile(CardInstance.HAND).size() == 5, "Vanguard plus the normal draws fill five cards")
+	_check(quota.library.pile(CardInstance.DRAW).size() == 1, "The spare plain card stays in the draw pile")
+	var crowd := _fresh(272, "van_crowd")
+	crowd.start_battle(80, 1, false, 100)
+	for _g in 6:
+		_make(crowd, "CARD_N1", ["EN_VANGUARD"], CardInstance.RUN_DECK)
+	var delayed_plain := _make(crowd, "CARD_N4", [], CardInstance.RUN_DECK)
+	var crowd_deal := crowd.draw_service.opening_deal(crowd.battle.battle_uid)
+	_check(crowd_deal.opening.size() == 6 and crowd_deal.draws.is_empty(), "More than five vanguards enter and skip the start draw")
+	_check(delayed_plain.zone == CardInstance.DRAW and crowd.library.pile(CardInstance.HAND).size() == 6, "The plain card waits through a crowded opening")
+	crowd.battle.advance(7.5)
+	_check(delayed_plain.zone == CardInstance.HAND and crowd.battle.delayed_draw_done, "The 7.5s draw still happens after a crowded opening")
+	crowd.battle.advance(1.0)
+	_check(crowd.library.pile(CardInstance.HAND).size() == 7 and crowd.battle.phase == "PLAYER_ACTIVE", "The delayed draw happens once")
+
+
+func _listen(run: RunContext) -> Array:
+	var moves: Array = []
+	run.card_zone_changed.connect(func(_card_uid: String, _from_zone: String, to_zone: String, reason: String, _txn: String) -> void:
+		moves.append({"to": to_zone, "reason": reason})
+	)
+	return moves
+
+
+func _drew_then_ended(moves: Array) -> bool:
+	var drew := false
+	var ends := 0
+	for move in moves:
+		if str(move.reason) == "END_TURN":
+			if not drew:
+				return false
+			ends += 1
+		elif not drew and str(move.to) == CardInstance.HAND:
+			drew = true
+	return drew and ends == 6
+
+
+func _stock(run: RunContext) -> void:
+	for _i in 12:
+		_make(run, "CARD_N1", [], CardInstance.RUN_DECK)
+	_make(run, "CARD_ADD", [], CardInstance.RUN_DECK)
+
+
+func _test_draw_clock() -> void:
+	var opening := _fresh(40, "draw5")
+	_stock(opening)
+	opening.start_battle(300, 1, true, 100)
+	_check(opening.library.pile(CardInstance.HAND).size() == 5, "Turn start draws exactly 5")
+	_check(opening.library.pile(CardInstance.DRAW).size() == 8, "Turn start does not refill the hand to 6")
+	opening.battle.advance(7.5)
+	_check(opening.library.pile(CardInstance.HAND).size() == 6 and opening.battle.delayed_draw_done, "Crossing 7.5 draws one card")
+	opening.battle.advance(1.0)
+	_check(opening.library.pile(CardInstance.HAND).size() == 6 and opening.battle.phase == "PLAYER_ACTIVE", "The delayed draw happens once")
+	var played := _fresh(41, "no_refill_play")
+	played.start_battle(300, 1, false, 80)
+	var left := _make(played, "CARD_N3", [], CardInstance.HAND)
+	var op := _make(played, "CARD_ADD", [], CardInstance.HAND)
+	var right := _make(played, "CARD_N4", [], CardInstance.HAND)
+	for _deck in 4:
+		_make(played, "CARD_N1", [], CardInstance.DRAW)
+	var play := _commit(played, [left, op, right], "no_refill_play")
+	_check(play.ok and play.draws.is_empty(), "Play does not refill")
+	_check(played.library.pile(CardInstance.HAND).is_empty() and played.library.pile(CardInstance.DRAW).size() == 4, "Play leaves the draw pile")
+	var burned := _fresh(42, "no_refill_burn")
+	burned.start_battle(300, 1, false, 40)
+	var fodder := _make(burned, "CARD_N2", [], CardInstance.HAND)
+	for _deck in 3:
+		_make(burned, "CARD_N1", [], CardInstance.DRAW)
+	var burn := burned.card_service.burn(fodder.card_uid, "no_refill_burn")
+	_check(burn.ok and burn.removed, "Burn removes the card")
+	_check(burned.library.pile(CardInstance.HAND).is_empty() and burned.library.pile(CardInstance.DRAW).size() == 3, "Burn does not refill")
+	var seed := _fragile_break_seed()
+	_check(seed > 0, "Fragile refill check needs a breaking seed")
+	var fragile := _fresh(seed, "no_refill_fragile")
+	fragile.start_battle(300, 1, false, 100)
+	var card := _make(fragile, "CARD_N3", ["EN_FRAGILE"], CardInstance.HAND)
+	var fragile_op := _make(fragile, "CARD_ADD", [], CardInstance.HAND)
+	var other := _make(fragile, "CARD_N4", [], CardInstance.HAND)
+	for _deck in 2:
+		_make(fragile, "CARD_N1", [], CardInstance.DRAW)
+	var broke := _commit(fragile, [card, fragile_op, other], "no_refill_fragile")
+	_check(broke.ok and broke.draws.is_empty() and card.zone == CardInstance.REMOVED, "Fragile break does not refill")
+	_check(fragile.library.pile(CardInstance.DRAW).size() == 2, "Fragile leaves the draw pile")
+	var early := _fresh(43, "early_end")
+	_stock(early)
+	early.start_battle(300, 1, true, 100)
+	var early_reasons := _listen(early)
+	early.battle.advance(7.4)
+	_check(early.library.pile(CardInstance.HAND).size() == 5, "Time before 7.5 does not draw")
+	early.battle.end_player_turn()
+	_check(not _drew_then_ended(early_reasons), "Ending before 7.5 does not grant the extra card, got %s" % str(early_reasons))
+	var exact := _fresh(44, "exact_end")
+	_stock(exact)
+	exact.start_battle(300, 1, true, 100)
+	var exact_reasons := _listen(exact)
+	exact.battle.player_elapsed_s = 7.5
+	exact.battle.end_player_turn()
+	_check(_drew_then_ended(exact_reasons), "Ending at 7.5 draws before the turn ends, got %s" % str(exact_reasons))
+	var crossed := _fresh(45, "cross_frame")
+	_stock(crossed)
+	crossed.start_battle(300, 1, true, 100)
+	var crossed_reasons := _listen(crossed)
+	crossed.battle.advance(7.0)
+	_check(crossed.library.pile(CardInstance.HAND).size() == 5, "7.0 seconds has not drawn yet")
+	crossed.battle.advance(3.0)
+	_check(_drew_then_ended(crossed_reasons), "A frame crossing 7.5 and 10 draws before the turn ends, got %s" % str(crossed_reasons))
+	_check(crossed.battle.turn_index == 2 and crossed.battle.phase == "PLAYER_ACTIVE", "That frame then ends the turn")
 
 
 func _test_card_view_and_lab() -> void:
@@ -680,6 +824,6 @@ func _test_card_view_and_lab() -> void:
 	await process_frame
 	_check(lab.run != null and lab.run.battle != null, "Card lab boots a battle")
 	_check(lab.run.battle.phase == "PLAYER_ACTIVE", "Card lab starts in the player turn")
-	_check(lab.run.library.pile(CardInstance.HAND).size() == 6, "Card lab deals a six-card hand")
+	_check(lab.run.library.pile(CardInstance.HAND).size() == 5, "Card lab deals a five-card hand")
 	_check(lab.get_child_count() > 0, "Card lab builds its own scene")
 	lab.queue_free()

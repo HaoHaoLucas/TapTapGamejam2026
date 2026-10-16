@@ -27,13 +27,17 @@ static func open_special_offers(run: RunState, source_uid: String, pool_id: Stri
 			continue
 		if not _depth_ok(row, run.depth):
 			continue
+		if float(row.get("weight", 0)) <= 0.0:
+			continue
 		remaining.append(row)
 	var picked: Array = []
 	while picked.size() < count and not remaining.is_empty():
 		var weights: Array = []
 		for row in remaining:
-			weights.append(int(row.get("weight", 0)))
+			weights.append(float(row.get("weight", 0)))
 		var index := run.roll_weighted("REWARD", weights)
+		if index < 0 or index >= remaining.size():
+			break
 		picked.append(remaining[index])
 		remaining.remove_at(index)
 	for row in picked:
@@ -126,8 +130,11 @@ static func plan_sacrifice(run: RunState, sacrifice_uids: Array) -> Dictionary:
 			return {"ok": false, "error": "没有能加上的变化。"}
 		var weights: Array = []
 		for option in options:
-			weights.append(int(option.weight))
-		var enh_id := str(options[run.roll_weighted("ENHANCE", weights)].enh_id)
+			weights.append(float(option.weight))
+		var index := run.roll_weighted("ENHANCE", weights)
+		if index < 0:
+			return {"ok": false, "error": "没有能加上的变化。"}
+		var enh_id := str(options[index].enh_id)
 		grants.append({"target_uid": card_uid, "enh_id": enh_id})
 	return {"ok": true, "grants": grants}
 
@@ -370,10 +377,7 @@ static func _roll_combat_card_once(run: RunState, plan: Dictionary, mark_count: 
 	var guard := 0
 	while marks.size() < mark_count and guard < 8:
 		guard += 1
-		var family := _sample_family(mark_ctx, mark_pool, def_id, marks)
-		if family == "":
-			break
-		var enh_id := _sample_family_on_def(mark_ctx, family, run.depth, def_id, marks)
+		var enh_id := _sample_mark(mark_ctx, mark_pool, run.depth, def_id, marks)
 		if enh_id == "":
 			break
 		marks.append(enh_id)
@@ -437,92 +441,35 @@ static func _log_reward_resolve(run: RunState, session: Dictionary, offer: Dicti
 
 static func _roll_mark_ids(run: RunState, pool_id: String, count: int) -> Array:
 	var picked: Array = []
-	var families := _legal_families(run, pool_id)
-	var remaining := families.duplicate()
-	while picked.size() < count and not remaining.is_empty():
+	var blocked := {}
+	while picked.size() < count:
+		var options := _mark_target_options(run, pool_id, blocked)
+		if options.is_empty():
+			break
 		var weights: Array = []
-		for family in remaining:
-			weights.append(int(family.weight))
-		var family: Dictionary = remaining[run.roll_weighted("ENHANCE", weights)]
-		remaining.erase(family)
-		var enh_id := _pick_family_enh(run, pool_id, str(family.family_id), picked)
-		if enh_id != "":
-			picked.append(enh_id)
-	if picked.size() < count:
-		var fresh := _all_legal_enh_options(run, pool_id, picked)
-		while picked.size() < count and not fresh.is_empty():
-			var weights: Array = []
-			for option in fresh:
-				weights.append(int(option.weight))
-			var option: Dictionary = fresh[run.roll_weighted("ENHANCE", weights)]
-			fresh.erase(option)
-			picked.append(str(option.enh_id))
-	if picked.size() < count:
-		var any := _all_legal_enh_options(run, pool_id, [])
-		while picked.size() < count and not any.is_empty():
-			var weights: Array = []
-			for option in any:
-				weights.append(int(option.weight))
-			picked.append(str(any[run.roll_weighted("ENHANCE", weights)].enh_id))
+		for option in options:
+			weights.append(float(option.weight))
+		var index := run.roll_weighted("ENHANCE", weights)
+		if index < 0 or index >= options.size():
+			break
+		var enh_id := str(options[index].enh_id)
+		picked.append(enh_id)
+		blocked[str(GameData.enh(enh_id).get("family_id", ""))] = true
 	return picked
 
 
-static func _legal_families(run: RunState, pool_id: String) -> Array:
-	var families: Array = []
-	for entry in GameData.rows("enhancement_pool"):
-		if str(entry.get("pool_id", "")) != pool_id or int(entry.get("weight", 0)) <= 0:
-			continue
-		var family := str(entry.get("family_id", ""))
-		if _family_options(run, pool_id, family, []).is_empty():
-			continue
-		families.append({"family_id": family, "weight": int(entry.get("weight", 0))})
-	return families
-
-
-static func _pick_family_enh(run: RunState, pool_id: String, family: String, already: Array) -> String:
-	var options := _family_options(run, pool_id, family, already)
-	if options.is_empty():
-		return ""
-	var weights: Array = []
-	for option in options:
-		weights.append(int(option.weight))
-	return str(options[run.roll_weighted("ENHANCE", weights)].enh_id)
-
-
-static func _family_options(run: RunState, _pool_id: String, family: String, already: Array) -> Array:
+static func _mark_target_options(run: RunState, pool_id: String, blocked_families: Dictionary) -> Array:
 	var options: Array = []
-	if family == "VALUE":
-		var profile := _variant_row("VAR_DEPTH", run.depth)
-		for i in profile.get("enh_ids", []).size():
-			var enh_id := str(profile.enh_ids[i])
-			if already.has(enh_id):
-				continue
-			if TowerDeck.targets_for_mark(run, enh_id).is_empty():
-				continue
-			options.append({"enh_id": enh_id, "weight": int(profile.weights[i])})
-		return options
-	for enh_id in TowerDeck._family_enh_ids(family):
-		if already.has(enh_id):
+	for entry in GameData.mark_pool_rows(pool_id, run.depth):
+		var enh_id := str(entry.get("enh_id", ""))
+		if enh_id == "":
+			continue
+		var family := str(GameData.enh(enh_id).get("family_id", ""))
+		if blocked_families.has(family):
 			continue
 		if TowerDeck.targets_for_mark(run, enh_id).is_empty():
 			continue
-		options.append({"enh_id": enh_id, "weight": 1})
-	return options
-
-
-static func _all_legal_enh_options(run: RunState, pool_id: String, exclude: Array) -> Array:
-	var options: Array = []
-	for entry in GameData.rows("enhancement_pool"):
-		if str(entry.get("pool_id", "")) != pool_id:
-			continue
-		var family := str(entry.get("family_id", ""))
-		for option in _family_options(run, pool_id, family, exclude):
-			option = option.duplicate()
-			if family == "VALUE":
-				option.weight = int(option.weight)
-			else:
-				option.weight = int(entry.get("weight", 1))
-			options.append(option)
+		options.append({"enh_id": enh_id, "weight": float(entry.get("weight", 0))})
 	return options
 
 
@@ -536,23 +483,15 @@ static func _weighted_marks(run: RunState, card_uid: String, pool_id: String, al
 	for enh_id in card.enhancement_ids:
 		blocked[str(GameData.enh(str(enh_id)).get("family_id", ""))] = true
 	var options: Array = []
-	for entry in GameData.rows("enhancement_pool"):
-		if str(entry.get("pool_id", "")) != pool_id or int(entry.get("weight", 0)) <= 0:
+	for entry in GameData.mark_pool_rows(pool_id, run.depth):
+		var enh_id := str(entry.get("enh_id", ""))
+		if enh_id == "":
 			continue
-		var family := str(entry.get("family_id", ""))
+		var family := str(GameData.enh(enh_id).get("family_id", ""))
 		if blocked.has(family):
 			continue
-		if family == "VALUE":
-			var profile := _variant_row("VAR_DEPTH", run.depth)
-			var ids: Array = profile.get("enh_ids", [])
-			var weights: Array = profile.get("weights", [])
-			for i in ids.size():
-				if TowerDeck.can_apply_mark(run, card_uid, str(ids[i])).get("ok", false):
-					options.append({"enh_id": str(ids[i]), "weight": int(entry.get("weight", 0)) * int(weights[i])})
-			continue
-		for enh_id in TowerDeck._family_enh_ids(family):
-			if TowerDeck.can_apply_mark(run, card_uid, enh_id).get("ok", false):
-				options.append({"enh_id": enh_id, "weight": int(entry.get("weight", 0))})
+		if TowerDeck.can_apply_mark(run, card_uid, enh_id).get("ok", false):
+			options.append({"enh_id": enh_id, "weight": float(entry.get("weight", 0))})
 	return options
 
 
@@ -579,10 +518,7 @@ static func _roll_card_once(ctx: Dictionary, plan: Dictionary, depth: int, pizza
 	var guard := 0
 	while marks.size() < mark_count and guard < 8:
 		guard += 1
-		var family := _sample_family(ctx, pool_id, def_id, marks)
-		if family == "":
-			break
-		var enh_id := _sample_family_on_def(ctx, family, depth, def_id, marks)
+		var enh_id := _sample_mark(ctx, pool_id, depth, def_id, marks)
 		if enh_id == "":
 			break
 		marks.append(enh_id)
@@ -608,8 +544,11 @@ static func mark_probabilities(profile: String, depth: int) -> Array:
 static func _normal_probs(depth: int) -> Array:
 	var clamped := maxi(depth, 1)
 	if clamped <= 10:
-		var curve := GameData.row("quality_curve", clamped)
-		return [float(curve.get("p0", 0.0)), float(curve.get("p1", 0.0)), float(curve.get("p2", 0.0))]
+		var floor_row := GameData.floor_config(clamped)
+		var p1 := float(floor_row.get("p1", 0.0))
+		var p2 := float(floor_row.get("p2", 0.0))
+		return [(100.0 - p1 - p2) / 100.0, p1 / 100.0, p2 / 100.0]
+	# Depth >= 11 percents: p0 = max(5, 10 - 0.5*(floor-10)), p2 = min(70, 55 + 1.5*(floor-10)).
 	var p0 := maxf(0.05, 0.10 - 0.005 * float(clamped - 10))
 	var p2 := minf(0.70, 0.55 + 0.015 * float(clamped - 10))
 	return [p0, 1.0 - p0 - p2, p2]
@@ -649,44 +588,30 @@ static func _sample_variant(ctx: Dictionary, profile_id: String, depth: int, def
 		var enh_id := str(profile.enh_ids[i])
 		if _mark_fits_def(def_id, enh_id, marks):
 			ids.append(enh_id)
-			weights.append(int(profile.weights[i]))
+			weights.append(float(profile.weights[i]))
 	if ids.is_empty():
 		return ""
-	return str(ids[_pick(ctx, weights)])
-
-
-static func _sample_family(ctx: Dictionary, pool_id: String, def_id: String, marks: Array) -> String:
-	var families: Array = []
-	var weights: Array = []
-	for entry in GameData.rows("enhancement_pool"):
-		if str(entry.get("pool_id", "")) != pool_id or int(entry.get("weight", 0)) <= 0:
-			continue
-		var family := str(entry.get("family_id", ""))
-		if _family_blocked(marks, family):
-			continue
-		if not _family_has_fit(family, def_id, marks):
-			continue
-		families.append(family)
-		weights.append(int(entry.get("weight", 0)))
-	if families.is_empty():
+	var index := _pick(ctx, weights)
+	if index < 0 or index >= ids.size():
 		return ""
-	return str(families[_pick(ctx, weights)])
+	return str(ids[index])
 
 
-static func _sample_family_on_def(ctx: Dictionary, family: String, depth: int, def_id: String, marks: Array) -> String:
-	if family == "VALUE":
-		return _sample_variant(ctx, "VAR_DEPTH", depth, def_id, marks)
-	for enh_id in TowerDeck._family_enh_ids(family):
-		if _mark_fits_def(def_id, enh_id, marks):
-			return enh_id
-	return ""
-
-
-static func _family_has_fit(family: String, def_id: String, marks: Array) -> bool:
-	for enh_id in TowerDeck._family_enh_ids(family):
-		if _mark_fits_def(def_id, enh_id, marks):
-			return true
-	return false
+static func _sample_mark(ctx: Dictionary, pool_id: String, depth: int, def_id: String, marks: Array) -> String:
+	var ids: Array = []
+	var weights: Array = []
+	for entry in GameData.mark_pool_rows(pool_id, depth):
+		var enh_id := str(entry.get("enh_id", ""))
+		if enh_id == "" or not _mark_fits_def(def_id, enh_id, marks):
+			continue
+		ids.append(enh_id)
+		weights.append(float(entry.get("weight", 0)))
+	if ids.is_empty():
+		return ""
+	var index := _pick(ctx, weights)
+	if index < 0 or index >= ids.size():
+		return ""
+	return str(ids[index])
 
 
 static func _mark_fits_def(def_id: String, enh_id: String, marks: Array) -> bool:

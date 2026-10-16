@@ -3,7 +3,7 @@ extends RefCounted
 ## Read-only jam config. Rows are indexed by primary key and never hold run state.
 
 const CONFIG_DIR := "res://data/config/jam_1.0.0"
-const CONFIG_VERSION := "jam_1.0.0"
+const CONFIG_VERSION := "jam_1.2.0"
 const FILES: PackedStringArray = [
 	"battle_rule.json",
 	"card_def.json",
@@ -183,7 +183,11 @@ func _validate_battle_rule() -> void:
 	if str(row_data.get("ruleset_id", "")) != "RULE_JAM_10S":
 		errors.append("ruleset_id 必须是 RULE_JAM_10S")
 	_expect_number(row_data, "turn_seconds", "battle_rule")
-	_expect_int(row_data, "hand_target", "battle_rule", 1, 20)
+	_expect_int(row_data, "turn_start_draw", "battle_rule", 1, 20)
+	_expect_number(row_data, "delayed_draw_at", "battle_rule")
+	_expect_int(row_data, "delayed_draw_count", "battle_rule", 1, 20)
+	if not _is_int_number(row_data.get("hand_limit", null)) or int(row_data.get("hand_limit", -1)) != 0:
+		errors.append("battle_rule.hand_limit 必须为 0")
 	_expect_int(row_data, "initial_deck_size", "battle_rule", 1, 99)
 	_expect_int(row_data, "max_hp", "battle_rule", 1, 999999)
 	_expect_number(row_data, "damage_scale", "battle_rule")
@@ -196,8 +200,20 @@ func _validate_battle_rule() -> void:
 	_expect_number(row_data, "combo_cap_s", "battle_rule")
 	_expect_int(row_data, "combo_click_damage", "battle_rule", 0, 99)
 	_expect_int(row_data, "combo_click_rate_cap", "battle_rule", 1, 60)
+	_expect_number(row_data, "normal_2_hp", "battle_rule")
+	_expect_number(row_data, "normal_2_atk", "battle_rule")
+	_expect_number(row_data, "boss_phase2_atk", "battle_rule")
 	if int(row_data.get("max_marks_per_card", 0)) != 2:
 		errors.append("本规则集每张牌最多 2 枚印记")
+	if _is_number_value(row_data.get("turn_seconds", null)) and _is_number_value(row_data.get("delayed_draw_at", null)):
+		var delayed_at := float(row_data.get("delayed_draw_at"))
+		var turn_s := float(row_data.get("turn_seconds"))
+		if delayed_at <= 0.0 or delayed_at >= turn_s:
+			errors.append("delayed_draw_at 必须大于 0 且小于 turn_seconds")
+	for key in ["normal_2_hp", "normal_2_atk", "boss_phase2_atk"]:
+		var scale = row_data.get(key, null)
+		if _is_number_value(scale) and float(scale) <= 0.0:
+			errors.append("battle_rule.%s 必须大于 0" % key)
 
 
 func _validate_cards() -> void:
@@ -381,9 +397,12 @@ func _expect_int(entry: Dictionary, key: String, table: String, low: int, high: 
 
 
 func _expect_number(entry: Dictionary, key: String, table: String) -> void:
-	var value = entry.get(key, null)
-	if typeof(value) != TYPE_FLOAT and typeof(value) != TYPE_INT:
+	if not _is_number_value(entry.get(key, null)):
 		errors.append("%s.%s 必须是数字" % [table, key])
+
+
+func _is_number_value(value) -> bool:
+	return typeof(value) == TYPE_FLOAT or typeof(value) == TYPE_INT
 
 
 func _expect_bool(entry: Dictionary, key: String, table: String) -> void:

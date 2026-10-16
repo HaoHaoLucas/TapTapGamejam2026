@@ -1,7 +1,6 @@
-class_name CombatSession
 extends RefCounted
-## Projects a run deck into CombatEngine and writes zones and HP back.
-## Every ENC_* fight is the existing watcher until monster tables exist.
+## Retired v0.3 projector. Run fights use CombatSession in scripts/run/combat_session.gd.
+## The card demo still drives CombatEngine on its own.
 
 var engine: CombatEngine
 var projected_uids: Array = []
