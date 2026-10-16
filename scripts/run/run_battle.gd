@@ -3,6 +3,8 @@ extends Control
 ## Hosted jam equation battle. The run shell calls adopt() and waits for returned_to_tower.
 
 const CARD_SCENE := preload("res://scenes/cards/card_view.tscn")
+const HERO_TEX := preload("res://assets/battle/hero.png")
+const ENEMY_TEX := preload("res://assets/battle/enemy.png")
 const PHASE_NAME := {
 	"PLAYER_ACTIVE": "玩家行动",
 	"COMBO": "连击窗口",
@@ -19,10 +21,25 @@ var session: CombatSession
 var formula: Array[String] = []
 var selected_uid: String = ""
 
-var _monster: Label
-var _clock: Label
-var _player: Label
-var _piles: Label
+var _hp_label: Label
+var _hp_fill: ColorRect
+var _floor_label: Label
+var _enemy_name: Label
+var _enemy_hp_label: Label
+var _enemy_hp_fill: ColorRect
+var _intent_label: Label
+var _timer_label: Label
+var _timer_extra: Label
+var _round_label: Label
+var _draw_label: Label
+var _discard_label: Label
+var _hand_caption: Label
+var _combo_status: Label
+var _combo_dot_a: Panel
+var _combo_dot_b: Panel
+var _incoming: Label
+var _eq_result: Label
+var _pause_button: Button
 var _preview: Label
 var _warning: Label
 var _log: Label
@@ -38,6 +55,7 @@ var _reported: bool = false
 func _ready() -> void:
 	set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
 	focus_mode = Control.FOCUS_ALL
+	_apply_theme()
 	_build()
 	_apply_host_state()
 
@@ -107,152 +125,410 @@ func _apply_host_state() -> void:
 
 func _build() -> void:
 	var background := ColorRect.new()
-	background.color = Color(0.04, 0.06, 0.09)
+	background.color = Color(0.027, 0.067, 0.09)
 	background.set_anchors_preset(Control.PRESET_FULL_RECT)
 	background.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	add_child(background)
 	var margin := MarginContainer.new()
 	margin.set_anchors_preset(Control.PRESET_FULL_RECT)
-	margin.add_theme_constant_override("margin_left", 18)
-	margin.add_theme_constant_override("margin_top", 14)
-	margin.add_theme_constant_override("margin_right", 18)
-	margin.add_theme_constant_override("margin_bottom", 14)
+	margin.add_theme_constant_override("margin_left", 28)
+	margin.add_theme_constant_override("margin_top", 12)
+	margin.add_theme_constant_override("margin_right", 28)
+	margin.add_theme_constant_override("margin_bottom", 10)
 	add_child(margin)
-	var root_box := VBoxContainer.new()
-	root_box.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-	root_box.size_flags_vertical = Control.SIZE_EXPAND_FILL
-	root_box.add_theme_constant_override("separation", 8)
-	margin.add_child(root_box)
-	var title := Label.new()
-	title.text = "战斗    Enter 提交 · 空格同提交 · B 烧牌 · E 结束回合 · Esc 清空 · P 暂停"
-	root_box.add_child(title)
-	_monster = Label.new()
-	_monster.add_theme_font_size_override("font_size", 22)
-	_monster.add_theme_color_override("font_color", Color(0.93, 0.86, 0.68))
-	root_box.add_child(_monster)
-	_clock = Label.new()
-	_clock.add_theme_font_size_override("font_size", 28)
-	_clock.add_theme_color_override("font_color", Color(0.93, 0.86, 0.68))
-	root_box.add_child(_clock)
-	_player = Label.new()
-	root_box.add_child(_player)
-	_piles = Label.new()
-	_piles.add_theme_color_override("font_color", Color(0.78, 0.82, 0.74))
-	root_box.add_child(_piles)
-	_preview = Label.new()
-	_preview.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
-	root_box.add_child(_preview)
-	root_box.add_child(_section("算式"))
-	_eq_box = _scroller(root_box, 176, false)
-	var buttons := HBoxContainer.new()
-	buttons.add_theme_constant_override("separation", 8)
-	root_box.add_child(buttons)
-	_button(buttons, "提交算式", _commit)
-	_button(buttons, "烧牌", _burn)
-	_button(buttons, "结束回合", _end_turn)
-	_button(buttons, "清空", _clear_selection)
-	_button(buttons, "暂停", _toggle_pause)
-	_warning = Label.new()
-	_warning.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
-	_warning.add_theme_color_override("font_color", Color(0.95, 0.72, 0.45))
-	root_box.add_child(_warning)
-	root_box.add_child(_section("手牌"))
-	_hand_box = _scroller(root_box, 188, true)
-	_log = Label.new()
-	_log.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
-	root_box.add_child(_log)
+	var column := VBoxContainer.new()
+	column.set_anchors_preset(Control.PRESET_FULL_RECT)
+	column.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	column.size_flags_vertical = Control.SIZE_EXPAND_FILL
+	column.add_theme_constant_override("separation", 8)
+	margin.add_child(column)
+	column.add_child(_build_topbar())
+	column.add_child(_build_stage())
+	column.add_child(_build_controls())
+	column.add_child(_build_hand())
+	var hint := _label("Enter / 空格 提交    B 烧牌    E 结束回合    Esc 清空    P 暂停", 12, Color(0.62, 0.7, 0.66))
+	hint.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	column.add_child(hint)
 	_combo_layer = ColorRect.new()
-	_combo_layer.color = Color(0, 0, 0, 0.55)
+	_combo_layer.color = Color(0.027, 0.078, 0.114, 0.72)
 	_combo_layer.set_anchors_preset(Control.PRESET_FULL_RECT)
 	_combo_layer.visible = false
 	_combo_layer.mouse_filter = Control.MOUSE_FILTER_STOP
 	_combo_layer.gui_input.connect(_on_combo_input)
 	add_child(_combo_layer)
+	var burst := PanelContainer.new()
+	burst.set_anchors_preset(Control.PRESET_CENTER)
+	burst.custom_minimum_size = Vector2(320, 180)
+	burst.offset_left = -160
+	burst.offset_top = -90
+	burst.offset_right = 160
+	burst.offset_bottom = 90
+	burst.add_theme_stylebox_override("panel", _panel_style())
+	_combo_layer.add_child(burst)
 	var combo_box := VBoxContainer.new()
-	combo_box.set_anchors_preset(Control.PRESET_CENTER)
 	combo_box.alignment = BoxContainer.ALIGNMENT_CENTER
-	_combo_layer.add_child(combo_box)
-	_combo_label = Label.new()
+	combo_box.add_theme_constant_override("separation", 8)
+	var pad := MarginContainer.new()
+	pad.add_theme_constant_override("margin_left", 18)
+	pad.add_theme_constant_override("margin_right", 18)
+	pad.add_theme_constant_override("margin_top", 14)
+	pad.add_theme_constant_override("margin_bottom", 14)
+	burst.add_child(pad)
+	pad.add_child(combo_box)
+	combo_box.add_child(_label("追击", 12, Color(0.82, 0.76, 0.55)))
+	_combo_label = _label("追击时刻", 24, Color(0.937, 0.855, 0.678))
 	_combo_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	combo_box.add_child(_combo_label)
 	var combo_button := Button.new()
-	combo_button.text = "连击"
+	combo_button.text = "连点追击"
 	combo_button.focus_mode = Control.FOCUS_NONE
+	combo_button.custom_minimum_size = Vector2(0, 44)
 	combo_button.pressed.connect(_combo_click)
 	combo_box.add_child(combo_button)
 
 
+func _build_topbar() -> Control:
+	var bar := PanelContainer.new()
+	bar.custom_minimum_size = Vector2(0, 64)
+	bar.add_theme_stylebox_override("panel", _panel_style(Color(0.043, 0.086, 0.125, 0.96), Color(0.55, 0.58, 0.45, 0.35), 0))
+	var row := HBoxContainer.new()
+	row.add_theme_constant_override("separation", 18)
+	bar.add_child(row)
+	var brand := VBoxContainer.new()
+	brand.custom_minimum_size = Vector2(120, 0)
+	brand.add_child(_label("涌现", 22, Color(0.91, 0.86, 0.72)))
+	brand.add_child(_label("限时对战", 12, Color(0.706, 0.725, 0.655)))
+	row.add_child(brand)
+	var life := VBoxContainer.new()
+	life.custom_minimum_size = Vector2(220, 0)
+	life.size_flags_vertical = Control.SIZE_SHRINK_CENTER
+	var life_row := HBoxContainer.new()
+	life_row.add_theme_constant_override("separation", 8)
+	life_row.add_child(_label("生命", 13, Color(0.62, 0.7, 0.66)))
+	_hp_label = _label("0 / 0", 16, Color(0.91, 0.86, 0.72))
+	life_row.add_child(_hp_label)
+	life.add_child(life_row)
+	_hp_fill = _hp_bar(life, Color(0.72, 0.42, 0.38))
+	row.add_child(life)
+	_floor_label = _label("", 14, Color(0.82, 0.84, 0.74))
+	_floor_label.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	_floor_label.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
+	row.add_child(_floor_label)
+	_pause_button = Button.new()
+	_pause_button.text = "暂停"
+	_pause_button.focus_mode = Control.FOCUS_NONE
+	_pause_button.custom_minimum_size = Vector2(88, 40)
+	_pause_button.pressed.connect(_toggle_pause)
+	row.add_child(_pause_button)
+	return bar
+
+
+func _build_stage() -> Control:
+	var stage := HBoxContainer.new()
+	stage.size_flags_vertical = Control.SIZE_EXPAND_FILL
+	stage.add_theme_constant_override("separation", 16)
+	var hero := VBoxContainer.new()
+	hero.custom_minimum_size = Vector2(240, 0)
+	hero.size_flags_vertical = Control.SIZE_EXPAND_FILL
+	var hero_art := TextureRect.new()
+	hero_art.texture = HERO_TEX
+	hero_art.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
+	hero_art.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED
+	hero_art.custom_minimum_size = Vector2(220, 180)
+	hero_art.size_flags_vertical = Control.SIZE_EXPAND_FILL
+	hero_art.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	hero.add_child(hero_art)
+	var hero_name := _label("实验员", 14, Color(0.784, 0.8, 0.718))
+	hero_name.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	hero.add_child(hero_name)
+	stage.add_child(hero)
+	var center := VBoxContainer.new()
+	center.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	center.size_flags_vertical = Control.SIZE_EXPAND_FILL
+	center.alignment = BoxContainer.ALIGNMENT_CENTER
+	center.add_theme_constant_override("separation", 4)
+	center.add_child(_label("每回合 10 秒", 12, Color(0.51, 0.6, 0.565)))
+	var title := _label("用算式击败对手", 18, Color(0.824, 0.816, 0.722))
+	title.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	center.add_child(title)
+	_round_label = _label("第 1 回合", 13, Color(0.72, 0.78, 0.7))
+	_round_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	center.add_child(_round_label)
+	_timer_label = _label("10.0", 48, Color(0.91, 0.86, 0.72))
+	_timer_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	center.add_child(_timer_label)
+	_timer_extra = _label("7.5 秒再抽 1 张", 13, Color(0.7, 0.76, 0.68))
+	_timer_extra.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	center.add_child(_timer_extra)
+	_log = _label("", 14, Color(0.933, 0.835, 0.651))
+	_log.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	_log.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	center.add_child(_log)
+	_warning = _label("", 13, Color(0.95, 0.72, 0.45))
+	_warning.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	_warning.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	center.add_child(_warning)
+	stage.add_child(center)
+	var enemy := VBoxContainer.new()
+	enemy.custom_minimum_size = Vector2(280, 0)
+	enemy.size_flags_vertical = Control.SIZE_EXPAND_FILL
+	enemy.add_theme_constant_override("separation", 4)
+	_intent_label = _label("意图", 14, Color(0.91, 0.86, 0.72))
+	_intent_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	_intent_label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	enemy.add_child(_intent_label)
+	var enemy_art := TextureRect.new()
+	enemy_art.texture = ENEMY_TEX
+	enemy_art.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
+	enemy_art.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED
+	enemy_art.custom_minimum_size = Vector2(240, 160)
+	enemy_art.size_flags_vertical = Control.SIZE_EXPAND_FILL
+	enemy_art.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	enemy.add_child(enemy_art)
+	_enemy_name = _label("敌人", 16, Color(0.82, 0.84, 0.74))
+	_enemy_name.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	enemy.add_child(_enemy_name)
+	_enemy_hp_fill = _hp_bar(enemy, Color(0.72, 0.38, 0.36))
+	_enemy_hp_label = _label("0 / 0", 13, Color(0.86, 0.84, 0.72))
+	_enemy_hp_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	enemy.add_child(_enemy_hp_label)
+	stage.add_child(enemy)
+	return stage
+
+
+func _build_controls() -> Control:
+	var row := HBoxContainer.new()
+	row.add_theme_constant_override("separation", 12)
+	row.custom_minimum_size = Vector2(0, 132)
+	var burn := Button.new()
+	burn.text = "烧掉回血\n|点数| × 10"
+	burn.focus_mode = Control.FOCUS_NONE
+	burn.custom_minimum_size = Vector2(150, 64)
+	burn.pressed.connect(_burn)
+	row.add_child(burn)
+	var eq := PanelContainer.new()
+	eq.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	eq.add_theme_stylebox_override("panel", _panel_style())
+	row.add_child(eq)
+	var eq_pad := MarginContainer.new()
+	eq_pad.add_theme_constant_override("margin_left", 10)
+	eq_pad.add_theme_constant_override("margin_right", 10)
+	eq_pad.add_theme_constant_override("margin_top", 6)
+	eq_pad.add_theme_constant_override("margin_bottom", 6)
+	eq.add_child(eq_pad)
+	var eq_box := VBoxContainer.new()
+	eq_box.add_theme_constant_override("separation", 4)
+	eq_pad.add_child(eq_box)
+	var eq_top := HBoxContainer.new()
+	var eq_head := _label("算式", 13, Color(0.64, 0.71, 0.65))
+	eq_head.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	eq_top.add_child(eq_head)
+	var clear := Button.new()
+	clear.text = "清空"
+	clear.focus_mode = Control.FOCUS_NONE
+	clear.custom_minimum_size = Vector2(64, 28)
+	clear.pressed.connect(_clear_selection)
+	eq_top.add_child(clear)
+	eq_box.add_child(eq_top)
+	var eq_scroll := ScrollContainer.new()
+	eq_scroll.custom_minimum_size = Vector2(0, 116)
+	eq_scroll.horizontal_scroll_mode = ScrollContainer.SCROLL_MODE_AUTO
+	eq_scroll.vertical_scroll_mode = ScrollContainer.SCROLL_MODE_DISABLED
+	eq_box.add_child(eq_scroll)
+	_eq_box = HBoxContainer.new()
+	_eq_box.add_theme_constant_override("separation", 8)
+	eq_scroll.add_child(_eq_box)
+	var eq_bottom := HBoxContainer.new()
+	eq_bottom.add_theme_constant_override("separation", 12)
+	eq_box.add_child(eq_bottom)
+	_preview = _label("从数字开始，数字和符号交替。", 13, Color(0.75, 0.78, 0.7))
+	_preview.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	_preview.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	_preview.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
+	eq_bottom.add_child(_preview)
+	_eq_result = _label("—", 22, Color(0.93, 0.85, 0.62))
+	_eq_result.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
+	eq_bottom.add_child(_eq_result)
+	var fire := Button.new()
+	fire.text = "发射  ↵"
+	fire.focus_mode = Control.FOCUS_NONE
+	fire.custom_minimum_size = Vector2(108, 44)
+	fire.pressed.connect(_commit)
+	eq_bottom.add_child(fire)
+	var combo := VBoxContainer.new()
+	combo.custom_minimum_size = Vector2(150, 0)
+	combo.alignment = BoxContainer.ALIGNMENT_CENTER
+	combo.add_child(_label("加法追击", 12, Color(0.64, 0.71, 0.65)))
+	var dots := HBoxContainer.new()
+	dots.alignment = BoxContainer.ALIGNMENT_CENTER
+	dots.add_theme_constant_override("separation", 8)
+	combo.add_child(dots)
+	_combo_dot_a = _combo_dot()
+	_combo_dot_b = _combo_dot()
+	dots.add_child(_combo_dot_a)
+	dots.add_child(_combo_dot_b)
+	_combo_status = _label("两次正数加法可追击\n乘法会打断", 12, Color(0.82, 0.84, 0.74))
+	_combo_status.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	_combo_status.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	combo.add_child(_combo_status)
+	row.add_child(combo)
+	var end_col := VBoxContainer.new()
+	end_col.custom_minimum_size = Vector2(168, 0)
+	var end_turn := Button.new()
+	end_turn.text = "结束回合\n可提前结束 · E"
+	end_turn.focus_mode = Control.FOCUS_NONE
+	end_turn.custom_minimum_size = Vector2(168, 56)
+	end_turn.pressed.connect(_end_turn)
+	end_col.add_child(end_turn)
+	_incoming = _label("", 12, Color(0.78, 0.7, 0.58))
+	_incoming.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	_incoming.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	end_col.add_child(_incoming)
+	row.add_child(end_col)
+	return row
+
+
+func _build_hand() -> Control:
+	var block := VBoxContainer.new()
+	block.add_theme_constant_override("separation", 4)
+	var caption := HBoxContainer.new()
+	_hand_caption = _label("手牌 0", 13, Color(0.82, 0.86, 0.78))
+	_hand_caption.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	caption.add_child(_hand_caption)
+	var rule := _label("出牌后本回合不补牌", 12, Color(0.62, 0.7, 0.66))
+	rule.horizontal_alignment = HORIZONTAL_ALIGNMENT_RIGHT
+	caption.add_child(rule)
+	block.add_child(caption)
+	var zone := HBoxContainer.new()
+	zone.add_theme_constant_override("separation", 10)
+	block.add_child(zone)
+	_draw_label = _pile_label("抽牌堆")
+	zone.add_child(_draw_label.get_parent())
+	var scroll := ScrollContainer.new()
+	scroll.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	scroll.custom_minimum_size = Vector2(0, 176)
+	scroll.horizontal_scroll_mode = ScrollContainer.SCROLL_MODE_AUTO
+	scroll.vertical_scroll_mode = ScrollContainer.SCROLL_MODE_DISABLED
+	zone.add_child(scroll)
+	_hand_box = HBoxContainer.new()
+	_hand_box.alignment = BoxContainer.ALIGNMENT_CENTER
+	_hand_box.add_theme_constant_override("separation", 10)
+	_hand_box.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	scroll.add_child(_hand_box)
+	_discard_label = _pile_label("弃牌堆")
+	zone.add_child(_discard_label.get_parent())
+	return block
+
+
 func _refresh_hud() -> void:
-	if _monster == null:
+	if _enemy_name == null:
 		return
 	var battle := _battle()
 	if battle == null:
-		_monster.text = "等待这场战斗。"
-		_clock.text = ""
-		_player.text = ""
-		_piles.text = ""
+		_enemy_name.text = "等待这场战斗。"
+		_timer_label.text = ""
+		_timer_extra.text = ""
+		_hp_label.text = ""
 		_warning.text = ""
 		if _combo_layer != null:
 			_combo_layer.visible = false
 		return
-	_monster.text = "%s    生命 %d/%d    意图 %s" % [
-		_monster_title(battle), battle.enemy_hp, battle.enemy_max_hp, _intent_text(battle),
-	]
-	_clock.text = _clock_text(battle)
-	var urgent := battle.phase == "PLAYER_ACTIVE" and not battle.paused and battle.turn_remaining <= 2.5
-	_clock.add_theme_color_override("font_color", Color(0.95, 0.55, 0.42) if urgent else Color(0.93, 0.86, 0.68))
 	var phase := str(PHASE_NAME.get(battle.phase, battle.phase))
-	_player.text = "你的生命 %d/%d    回合 %d    %s" % [battle.player_hp, battle.player_max_hp, battle.turn_index, phase]
+	_enemy_name.text = _monster_title(battle)
+	_enemy_hp_label.text = "%d / %d" % [battle.enemy_hp, battle.enemy_max_hp]
+	_set_fill(_enemy_hp_fill, float(battle.enemy_hp) / float(maxi(1, battle.enemy_max_hp)))
+	var intent := _intent_text(battle)
+	var stolen := 0
+	if session != null and session.ctx != null:
+		stolen = session.ctx.library.pile(CardInstance.STOLEN).size()
+	if stolen > 0:
+		intent += "    扣押 %d" % stolen
+	_intent_label.text = intent
+	_incoming.text = intent
+	_hp_label.text = "%d / %d" % [battle.player_hp, battle.player_max_hp]
+	_set_fill(_hp_fill, float(battle.player_hp) / float(maxi(1, battle.player_max_hp)))
+	var depth := 1
+	if session != null and session.ctx != null:
+		depth = int(session.ctx.depth)
+	_floor_label.text = "第 %d 层    第 %d 回合    %s" % [depth, battle.turn_index, phase]
+	_round_label.text = "第 %d 回合 · %s" % [battle.turn_index, phase]
+	_paint_clock(battle)
+	if _pause_button != null:
+		_pause_button.text = "继续" if battle.paused else "暂停"
 	var library := session.ctx.library
-	_piles.text = "抽牌 %d    弃牌 %d    扣押 %d" % [
-		library.pile(CardInstance.DRAW).size(),
-		library.pile(CardInstance.DISCARD).size(),
-		library.pile(CardInstance.STOLEN).size(),
-	]
+	var hand_count := library.pile(CardInstance.HAND).size()
+	_hand_caption.text = "手牌 %d" % hand_count
+	_draw_label.text = "抽牌堆\n%d" % library.pile(CardInstance.DRAW).size()
+	_discard_label.text = "弃牌堆\n%d" % library.pile(CardInstance.DISCARD).size()
 	_warning.text = _burn_warning()
+	_paint_combo(battle)
 	var show_combo := battle.phase == "COMBO"
 	_combo_layer.visible = show_combo
-	if show_combo:
-		_combo_label.text = "追击 %.1f / %.1f 秒，点击任意处" % [battle.combo_remaining, battle.combo_window]
+	if show_combo and _combo_label != null:
+		_combo_label.text = "追击 %.1f / %.1f 秒" % [battle.combo_remaining, battle.combo_window]
 	_update_preview()
 
 
-func _clock_text(battle: CardBattle) -> String:
-	var text := ""
+func _paint_clock(battle: CardBattle) -> void:
+	var urgent := battle.phase == "PLAYER_ACTIVE" and not battle.paused and battle.turn_remaining <= 2.5
+	var color := Color(0.95, 0.55, 0.42) if urgent else Color(0.91, 0.86, 0.72)
 	if battle.phase == "COMBO":
-		text = "连击 %.1f / %.1f 秒" % [battle.combo_remaining, battle.combo_window]
+		_timer_label.text = "%.1f" % battle.combo_remaining
+		_timer_extra.text = "追击还剩 %.1f / %.1f 秒" % [battle.combo_remaining, battle.combo_window]
 	elif battle.phase == "PLAYER_ACTIVE":
-		var total := float(session.ctx.catalog.rule().get("turn_seconds", 10))
-		text = "剩余 %.1f / %.0f 秒" % [battle.turn_remaining, total]
+		_timer_label.text = "%.1f" % battle.turn_remaining
 		if battle.delayed_draw_done:
-			text += "    本回合加抽已处理"
+			_timer_extra.text = "本回合加抽已处理"
 		else:
 			var at := float(session.ctx.catalog.rule().get("delayed_draw_at", 7.5))
 			var extra := int(session.ctx.catalog.rule().get("delayed_draw_count", 1))
-			text += "    %.1f 秒再抽 %d 张" % [at, extra]
+			_timer_extra.text = "%.1f 秒再抽 %d 张" % [at, extra]
 	else:
-		text = str(PHASE_NAME.get(battle.phase, battle.phase))
+		_timer_label.text = str(PHASE_NAME.get(battle.phase, battle.phase))
+		_timer_extra.text = ""
 	if battle.paused:
-		text += "    暂停"
-	return text
+		_timer_extra.text = "暂停" if _timer_extra.text == "" else _timer_extra.text + "    暂停"
+	_timer_label.add_theme_color_override("font_color", color)
+
+
+func _paint_combo(battle: CardBattle) -> void:
+	if _combo_dot_a == null or _combo_dot_b == null or _combo_status == null:
+		return
+	var hot := Color(0.93, 0.82, 0.52)
+	var dim := Color(0.35, 0.42, 0.4)
+	_combo_dot_a.modulate = hot if battle.combo_streak >= 1 else dim
+	_combo_dot_b.modulate = hot if battle.combo_pending or battle.combo_streak >= 2 else dim
+	if battle.phase == "COMBO":
+		_combo_status.text = "追击 %.1f 秒" % battle.combo_remaining
+	elif battle.combo_streak <= 0:
+		_combo_status.text = "两次正数加法可追击\n乘法会打断"
+	elif battle.combo_pending:
+		_combo_status.text = "回合结束后追击\n%.0f 秒" % battle.combo_window
+	else:
+		_combo_status.text = "再来一次正数加法\n乘法会打断"
 
 
 func _update_preview() -> void:
 	if _preview == null or session == null or session.ctx == null:
 		return
 	if formula.is_empty():
-		_preview.text = "从数字开始，数字和符号交替，3 到 11 张，最后一张是数字。"
+		_preview.text = "点数字和符号交替组成算式，再发射。"
+		if _eq_result != null:
+			_eq_result.text = "—"
 		return
 	var preview := session.ctx.equation_service.preview(formula, _combat_snapshot())
 	if not preview.ok:
-		_preview.text = "当前算式不能提交：%s" % _reason(str(preview.invalid_reason))
+		_preview.text = "不能提交：%s" % _reason(str(preview.invalid_reason))
+		if _eq_result != null:
+			_eq_result.text = "—"
 		return
-	_preview.text = "预览 %s   结果 %s   伤害 %s%s" % [
+	_preview.text = "%s  结果 %s%s" % [
 		preview.primary_op,
 		preview.effective_result,
-		preview.damage,
-		"   伤害翻倍" if preview.yinyang else "",
+		"  伤害翻倍" if preview.yinyang else "",
 	]
+	if _eq_result != null:
+		_eq_result.text = str(preview.damage)
 
 
 func _sync_cards(force: bool = false) -> void:
@@ -280,6 +556,7 @@ func _rebuild(box: HBoxContainer, uids: Array, equation: bool) -> void:
 	for card_uid in uids:
 		var view := CARD_SCENE.instantiate() as CardView
 		box.add_child(view)
+		view.set_compact(equation)
 		view.bind(session.ctx.library, str(card_uid))
 		view.set_highlight(_mode(str(card_uid), equation))
 		view.pressed.connect(_on_card_pressed)
@@ -545,32 +822,93 @@ func _phase() -> String:
 	return "" if battle == null else str(battle.phase)
 
 
-func _section(text: String) -> Label:
+func _apply_theme() -> void:
+	var font := SystemFont.new()
+	font.font_names = PackedStringArray(["Microsoft YaHei UI", "Microsoft YaHei", "Noto Sans CJK SC", "Segoe UI"])
+	var ui := Theme.new()
+	ui.default_font = font
+	ui.default_font_size = 15
+	var normal := _panel_style(Color(0.12, 0.2, 0.22, 0.94), Color(0.71, 0.63, 0.42, 0.7), 4)
+	var hover := _panel_style(Color(0.22, 0.32, 0.33), Color(0.85, 0.76, 0.52, 0.8), 4)
+	var pressed := _panel_style(Color(0.1, 0.16, 0.18), Color(0.85, 0.76, 0.52), 4)
+	ui.set_stylebox("normal", "Button", normal)
+	ui.set_stylebox("hover", "Button", hover)
+	ui.set_stylebox("pressed", "Button", pressed)
+	ui.set_stylebox("focus", "Button", StyleBoxEmpty.new())
+	ui.set_color("font_color", "Button", Color(0.91, 0.86, 0.72))
+	ui.set_color("font_hover_color", "Button", Color(0.97, 0.93, 0.82))
+	theme = ui
+
+
+func _label(text: String, size_px: int, color: Color) -> Label:
 	var label := Label.new()
 	label.text = text
+	label.add_theme_font_size_override("font_size", size_px)
+	label.add_theme_color_override("font_color", color)
 	return label
 
 
-func _scroller(parent: Node, height: int, expand: bool) -> HBoxContainer:
-	var scroll := ScrollContainer.new()
-	scroll.custom_minimum_size = Vector2(0, height)
-	scroll.horizontal_scroll_mode = ScrollContainer.SCROLL_MODE_AUTO
-	scroll.vertical_scroll_mode = ScrollContainer.SCROLL_MODE_DISABLED
-	if expand:
-		scroll.size_flags_vertical = Control.SIZE_EXPAND_FILL
-	parent.add_child(scroll)
-	var box := HBoxContainer.new()
-	box.add_theme_constant_override("separation", 8)
-	scroll.add_child(box)
+func _panel_style(bg: Color = Color(0.125, 0.2, 0.22, 0.94), border: Color = Color(0.71, 0.63, 0.42, 0.53), radius: int = 7) -> StyleBoxFlat:
+	var box := StyleBoxFlat.new()
+	box.bg_color = bg
+	box.set_border_width_all(1)
+	box.border_color = border
+	box.set_corner_radius_all(radius)
+	box.content_margin_left = 10
+	box.content_margin_right = 10
+	box.content_margin_top = 8
+	box.content_margin_bottom = 8
 	return box
 
 
-func _button(parent: Node, text: String, callback: Callable) -> void:
-	var button := Button.new()
-	button.text = text
-	button.focus_mode = Control.FOCUS_NONE
-	button.pressed.connect(callback)
-	parent.add_child(button)
+func _hp_bar(parent: Node, color: Color) -> ColorRect:
+	var track := ColorRect.new()
+	track.color = Color(0.12, 0.18, 0.2)
+	track.custom_minimum_size = Vector2(160, 8)
+	track.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	parent.add_child(track)
+	var fill := ColorRect.new()
+	fill.color = color
+	fill.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
+	fill.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	track.add_child(fill)
+	return fill
+
+
+func _set_fill(fill: ColorRect, ratio: float) -> void:
+	if fill == null:
+		return
+	fill.anchor_left = 0.0
+	fill.anchor_top = 0.0
+	fill.anchor_bottom = 1.0
+	fill.anchor_right = clampf(ratio, 0.0, 1.0)
+	fill.offset_left = 0.0
+	fill.offset_top = 0.0
+	fill.offset_right = 0.0
+	fill.offset_bottom = 0.0
+
+
+func _pile_label(title: String) -> Label:
+	var panel := PanelContainer.new()
+	panel.custom_minimum_size = Vector2(96, 120)
+	panel.size_flags_vertical = Control.SIZE_SHRINK_CENTER
+	panel.add_theme_stylebox_override("panel", _panel_style(Color(0.17, 0.26, 0.255), Color(0.55, 0.58, 0.42, 0.53), 4))
+	var label := _label("%s\n0" % title, 14, Color(0.86, 0.84, 0.72))
+	label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	label.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
+	panel.add_child(label)
+	return label
+
+
+func _combo_dot() -> Panel:
+	var dot := Panel.new()
+	dot.custom_minimum_size = Vector2(16, 16)
+	var style := StyleBoxFlat.new()
+	style.bg_color = Color(0.93, 0.82, 0.52)
+	style.set_corner_radius_all(8)
+	dot.add_theme_stylebox_override("panel", style)
+	dot.modulate = Color(0.35, 0.42, 0.4)
+	return dot
 
 
 func _set_log(text: String) -> void:

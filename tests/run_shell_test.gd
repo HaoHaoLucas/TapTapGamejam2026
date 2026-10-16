@@ -19,6 +19,7 @@ func _run() -> void:
 	root.size = Vector2i(1440, 900)
 	await _test_battle_choice_opens_combat()
 	await _test_battle_losses()
+	_test_sacrifice_result_is_readable()
 	if _failures == 0:
 		print("PASS: a battle room opens the jam fight and writes zones back")
 	quit(1 if _failures else 0)
@@ -158,6 +159,39 @@ func _burn_hand_number(shell) -> String:
 		if result.get("ok", false) and result.get("removed", false):
 			return card.card_uid
 	return ""
+
+
+func _test_sacrifice_result_is_readable() -> void:
+	var created := RunService.new_run("sac-result")
+	_check(created.get("ok", false), "Could not start a run for the sacrifice result")
+	if not created.get("ok", false):
+		return
+	var run: RunState = created.run
+	var room := GameData.room("RM_SAC")
+	run.current_room = {
+		"room_uid": run.uid("R"),
+		"room_id": "RM_SAC",
+		"content_id": "EV_SAC",
+		"room_kind": str(room.get("room_kind", "EVENT")),
+		"display_key": str(room.get("display_key", "ROOM_EVENT")),
+		"scene_key": "event",
+		"status": "ENTERED",
+	}
+	run.phase = "ROOM"
+	var room_uid := str(run.current_room.get("room_uid", ""))
+	var offered := str(TowerDeck.deck_cards(run)[0].card_uid)
+	var result := EventService.commit(run, room_uid, {"sacrifice_uids": [offered]}, "sac-result")
+	_check(result.get("ok", false), "A one-card sacrifice should succeed: %s" % result.get("error", ""))
+	if not result.get("ok", false):
+		return
+	var shell = load("res://scripts/run/run_shell.gd").new()
+	shell.run = run
+	var lines: PackedStringArray = shell._event_result_lines(result)
+	var text := "\n".join(lines)
+	_check(text.contains("交出了这些牌"), "Sacrifice result must name the cards that were given")
+	_check(text.contains("给剩下的牌加上了"), "Sacrifice result must name the marks that were granted")
+	_check(text.contains("加上 "), "Each granted mark must be written out, got %s" % text)
+	shell.free()
 
 
 func _reach_choice(shell) -> bool:

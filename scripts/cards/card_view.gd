@@ -32,6 +32,15 @@ func set_highlight(mode: String) -> void:
 	_apply_style()
 
 
+func set_compact(compact: bool) -> void:
+	_ensure()
+	custom_minimum_size = Vector2(84, 112) if compact else Vector2(116, 168)
+	if _value != null:
+		_value.add_theme_font_size_override("font_size", 22 if compact else 32)
+	if _marks != null:
+		_marks.add_theme_font_size_override("font_size", 11 if compact else 12)
+
+
 func face_text() -> String:
 	_ensure()
 	return "" if _value == null else _value.text
