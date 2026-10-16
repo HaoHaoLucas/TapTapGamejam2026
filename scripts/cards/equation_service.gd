@@ -1,6 +1,7 @@
 class_name EquationService
 extends RefCounted
-## Preview is pure. Commit follows the jam settlement order and does not rerun an action id.
+## Preview is pure. Commit settles damage, combo, fragile, and return, then stops. It does not draw.
+## Monster tax and coefficient are read here. A legal commit is what consumes them.
 
 var _run: WeakRef
 
@@ -47,11 +48,18 @@ func commit(ordered_uids: Array, action_uid: String, combat_snapshot: Dictionary
 		cards.append(card)
 		ctx.library.move(card, CardInstance.RESOLVING, "RESOLVE", action_uid, ctx)
 	if ctx.battle != null:
+		if str(ctx.battle.monster_id) != "":
+			MonsterRules.note_legal_equation(
+				ctx.battle,
+				str(evaluated.primary_op),
+				int(evaluated.raw_result),
+				int(evaluated.damage),
+				_has_negative_printed(cards),
+			)
 		ctx.battle.apply_damage(int(evaluated.damage))
 		_record_combo(evaluated)
 		if ctx.battle.enemy_hp <= 0:
-			ctx.battle.phase = "VICTORY"
-			ctx.battle.combo_pending = false
+			ctx.battle.declare_victory()
 	var fragile: Array = []
 	for card in cards:
 		var broke := false
@@ -68,25 +76,19 @@ func commit(ordered_uids: Array, action_uid: String, combat_snapshot: Dictionary
 		else:
 			ctx.library.move(card, CardInstance.DISCARD, "DISCARD", action_uid, ctx)
 	var outcome := "ONGOING"
-	var ended := false
 	if ctx.battle != null:
-		if ctx.battle.phase == "VICTORY":
+		if ctx.battle.phase == "VICTORY" or ctx.battle.enemy_hp <= 0:
+			if ctx.battle.phase != "VICTORY":
+				ctx.battle.declare_victory()
 			outcome = "VICTORY"
-			ended = true
-		elif not ctx.battle.combo_pending and ctx.library.is_fighting_exhausted():
-			ctx.battle.phase = "DECK_EXHAUSTED"
+		elif ctx.battle.fail_if_resources_exhausted():
 			outcome = "DECK_EXHAUSTED"
-			ended = true
-	var draws: Array = []
-	if not ended:
-		var battle_uid := "" if ctx.battle == null else ctx.battle.battle_uid
-		draws = ctx.draw_service.refill(battle_uid, "AFTER_EQUATION", action_uid).events
 	var equation_uid := action_uid if action_uid != "" else "eq_%d" % Time.get_ticks_usec()
 	evaluated["equation_uid"] = equation_uid
 	evaluated["action_uid"] = action_uid
 	evaluated["fragile"] = fragile
 	evaluated["battle_outcome"] = outcome
-	evaluated["draws"] = draws
+	evaluated["draws"] = []
 	evaluated["replayed"] = false
 	ctx.equation_committed.emit(
 		equation_uid,
@@ -170,6 +172,10 @@ func _evaluate(ordered_uids: Array, combat_snapshot: Dictionary) -> Dictionary:
 	var raw := _eval_expr(operands, op_codes)
 	var tax := int(combat_snapshot.get("tax", 0))
 	var coefficient := float(combat_snapshot.get("damage_coefficient", 1.0))
+	if ctx.battle != null:
+		var mods: Dictionary = MonsterRules.equation_mods(ctx.battle, cards.size(), primary, raw)
+		tax += int(mods.get("tax", 0))
+		coefficient *= float(mods.get("coefficient", 1.0))
 	var yinyang := _yinyang(cards)
 	var dealt := _damage(raw, tax, coefficient, yinyang)
 	result.ok = true
@@ -193,6 +199,17 @@ func _evaluate(ordered_uids: Array, combat_snapshot: Dictionary) -> Dictionary:
 		"cards": snap_cards,
 	}
 	return result
+
+
+func _has_negative_printed(cards: Array) -> bool:
+	var ctx := _ctx()
+	for card in cards:
+		if card == null:
+			continue
+		var kind := str(ctx.catalog.card(card.def_id).get("card_kind", ""))
+		if kind == "NUM" and int(card.printed_value(ctx.catalog)) < 0:
+			return true
+	return false
 
 
 func _operand(card: CardInstance, primary: String) -> int:

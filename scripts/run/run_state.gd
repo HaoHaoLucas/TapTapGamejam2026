@@ -4,7 +4,7 @@ extends RefCounted
 
 const STREAMS: PackedStringArray = ["MAP", "REWARD", "ENHANCE", "COMBAT", "QUEST"]
 const ENGINE_VERSION := "4.7.2"
-const CONFIG_VERSION := "jam_1.0.0"
+const CONFIG_VERSION := "jam_1.2.0"
 const RULESET_ID := "RULE_JAM_10S"
 
 var run_id: String = ""
@@ -127,16 +127,29 @@ func randf_stream(stream: String) -> float:
 
 
 func roll_weighted(stream: String, weights: Array) -> int:
-	var total := 0
+	if RngStream.all_whole(weights):
+		var total := 0
+		for weight in weights:
+			total += int(weight)
+		if total <= 0:
+			return -1
+		var roll := randi_range_stream(stream, 0, total - 1)
+		var acc := 0
+		for i in weights.size():
+			acc += int(weights[i])
+			if roll < acc:
+				return i
+		return weights.size() - 1
+	var float_total := 0.0
 	for weight in weights:
-		total += int(weight)
-	if total <= 0:
+		float_total += float(weight)
+	if float_total <= 0.0:
 		return -1
-	var roll := randi_range_stream(stream, 0, total - 1)
-	var acc := 0
+	var float_roll := randf_stream(stream) * float_total
+	var float_acc := 0.0
 	for i in weights.size():
-		acc += int(weights[i])
-		if roll < acc:
+		float_acc += float(weights[i])
+		if float_roll < float_acc:
 			return i
 	return weights.size() - 1
 

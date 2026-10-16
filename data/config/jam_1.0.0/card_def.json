@@ -1,6 +1,6 @@
 {
   "schema_version": 1,
-  "config_version": "jam_1.0.0",
+  "config_version": "jam_1.2.0",
   "table": "card_def",
   "rows": [
     {"def_id": "CARD_NM5", "card_kind": "NUM", "base_value": -5, "operator_code": "NONE", "motif_id": "M_NUM_05", "name": "−5"},

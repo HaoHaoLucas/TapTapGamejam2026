@@ -1,11 +1,11 @@
 {
   "schema_version": 1,
-  "config_version": "jam_1.0.0",
+  "config_version": "jam_1.2.0",
   "table": "event_def",
   "rows": [
     {
       "event_id": "EV_COPY",
-      "name": "复印机",
+      "name": "终极复制机",
       "text": "选一张牌，我照着再做一张，上面的变化也一起抄上。",
       "handler_id": "COPY_CARD",
       "condition_id": "CAN_COPY",
@@ -16,7 +16,7 @@
     },
     {
       "event_id": "EV_SAC",
-      "name": "祭坛",
+      "name": "无言的祭祀",
       "text": "交出 1 到 3 张牌。我从剩下的牌里挑同样的张数，各给一张加上变化。",
       "handler_id": "SACRIFICE_MARK",
       "condition_id": "CAN_SACRIFICE",
@@ -27,7 +27,7 @@
     },
     {
       "event_id": "EV_MAGE",
-      "name": "魔导师",
+      "name": "大魔导师",
       "text": "三张特殊牌，挑一张带走。",
       "handler_id": "SPECIAL_OFFER",
       "condition_id": "ALWAYS",
@@ -49,7 +49,7 @@
     },
     {
       "event_id": "EV_PIZZA",
-      "name": "披萨师傅",
+      "name": "披萨饼师傅",
       "text": "要一份披萨吗？之后 1 层或 2 层的 Boss 打完，盒子会送到。现在看不到里面有什么。",
       "handler_id": "ACCEPT_PIZZA",
       "condition_id": "NO_PIZZA",
@@ -60,7 +60,7 @@
     },
     {
       "event_id": "EV_TRANS",
-      "name": "换牌",
+      "name": "无机转化",
       "text": "选一张牌，我把它换成另一张同类的。能留住的变化会留着。换完之后，牌组还得打得出正数。",
       "handler_id": "TRANSFORM_CARD",
       "condition_id": "CAN_TRANSFORM",

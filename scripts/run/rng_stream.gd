@@ -17,16 +17,39 @@ static func make(seed_value: int) -> RandomNumberGenerator:
 	return rng
 
 
-static func pick_index(rng: RandomNumberGenerator, weights: Array) -> int:
-	var total := 0
+static func all_whole(weights: Array) -> bool:
 	for weight in weights:
-		total += int(weight)
-	if total <= 0:
+		if typeof(weight) != TYPE_INT and typeof(weight) != TYPE_FLOAT:
+			return false
+		var number := float(weight)
+		if not is_finite(number) or number != floor(number):
+			return false
+	return true
+
+
+static func pick_index(rng: RandomNumberGenerator, weights: Array) -> int:
+	if all_whole(weights):
+		var total := 0
+		for weight in weights:
+			total += int(weight)
+		if total <= 0:
+			return -1
+		var roll := rng.randi_range(0, total - 1)
+		var acc := 0
+		for i in weights.size():
+			acc += int(weights[i])
+			if roll < acc:
+				return i
+		return weights.size() - 1
+	var float_total := 0.0
+	for weight in weights:
+		float_total += float(weight)
+	if float_total <= 0.0:
 		return -1
-	var roll := rng.randi_range(0, total - 1)
-	var acc := 0
+	var float_roll := rng.randf() * float_total
+	var float_acc := 0.0
 	for i in weights.size():
-		acc += int(weights[i])
-		if roll < acc:
+		float_acc += float(weights[i])
+		if float_roll < float_acc:
 			return i
 	return weights.size() - 1

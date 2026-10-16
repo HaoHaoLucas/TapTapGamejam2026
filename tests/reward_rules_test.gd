@@ -33,6 +33,7 @@ func _run() -> void:
 	_test_defeat()
 	_test_pizza_and_events_ignore_pity()
 	_test_reward_streams()
+	_test_direct_value_roll()
 	await process_frame
 	if _failures == 0:
 		print("PASS: reward quality, pity, type guarantee, boss fallback, victory flow")
@@ -262,7 +263,7 @@ func _test_victory_flow() -> void:
 	var new_uid := str(claimed.get("granted_card_uids", [""])[0])
 	_check(run.card_instances.size() == before + 1, "Victory claim adds one card")
 	_check(not during.has(new_uid), "The new card is not in the fight that just ended")
-	_check(not _engine_has(fight.engine, new_uid), "The finished engine does not contain the new card")
+	_check(fight.ctx.library.get_card(new_uid) == null, "The finished fight does not contain the new card")
 	_check(run.find_card(new_uid) != null and run.find_card(new_uid).zone == "RUN_DECK", "The new card enters the run deck")
 	_check(run.phase == "REWARD", "Claiming does not leave the reward phase by itself")
 	_check(run.current_offers.is_empty(), "Claiming does not roll the next rooms")
@@ -273,13 +274,13 @@ func _test_victory_flow() -> void:
 	var nxt := CombatSession.new()
 	nxt.start(run)
 	var created := run.find_card(new_uid)
-	var projected := _find_projected(nxt.engine, new_uid)
+	var projected := nxt.ctx.library.get_card(new_uid)
 	_check(projected != null, "The next fight projects the new card")
 	if projected != null and created != null:
 		_check(projected.enhancement_ids == created.enhancement_ids, "The next fight keeps enhancement ids")
 		if str(GameData.card(created.def_id).get("card_kind", "")) == "NUM":
-			_check(projected.value == CardService.printed_value_of(created), "The next fight uses the printed value")
-		_check(not _engine_has(fight.engine, new_uid), "The finished fight still does not contain the new card")
+			_check(projected.printed_value(nxt.ctx.catalog) == CardService.printed_value_of(created), "The next fight uses the printed value")
+		_check(fight.ctx.library.get_card(new_uid) == null, "The finished fight still does not contain the new card")
 
 
 func _test_skip_then_map() -> void:
@@ -410,6 +411,50 @@ func _test_reward_streams() -> void:
 	_check(str(left_offers[0].get("def_id", "")) == str(right_offers[0].get("def_id", "x")), "Card face uses the reward stream")
 	_check((left_offers[0].get("enhancement_ids", []) as Array).size() >= 1, "Pity places a mark on the first offer")
 	_check(str(left.rng_states.ENHANCE.state) != enhance_before, "Marks draw the enhance stream")
+
+
+func _test_direct_value_roll() -> void:
+	for pool_id in ["EP_SAFE", "EP_SMITH"]:
+		for depth in [1, 2]:
+			var weights := {}
+			for row in GameData.mark_pool_rows(pool_id, depth):
+				var enh_id := str(row.get("enh_id", ""))
+				_check(enh_id != "EN_GHOST", "%s still offers EN_GHOST at depth %s" % [pool_id, depth])
+				weights[enh_id] = float(row.get("weight", 0.0))
+			_check(is_equal_approx(float(weights.get("EN_NUM1", -1.0)), 21.0), "%s EN_NUM1 is 21 at depth %s" % [pool_id, depth])
+			_check(is_equal_approx(float(weights.get("EN_NUM2", -1.0)), 7.5), "%s EN_NUM2 is 7.5 at depth %s" % [pool_id, depth])
+			_check(is_equal_approx(float(weights.get("EN_NUM3", -1.0)), 1.5), "%s EN_NUM3 is 1.5 at depth %s" % [pool_id, depth])
+	var total := 0.0
+	for row in GameData.mark_pool_rows("EP_SAFE", 1):
+		total += float(row.get("weight", 0.0))
+	_check(is_equal_approx(total, 94.0), "Ghost's 6 points stay out of the safe pool, total %s" % total)
+	for row in GameData.rows("enhancement_pool"):
+		if str(row.get("enh_id", "")).begins_with("EN_NUM"):
+			_check(str(row.get("variant_profile_id", "")) == "", "Value marks are one direct roll, not a variant step")
+	var profiles := {}
+	for row in GameData.rows("variant_profile"):
+		profiles[str(row.get("profile_id", ""))] = true
+	_check(profiles.has("VAR_PIZZA") and not profiles.has("VAR_DEPTH"), "Combat value marks do not use VAR_DEPTH")
+	var run := _run_for("value-direct")
+	var counts := {}
+	for i in 400:
+		var session := RewardService.open_mark_offers(run, "value-%s" % i, "EP_SAFE", 1)
+		var offers: Array = session.get("offers", [])
+		if offers.is_empty():
+			continue
+		var enh_id := str(offers[0].get("enh_id", ""))
+		_check(enh_id != "EN_GHOST", "A rolled mark is not EN_GHOST")
+		counts[enh_id] = int(counts.get(enh_id, 0)) + 1
+	var num1 := int(counts.get("EN_NUM1", 0))
+	var num2 := int(counts.get("EN_NUM2", 0))
+	var num3 := int(counts.get("EN_NUM3", 0))
+	_check(num1 > num2 * 1.5 and num2 > num3, "Value marks follow 21/7.5/1.5, got %s/%s/%s" % [num1, num2, num3])
+	var special := RewardService.open_special_offers(run, "fist", "SP_MAGE", 6)
+	var specials: Array = special.get("offers", [])
+	_check(specials.size() == 5, "SP_FIST weight 0 leaves five mage cards, got %s" % specials.size())
+	for offer in specials:
+		_check(str(offer.get("special_id", "")) != "SP_FIST", "SP_FIST is not offered")
+		_check(not (offer.get("enhancement_ids", []) as Array).has("EN_GHOST"), "The stopped fist is not offered")
 
 
 func _count_plain_panels(run: RunState) -> int:
@@ -545,22 +590,6 @@ func _has_resolve(run: RunState, choice: String, def_id: String) -> bool:
 			continue
 		return true
 	return false
-
-
-func _engine_has(engine: CombatEngine, card_uid: String) -> bool:
-	for zone in [engine.s.hand, engine.s.draw, engine.s.discard, engine.s.burned]:
-		for card in zone:
-			if card != null and str(card.id) == card_uid:
-				return true
-	return false
-
-
-func _find_projected(engine: CombatEngine, card_uid: String) -> BattleCard:
-	for zone in [engine.s.hand, engine.s.draw, engine.s.discard]:
-		for card in zone:
-			if card != null and str(card.id) == card_uid:
-				return card
-	return null
 
 
 func _run_for(seed: String) -> RunState:

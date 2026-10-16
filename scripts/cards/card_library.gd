@@ -84,6 +84,28 @@ func move(card: CardInstance, to_zone: String, reason: String, txn_id: String, b
 		bus.card_zone_changed.emit(card.card_uid, from, to_zone, reason, txn_id)
 
 
+func swap_cards(a: CardInstance, b: CardInstance, reason: String, txn_id: String, bus: RunContext) -> void:
+	if a == null or b == null or a == b:
+		return
+	var a_zone := a.zone
+	var b_zone := b.zone
+	if a_zone == b_zone or not _piles.has(a_zone) or not _piles.has(b_zone):
+		return
+	var a_pile: Array = _piles[a_zone]
+	var b_pile: Array = _piles[b_zone]
+	var a_index := a_pile.find(a.card_uid)
+	var b_index := b_pile.find(b.card_uid)
+	if a_index < 0 or b_index < 0:
+		return
+	a_pile[a_index] = b.card_uid
+	b_pile[b_index] = a.card_uid
+	a.zone = b_zone
+	b.zone = a_zone
+	if bus != null:
+		bus.card_zone_changed.emit(a.card_uid, a_zone, b_zone, reason, txn_id)
+		bus.card_zone_changed.emit(b.card_uid, b_zone, a_zone, reason, txn_id)
+
+
 func normal_hand_count() -> int:
 	var count := 0
 	for card_uid in _piles[CardInstance.HAND]:
@@ -96,7 +118,8 @@ func normal_hand_count() -> int:
 func is_fighting_exhausted() -> bool:
 	var numbers := 0
 	var operators := 0
-	for zone in CardInstance.FIGHTING_ZONES:
+	# STOLEN is withheld and does not count. RUN_DECK is outside the fight.
+	for zone in [CardInstance.HAND, CardInstance.DRAW, CardInstance.DISCARD, CardInstance.RESOLVING]:
 		for card_uid in _piles[zone]:
 			var card: CardInstance = _cards[card_uid]
 			var def := catalog.card(card.def_id)

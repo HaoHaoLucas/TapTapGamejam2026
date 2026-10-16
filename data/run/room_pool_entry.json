@@ -1,6 +1,6 @@
 {
   "schema_version": 1,
-  "config_version": "jam_1.0.0",
+  "config_version": "jam_1.2.0",
   "table": "room_pool_entry",
   "rows": [
     {"entry_id": "PN01", "pool_id": "POOL_NORMAL", "room_id": "RM_RUST", "weight": 40, "min_depth": 1, "max_depth": 0},

@@ -1,6 +1,6 @@
 {
   "schema_version": 1,
-  "config_version": "jam_1.0.0",
+  "config_version": "jam_1.2.0",
   "table": "reward_plan",
   "rows": [
     {

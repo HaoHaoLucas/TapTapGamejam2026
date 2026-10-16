@@ -1,5 +1,5 @@
 extends Control
-## Playable tower entry. F5 stays on the collection prototype.
+## Tower after the main menu. A new run opens on the first room choice.
 
 const DISPLAY := {
 	"ROOM_NORMAL": "战斗",
@@ -9,14 +9,17 @@ const DISPLAY := {
 
 var run: RunState
 var _session: CombatSession
-var _demo: BattleDemo
+var _battle: RunBattle
 var _battle_room := ""
 var _body: VBoxContainer
+var _scroll: ScrollContainer
 var _header: Label
 var _status: Label
+var _fit_queued := false
 var _selected_offer := ""
 var _selected_cards: Array = []
 var _pizza_done := false
+var _notice: Dictionary = {}
 
 
 func _ready() -> void:
@@ -51,20 +54,20 @@ func _ready() -> void:
 	_status.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	_status.add_theme_color_override("font_color", Color(0.78, 0.82, 0.74))
 	column.add_child(_status)
-	var scroll := ScrollContainer.new()
-	scroll.size_flags_vertical = Control.SIZE_EXPAND_FILL
-	scroll.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-	column.add_child(scroll)
+	_scroll = ScrollContainer.new()
+	_scroll.size_flags_vertical = Control.SIZE_EXPAND_FILL
+	_scroll.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	_scroll.horizontal_scroll_mode = ScrollContainer.SCROLL_MODE_DISABLED
+	_scroll.resized.connect(_queue_fit)
+	column.add_child(_scroll)
 	_body = VBoxContainer.new()
 	_body.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	_body.add_theme_constant_override("separation", 8)
-	scroll.add_child(_body)
-	_demo = load(SceneRegistry.path_for("battle")).instantiate()
-	_demo.hosted = true
-	_demo.auto_advance = false
-	_demo.visible = false
-	_demo.returned_to_tower.connect(_on_return_to_tower)
-	add_child(_demo)
+	_scroll.add_child(_body)
+	_battle = load(SceneRegistry.path_for("battle")).instantiate() as RunBattle
+	_battle.visible = false
+	_battle.returned_to_tower.connect(_on_return_to_tower)
+	add_child(_battle)
 	_start_run(str(Time.get_unix_time_from_system()))
 
 
@@ -73,9 +76,8 @@ func _start_run(seed: String) -> void:
 	_pizza_done = false
 	_selected_offer = ""
 	_selected_cards = []
-	if _demo != null:
-		_demo.auto_advance = false
-		_demo.visible = false
+	if _battle != null:
+		_battle.visible = false
 	var created := RunService.new_run(seed)
 	if not created.get("ok", false):
 		run = null
@@ -92,6 +94,9 @@ func _start_run(seed: String) -> void:
 
 func _show() -> void:
 	if run == null:
+		return
+	if not _notice.is_empty():
+		_show_notice()
 		return
 	_header.text = "第 %d 层    生命 %d/%d    牌库 %d" % [run.depth, run.hp, run.max_hp, TowerDeck.deck_cards(run).size()]
 	var pizza := _active_pizza()
@@ -148,13 +153,16 @@ func _choose_offer(offer_uid: String) -> void:
 func _show_battle() -> void:
 	_clear_body()
 	var room_uid := str(run.current_room.get("room_uid", ""))
-	_set_battle_visible(true)
-	if _battle_room == room_uid:
+	if _battle_room == room_uid and _session != null:
+		_set_battle_visible(true)
 		return
+	_set_battle_visible(false)
 	_session = CombatSession.new()
 	_session.start(run)
-	_demo.adopt_engine(_session.engine)
+	if _battle != null:
+		_battle.adopt(_session)
 	_battle_room = room_uid
+	_set_battle_visible(true)
 
 
 func _on_return_to_tower(outcome: String) -> void:
@@ -166,11 +174,15 @@ func _on_return_to_tower(outcome: String) -> void:
 	_session = null
 	_selected_offer = ""
 	_selected_cards = []
-	if phase == "defeat" or outcome == "defeat" or run.hp <= 0:
+	if _is_battle_loss(phase) or _is_battle_loss(outcome) or run.hp <= 0:
 		RunService.finish_room(run, "defeat")
 	else:
 		RunService.finish_room(run, "victory")
 	_show()
+
+
+func _is_battle_loss(phase: String) -> bool:
+	return phase == "defeat" or phase == "DEFEAT" or phase == "DECK_EXHAUSTED"
 
 
 func _show_event() -> void:
@@ -209,11 +221,19 @@ func _show_event() -> void:
 
 
 func _show_card_choices(view: Dictionary, multi: bool) -> void:
+	if multi:
+		_body.add_child(_hint(_multi_status()))
 	for card_uid in view.get("eligible_target_uids", []):
 		var card := run.find_card(str(card_uid))
 		if card == null:
 			continue
-		var button := _button(TowerDeck.describe_card(card))
+		var picked := _selected_cards.has(str(card_uid))
+		var label := TowerDeck.describe_card(card)
+		if picked:
+			label = "已选\n" + label
+		var button := _button(label)
+		if picked:
+			button.modulate = Color(1, 0.86, 0.55)
 		button.pressed.connect(_select_card.bind(str(card_uid), multi, str(view.get("room_uid", ""))))
 		_body.add_child(button)
 	var confirm := _button("确认")
@@ -227,7 +247,8 @@ func _select_card(card_uid: String, multi: bool, room_uid: String) -> void:
 			_selected_cards.erase(card_uid)
 		elif _selected_cards.size() < 3:
 			_selected_cards.append(card_uid)
-		_status.text = "选了 %d 张。" % _selected_cards.size()
+		_status.text = _multi_status()
+		call_deferred("_show_event")
 		return
 	_selected_cards = [card_uid]
 	var view := EventService.make_view(run, room_uid)
@@ -239,6 +260,7 @@ func _select_card(card_uid: String, multi: bool, room_uid: String) -> void:
 			_status.text = str(preview.get("error", "换不了。"))
 	else:
 		_status.text = "选好了这张牌。"
+	call_deferred("_show_event")
 
 
 func _confirm_cards(room_uid: String, handler_id: String, multi: bool) -> void:
@@ -270,8 +292,12 @@ func _show_offers(view: Dictionary) -> void:
 		var label := str(offer.get("display_name", ""))
 		if str(offer.get("payload_kind", "")) == "CARD":
 			label = TowerDeck.describe_parts(str(offer.get("def_id", "")), offer.get("enhancement_ids", []), str(offer.get("display_name", "")))
-		var button := _button(label)
 		var uid := str(offer.get("offer_uid", ""))
+		if uid == _selected_offer:
+			label = "已选\n" + label
+		var button := _button(label)
+		if uid == _selected_offer:
+			button.modulate = Color(1, 0.86, 0.55)
 		button.pressed.connect(_select_offer.bind(uid, handler))
 		_body.add_child(button)
 	if handler == "MARK_OFFER" and _selected_offer != "":
@@ -282,7 +308,13 @@ func _show_offers(view: Dictionary) -> void:
 				enh_id = str(offer.get("enh_id", ""))
 		for card_uid in TowerDeck.targets_for_mark(run, enh_id):
 			var card := run.find_card(card_uid)
-			var button := _button(TowerDeck.describe_card(card))
+			var picked := _selected_cards.has(str(card_uid))
+			var label := TowerDeck.describe_card(card)
+			if picked:
+				label = "已选\n" + label
+			var button := _button(label)
+			if picked:
+				button.modulate = Color(1, 0.86, 0.55)
 			button.pressed.connect(_select_card.bind(card_uid, false, str(view.get("room_uid", ""))))
 			_body.add_child(button)
 	var confirm := _button("确认")
@@ -297,6 +329,7 @@ func _select_offer(offer_uid: String, handler: String) -> void:
 		call_deferred("_show_event")
 		return
 	_status.text = "选好了。"
+	call_deferred("_show_event")
 
 
 func _confirm_offer(room_uid: String, handler: String) -> void:
@@ -334,16 +367,23 @@ func _skip_event(room_uid: String) -> void:
 
 
 func _commit_event(room_uid: String, payload: Dictionary) -> void:
+	var view := EventService.make_view(run, room_uid)
+	var title := str(view.get("name", "奇遇"))
 	var txn := run.uid("T")
 	var result := EventService.commit(run, room_uid, payload, txn)
 	if not result.get("ok", false):
 		_status.text = str(result.get("error", "没做成。"))
 		call_deferred("_show_event")
 		return
+	var lines := _event_result_lines(result)
 	_selected_offer = ""
 	_selected_cards = []
 	if str(run.current_room.get("status", "")) == "ENTERED" and str(run.current_room.get("room_uid", "")) == room_uid:
 		RunService.finish_room(run, "clear")
+	if lines.is_empty():
+		call_deferred("_show")
+		return
+	_notice = {"title": title, "lines": lines}
 	call_deferred("_show")
 
 
@@ -383,8 +423,12 @@ func _show_card_reward(session: Dictionary) -> void:
 	var session_uid := str(session.get("reward_session_uid", ""))
 	for offer in session.get("offers", []):
 		var label := TowerDeck.describe_parts(str(offer.get("def_id", "")), offer.get("enhancement_ids", []), str(offer.get("display_name", "")))
-		var button := _button(label)
 		var uid := str(offer.get("offer_uid", ""))
+		if uid == _selected_offer:
+			label = "已选\n" + label
+		var button := _button(label)
+		if uid == _selected_offer:
+			button.modulate = Color(1, 0.86, 0.55)
 		button.pressed.connect(_select_reward_offer.bind(uid, false))
 		_body.add_child(button)
 	var confirm := _button("确认")
@@ -397,8 +441,13 @@ func _show_mark_reward(session: Dictionary) -> void:
 	_body.add_child(_hint("先选一种变化，再选一张牌。也可以不要。"))
 	var session_uid := str(session.get("reward_session_uid", ""))
 	for offer in session.get("offers", []):
-		var button := _button(str(offer.get("display_name", "")))
+		var label := str(offer.get("display_name", ""))
 		var uid := str(offer.get("offer_uid", ""))
+		if uid == _selected_offer:
+			label = "已选\n" + label
+		var button := _button(label)
+		if uid == _selected_offer:
+			button.modulate = Color(1, 0.86, 0.55)
 		button.pressed.connect(_select_reward_offer.bind(uid, true))
 		_body.add_child(button)
 	if _selected_offer != "":
@@ -412,7 +461,13 @@ func _show_mark_reward(session: Dictionary) -> void:
 			var card := run.find_card(str(card_uid))
 			if card == null:
 				continue
-			var button := _button(TowerDeck.describe_card(card))
+			var picked := _selected_cards.has(str(card_uid))
+			var label := TowerDeck.describe_card(card)
+			if picked:
+				label = "已选\n" + label
+			var button := _button(label)
+			if picked:
+				button.modulate = Color(1, 0.86, 0.55)
 			button.pressed.connect(_select_reward_card.bind(str(card_uid)))
 			_body.add_child(button)
 	var confirm := _button("确认")
@@ -437,11 +492,13 @@ func _select_reward_offer(offer_uid: String, marks: bool) -> void:
 		call_deferred("_show")
 		return
 	_status.text = "选好了。"
+	call_deferred("_show")
 
 
 func _select_reward_card(card_uid: String) -> void:
 	_selected_cards = [card_uid]
 	_status.text = "选好了这张牌。"
+	call_deferred("_show")
 
 
 func _confirm_card_reward(session_uid: String) -> void:
@@ -452,6 +509,12 @@ func _confirm_card_reward(session_uid: String) -> void:
 	if not result.get("ok", false):
 		_status.text = str(result.get("error", "没拿到牌。"))
 		return
+	var lines := PackedStringArray()
+	lines.append("放进牌库：")
+	for card_uid in result.get("granted_card_uids", []):
+		lines.append(_face_block(str(card_uid)))
+	if lines.size() > 1:
+		_notice = {"title": "战利品", "lines": lines}
 	_finish_reward_step()
 
 
@@ -462,10 +525,16 @@ func _confirm_mark_reward(session_uid: String) -> void:
 	if _selected_cards.is_empty():
 		_status.text = "再选一张牌。"
 		return
-	var result := RewardService.commit_mark(run, session_uid, _selected_offer, str(_selected_cards[0]), run.uid("T"))
+	var target_uid := str(_selected_cards[0])
+	var result := RewardService.commit_mark(run, session_uid, _selected_offer, target_uid, run.uid("T"))
 	if not result.get("ok", false):
 		_status.text = str(result.get("error", "没加上去。"))
 		return
+	var lines := PackedStringArray()
+	lines.append("给 %s 加上了 %s" % [_brief(target_uid), TowerDeck.mark_line(str(result.get("enh_id", "")))])
+	if bool(result.get("converted", false)):
+		lines.append("这张牌收进了收藏。")
+	_notice = {"title": "战利品", "lines": lines}
 	_finish_reward_step()
 
 
@@ -571,13 +640,12 @@ func _ready_pizza() -> Dictionary:
 
 
 func _set_battle_visible(show_battle: bool) -> void:
-	_demo.visible = show_battle
-	_demo.auto_advance = show_battle
+	if _battle == null:
+		return
+	_battle.visible = show_battle
 	_body.visible = not show_battle
 	_header.visible = not show_battle
 	_status.visible = not show_battle
-	if show_battle:
-		_demo.call_deferred("_fit_scale")
 
 
 func _clear_body() -> void:
@@ -596,12 +664,140 @@ func _button(text: String) -> Button:
 	button.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	button.custom_minimum_size = Vector2(0, 44)
 	button.add_theme_font_size_override("font_size", 18)
+	_queue_fit()
 	return button
+
+
+func _show_notice() -> void:
+	_set_battle_visible(false)
+	_clear_body()
+	_header.text = str(_notice.get("title", "结果"))
+	_status.text = ""
+	for line in _notice.get("lines", []):
+		var text := str(line)
+		if text == "":
+			continue
+		_body.add_child(_hint(text))
+	var onward := _button("继续")
+	onward.pressed.connect(_dismiss_notice)
+	_body.add_child(onward)
+
+
+func _dismiss_notice() -> void:
+	_notice = {}
+	_show()
+
+
+func _event_result_lines(result: Dictionary) -> PackedStringArray:
+	if bool(result.get("skipped", false)):
+		return PackedStringArray()
+	var lines := PackedStringArray()
+	var removed: Array = result.get("removed", [])
+	if not removed.is_empty():
+		lines.append("交出了这些牌：")
+		for card_uid in removed:
+			lines.append(_face_block(str(card_uid)))
+	var marks: Array = result.get("marks", [])
+	if not marks.is_empty():
+		lines.append("给剩下的牌加上了：")
+		for grant in marks:
+			if grant is not Dictionary:
+				continue
+			var card_uid := str(grant.get("target_uid", ""))
+			lines.append("%s\n加上 %s" % [_brief(card_uid), TowerDeck.mark_line(str(grant.get("enh_id", "")))])
+	if str(result.get("enh_id", "")) != "" and marks.is_empty():
+		lines.append("给 %s 加上了 %s" % [_brief(str(result.get("target_uid", ""))), TowerDeck.mark_line(str(result.get("enh_id", "")))])
+		if bool(result.get("converted", false)):
+			lines.append("这张牌收进了收藏。")
+	var granted: Array = result.get("granted_card_uids", [])
+	if not granted.is_empty():
+		lines.append("得到了：")
+		for card_uid in granted:
+			lines.append(_face_block(str(card_uid)))
+	if str(result.get("def_id", "")) != "" and str(result.get("enh_id", "")) == "" and granted.is_empty() and marks.is_empty() and removed.is_empty():
+		lines.append("这张牌变成了：")
+		lines.append(_face_block(str(result.get("target_uid", ""))))
+	if int(result.get("target_depth", 0)) > 0:
+		lines.append("披萨会在第 %d 层的 Boss 之后送到。现在看不到里面有什么。" % int(result.get("target_depth", 0)))
+	return lines
+
+
+func _multi_status() -> String:
+	if _selected_cards.is_empty():
+		return "点选 1 到 3 张要交出的牌。"
+	var names := PackedStringArray()
+	for card_uid in _selected_cards:
+		names.append(_brief(str(card_uid)))
+	return "已选 %d 张：%s" % [_selected_cards.size(), "、".join(names)]
+
+
+func _face_block(card_uid: String) -> String:
+	var card := run.find_card(card_uid)
+	if card == null:
+		return card_uid
+	return TowerDeck.describe_card(card)
+
+
+func _brief(card_uid: String) -> String:
+	var text := _face_block(card_uid)
+	var parts := text.split("\n")
+	return str(parts[0]) if not parts.is_empty() else card_uid
 
 
 func _hint(text: String) -> Label:
 	var label := Label.new()
 	label.text = text
 	label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	label.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	label.add_theme_color_override("font_color", Color(0.86, 0.84, 0.72))
+	_queue_fit()
 	return label
+
+
+func _queue_fit() -> void:
+	if _fit_queued:
+		return
+	_fit_queued = true
+	call_deferred("_fit_text")
+
+
+func _fit_text() -> void:
+	_fit_queued = false
+	if _scroll == null or _body == null or _scroll.size.x < 80.0:
+		return
+	var width := _scroll.size.x
+	var bar := _scroll.get_v_scroll_bar()
+	if bar != null and bar.visible:
+		width -= bar.size.x
+	width = maxf(40.0, width)
+	_body.custom_minimum_size.x = width
+	_grow_label(_status, width)
+	for child in _body.get_children():
+		if child is Button:
+			_grow_button(child, width)
+		elif child is Label:
+			_grow_label(child, width)
+
+
+func _grow_button(button: Button, width: float) -> void:
+	var font := button.get_theme_font("font")
+	var font_size := button.get_theme_font_size("font_size")
+	if font == null:
+		return
+	var inner := maxf(40.0, width - 24.0)
+	var measured := font.get_multiline_string_size(button.text, HORIZONTAL_ALIGNMENT_LEFT, inner, font_size)
+	var need := measured.y + 22.0
+	if absf(button.custom_minimum_size.y - need) > 1.0:
+		button.custom_minimum_size.y = need
+
+
+func _grow_label(label: Label, width: float) -> void:
+	if label == null or label.autowrap_mode == TextServer.AUTOWRAP_OFF or label.text == "":
+		return
+	var font := label.get_theme_font("font")
+	var font_size := label.get_theme_font_size("font_size")
+	if font == null:
+		return
+	var measured := font.get_multiline_string_size(label.text, HORIZONTAL_ALIGNMENT_LEFT, maxf(40.0, width), font_size)
+	if absf(label.custom_minimum_size.y - measured.y) > 1.0:
+		label.custom_minimum_size.y = measured.y

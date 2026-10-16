@@ -20,56 +20,89 @@ func _run() -> void:
 		quit(1)
 		return
 	_test_hosted_deck()
+	_test_write_back_outcomes()
+	_test_room_multipliers()
 	_test_default_start()
 	if _failures == 0:
-		print("PASS: hosted deck uids, burned cards removed, default start unchanged")
+		print("PASS: jam battle write-back, thief return, room multipliers, v0.3 default start")
 	quit(1 if _failures else 0)
 
 
 func _test_hosted_deck() -> void:
-	var created := RunService.new_run("combat-dock")
-	_check(created.get("ok", false), "Hosted run failed to start")
-	if not created.get("ok", false):
+	var run := _run_for("combat-dock")
+	if run == null:
 		return
-	var run: RunState = created.run
+	_enter(run, "RM_RUST")
 	var sample: CardInstance = null
 	for card in TowerDeck.deck_cards(run):
 		if str(GameData.card(card.def_id).get("card_kind", "")) == "NUM":
 			sample = card
 			break
 	_check(sample != null, "Starter deck needs a number card")
+	if sample == null:
+		return
 	sample.enhancement_ids = ["EN_NUM3"]
 	var base_value := int(GameData.card(sample.def_id).get("base_value", 0))
 	var session := CombatSession.new()
 	session.start(run)
-	var engine := session.engine
-	_check(engine.s.hp == 100 and engine.s.maxHp == 100, "A new run enters combat at 100/100")
-	_check(int(engine.s.enemies[0].hp) == 120 and str(engine.s.enemies[0].name) == "深渊观测者", "Hosted fights still use the watcher")
-	_check(engine.s.hand.size() == 5 and engine.s.allIds.size() == 15, "Hosted combat keeps a 5 card hand and the run deck")
-	_check(engine.invariant(), "External deck invariant should follow the actual card count")
-	var projected: BattleCard = null
-	for zone in [engine.s.hand, engine.s.draw, engine.s.discard]:
-		for card in zone:
-			if card != null and card.id == sample.card_uid:
-				projected = card
-	_check(projected != null and projected.value == base_value + 3, "Number cards project the printed value")
-	_check(projected.value == CardService.printed_value_of(sample), "Projection uses the printed value")
+	var battle := session.ctx.battle
+	_check(battle.player_hp == 100 and battle.player_max_hp == 100, "A new run enters combat at 100/100")
+	_check(battle.monster_id == "MON_RUST" and battle.monster_name == "锈刃哥布林", "The rust room opens the rust monster, got %s" % battle.monster_name)
+	_check(battle.enemy_hp == 60 and battle.enemy_max_hp == 60 and battle.intent_damage == 10, "Floor 1 rust is 60 hp and intent 10")
+	_check(session.ctx.library.pile(CardInstance.HAND).size() == 5, "The jam battle draws 5")
+	_check(session.ctx.library.card_count() == 15 and session.projected_uids.size() == 15, "The jam battle keeps the 15 card run deck")
+	var projected := session.ctx.library.get_card(sample.card_uid)
+	_check(projected != null and projected.printed_value(session.ctx.catalog) == base_value + 3, "Number cards keep the printed value")
+	_check(projected.printed_value(session.ctx.catalog) == CardService.printed_value_of(sample), "The battle card uses the printed value")
 	_check(CardService.printed_value_of({"def_id": sample.def_id, "enhancement_ids": ["EN_FRAGILE"]}) == base_value + 3, "Fragile adds to the printed value")
 	_check(projected.enhancement_ids == ["EN_NUM3"], "Projected cards keep enhancement ids")
-	_check(projected.marks.has("数值增长 +3"), "Marks are carried for display")
-	for card_id in engine.s.allIds:
-		_check(run.find_card(str(card_id)) != null, "Battle ids must be run card uids")
-		_check(str(card_id).contains("_C"), "Hosted ids are not the standalone n0 deck")
-	var burned := _burn_one(engine)
+	for card_uid in session.projected_uids:
+		_check(run.find_card(str(card_uid)) != null, "Battle ids must be run card uids")
+		_check(str(card_uid).contains("_C"), "Hosted ids are not the standalone n0 deck")
+	var burned := _burn_one(session, sample.card_uid)
 	_check(burned != "", "A number card should be burnable")
-	_check(session.write_back(run) != "", "Write-back returns the battle phase")
-	for card_id in session.projected_uids:
-		var inst := run.find_card(str(card_id))
-		if str(card_id) == burned:
+	_check(session.ctx.library.pile(CardInstance.HAND).size() == 4, "Burn does not refill the hand")
+	var outcome := session.write_back(run)
+	_check(outcome == "PLAYER_ACTIVE", "An open fight writes back its phase, got %s" % outcome)
+	for card_uid in session.projected_uids:
+		var inst := run.find_card(str(card_uid))
+		if str(card_uid) == burned:
 			_check(inst.zone == "REMOVED", "Burned uid returns as REMOVED")
 		else:
 			_check(inst.zone == "RUN_DECK", "Unburned battle cards return to the run deck")
-	_check(run.hp == int(engine.s.hp), "Player HP is written back")
+	_check(run.hp == int(battle.player_hp), "Player HP is written back")
+
+
+func _test_write_back_outcomes() -> void:
+	_check(_outcome("RM_RUST", "VICTORY") == "victory", "VICTORY writes back as a win")
+	_check(_outcome("RM_RUST", "DEFEAT") == "defeat", "DEFEAT writes back as a loss")
+	_check(_outcome("RM_RUST", "DECK_EXHAUSTED") == "defeat", "DECK_EXHAUSTED writes back as a loss")
+	var run := _run_for("thief-return")
+	if run == null:
+		return
+	_enter(run, "RM_THIEF")
+	var session := CombatSession.new()
+	session.start(run)
+	var stolen := str(session.ctx.battle.stolen_card_uid)
+	_check(stolen != "" and session.ctx.library.get_card(stolen).zone == CardInstance.STOLEN, "The thief battle detains a card")
+	var burned := _burn_one(session, stolen)
+	_check(burned != "" and burned != stolen, "Burn a card that is still in hand")
+	_check(session.write_back(run) != "", "Thief write-back returns an outcome")
+	_check(run.find_card(stolen).zone == "RUN_DECK", "A stolen card left at the end returns to the run deck")
+	_check(run.find_card(burned).zone == "REMOVED", "A removed card stays removed")
+
+
+func _test_room_multipliers() -> void:
+	var second := _started("RM_RUST", 2)
+	if second == null:
+		return
+	var rust: CardBattle = second.ctx.battle
+	_check(rust.enemy_max_hp == 66 and rust.intent_damage == 11, "The second normal fight scales rust to 66 hp and 11 atk, got %s/%s" % [rust.enemy_max_hp, rust.intent_damage])
+	var boss := _started("RM_SWORD", 2)
+	if boss == null:
+		return
+	var sword: CardBattle = boss.ctx.battle
+	_check(sword.enemy_max_hp == 160 and sword.intent_damage == 16, "A boss stays 160/16 when normal_used is 2, got %s/%s" % [sword.enemy_max_hp, sword.intent_damage])
 
 
 func _test_default_start() -> void:
@@ -83,29 +116,64 @@ func _test_default_start() -> void:
 	_check(engine.invariant(), "Default invariant still expects 15 cards")
 
 
-func _burn_one(engine: CombatEngine) -> String:
-	engine.s.hp = 40
-	var pool: Array = []
-	for zone in [engine.s.hand, engine.s.draw, engine.s.discard]:
-		for card in zone:
-			if card != null and card.type == "number" and card.value != 0:
-				pool.append(card)
-	for card in pool:
-		_place_in_hand(engine, card)
-		if engine.burn(card.id):
-			return card.id
+func _run_for(seed: String) -> RunState:
+	var created := RunService.new_run(seed)
+	_check(created.get("ok", false), "Could not start %s" % seed)
+	if not created.get("ok", false):
+		return null
+	return created.run
+
+
+func _enter(run: RunState, room_id: String) -> void:
+	var room := GameData.room(room_id)
+	run.current_offers = []
+	run.current_room = {
+		"room_uid": run.uid("R"),
+		"room_id": room_id,
+		"content_id": str(room.get("content_id", "")),
+		"room_kind": str(room.get("room_kind", "")),
+		"display_key": str(room.get("display_key", "")),
+		"scene_key": str(room.get("scene_key", "")),
+		"status": "ENTERED",
+	}
+	run.phase = "ROOM"
+
+
+func _started(room_id: String, normal_used: int) -> CombatSession:
+	var run := _run_for("%s-%s" % [room_id, normal_used])
+	if run == null:
+		return null
+	_host = run
+	run.normal_used = normal_used
+	_enter(run, room_id)
+	var session := CombatSession.new()
+	session.start(run)
+	return session
+
+
+func _outcome(room_id: String, phase: String) -> String:
+	var session := _started(room_id, 0)
+	if session == null or _host == null:
+		return ""
+	session.ctx.battle.phase = phase
+	return session.write_back(_host)
+
+
+func _burn_one(session: CombatSession, skip_uid: String) -> String:
+	session.ctx.battle.player_hp = 40
+	for card_uid in session.ctx.library.pile(CardInstance.HAND):
+		if str(card_uid) == skip_uid:
+			continue
+		var card := session.ctx.library.get_card(str(card_uid))
+		if card == null:
+			continue
+		var kind := str(session.ctx.catalog.card(card.def_id).get("card_kind", ""))
+		if kind != "NUM" or card.printed_value(session.ctx.catalog) == 0:
+			continue
+		var result := session.ctx.card_service.burn(card.card_uid, "burn-%s" % card.card_uid)
+		if result.get("ok", false) and result.get("removed", false):
+			return card.card_uid
 	return ""
 
 
-func _place_in_hand(engine: CombatEngine, card: BattleCard) -> void:
-	if engine.s.hand.has(card):
-		return
-	engine.s.draw.erase(card)
-	engine.s.discard.erase(card)
-	if engine.s.hand.size() >= int(CombatEngine.CFG.handSize):
-		var displaced = engine.s.hand[0]
-		engine.s.hand[0] = card
-		if displaced != null:
-			engine.s.draw.append(displaced)
-	else:
-		engine.s.hand.append(card)
+var _host: RunState

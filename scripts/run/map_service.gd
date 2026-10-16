@@ -1,6 +1,6 @@
 class_name MapService
 extends RefCounted
-## Fixed 5-room floors: auto room 1, three choices on rooms 2–4, boss in room 5.
+## Fixed 5-room floors: three choices on rooms 1–4, boss in room 5.
 
 
 static func make_offers(run: RunState) -> Dictionary:
@@ -29,9 +29,9 @@ static func make_offers(run: RunState) -> Dictionary:
 	var cache := _condition_cache(run)
 	if next_slot == int(rule.get("boss_slot", 5)):
 		return _enter_generated(run, next_slot, "BOSS", cache)
-	if next_slot == 1:
-		return _enter_first(run, next_slot, cache)
-	return _offer_choice(run, next_slot, cache)
+	if _is_choice_slot(rule, next_slot):
+		return _offer_choice(run, next_slot, cache)
+	return _enter_first(run, next_slot, cache)
 
 
 static func choose_room(run: RunState, offer_uid: String) -> Dictionary:
@@ -49,6 +49,13 @@ static func choose_room(run: RunState, offer_uid: String) -> Dictionary:
 	if bool(offer.get("chosen", false)):
 		return {"ok": true, "room_uid": str(run.current_room.get("room_uid", "")), "duplicate": true}
 	return _enter_offer(run, offer)
+
+
+static func _is_choice_slot(rule: Dictionary, slot: int) -> bool:
+	for item in rule.get("choice_slots", []):
+		if int(item) == slot:
+			return true
+	return false
 
 
 static func _enter_first(run: RunState, next_slot: int, cache: Dictionary) -> Dictionary:

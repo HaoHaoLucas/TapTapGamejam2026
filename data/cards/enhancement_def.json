@@ -1,6 +1,6 @@
 {
   "schema_version": 1,
-  "config_version": "jam_1.0.0",
+  "config_version": "jam_1.2.0",
   "table": "enhancement_def",
   "rows": [
     {"enh_id": "EN_NUM1", "legacy_no": 1, "name": "数值增长 +1", "text": "牌面上的数字永久加 1。", "valid_card_kinds": ["NUM"], "family_id": "VALUE", "handler_id": "EN_NUM1", "hooks": ["STAT"], "params": {"add": 1}, "slot_cost": 1, "max_stacks": 1, "power_score": 1, "risk_kind": "BOON", "description_key": "DESC_EN_NUM1"},

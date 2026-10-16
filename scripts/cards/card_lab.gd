@@ -106,7 +106,7 @@ func _build() -> void:
 	root_box.add_theme_constant_override("separation", 8)
 	margin.add_child(root_box)
 	var title := Label.new()
-	title.text = "卡牌实验 · jam_1.0.0    手牌目标 6 · 回合 10 秒 · 这不是 v0.3 战斗 Demo"
+	title.text = "卡牌实验 · jam_1.0.0    每回合抽 5 张 · 7.5 秒再抽 1 张 · 回合 10 秒 · 这不是 v0.3 战斗 Demo"
 	root_box.add_child(title)
 	_status = Label.new()
 	root_box.add_child(_status)
@@ -178,8 +178,9 @@ func _refresh_hud() -> void:
 	var phase := str(PHASE_NAME.get(battle.phase, battle.phase))
 	if battle.paused:
 		phase += " · 暂停"
-	_status.text = "回合 %d   %s   时间 %.1f   玩家 %d/%d   假想敌人 %d/%d   固定意图 %d   加法连续 %d" % [
-		battle.turn_index, phase, battle.turn_remaining,
+	var delayed := "已处理" if battle.delayed_draw_done else "未到"
+	_status.text = "回合 %d   %s   行动 %.1f 秒   剩余 %.1f   定时%s   玩家 %d/%d   假想敌人 %d/%d   固定意图 %d   加法连续 %d" % [
+		battle.turn_index, phase, battle.player_elapsed_s, battle.turn_remaining, delayed,
 		battle.player_hp, battle.player_max_hp,
 		battle.enemy_hp, battle.enemy_max_hp, battle.intent_damage, battle.combo_streak,
 	]
@@ -357,7 +358,7 @@ func _burn_warning() -> String:
 		notes.append("这张牌冻住了，可以烧，不能放进算式。")
 	if card.kind(run.catalog) == "OP":
 		var operators := 0
-		for zone in CardInstance.FIGHTING_ZONES:
+		for zone in [CardInstance.HAND, CardInstance.DRAW, CardInstance.DISCARD, CardInstance.RESOLVING]:
 			for card_uid in run.library.pile(zone):
 				var other := run.library.get_card(str(card_uid))
 				if other.kind(run.catalog) == "OP":
