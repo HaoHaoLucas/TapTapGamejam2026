@@ -5,6 +5,7 @@ extends Control
 const CARD_SCENE := preload("res://scenes/cards/card_view.tscn")
 const HERO_TEX := preload("res://assets/battle/hero.png")
 const ENEMY_TEX := preload("res://assets/battle/enemy.png")
+const DESIGN := Vector2(1440, 900)
 const PHASE_NAME := {
 	"PLAYER_ACTIVE": "玩家行动",
 	"COMBO": "连击窗口",
@@ -50,6 +51,7 @@ var _combo_label: Label
 var _signature: String = ""
 var _action_seq: int = 0
 var _reported: bool = false
+var _board: Control
 
 
 func _ready() -> void:
@@ -58,6 +60,8 @@ func _ready() -> void:
 	_apply_theme()
 	_build()
 	_apply_host_state()
+	resized.connect(_fit_board)
+	call_deferred("_fit_board")
 
 
 func _notification(what: int) -> void:
@@ -116,11 +120,27 @@ func adopt(session: CombatSession) -> void:
 	_sync_cards(true)
 
 
+func _fit_board() -> void:
+	if _board == null:
+		return
+	var view := size
+	if view.x < 8.0 or view.y < 8.0:
+		view = get_viewport_rect().size
+	if view.x < 8.0 or view.y < 8.0:
+		return
+	var fitted := minf(view.x / DESIGN.x, view.y / DESIGN.y)
+	_board.scale = Vector2(fitted, fitted)
+	_board.size = DESIGN
+	_board.position = (view - DESIGN * fitted) * 0.5
+
+
 func _apply_host_state() -> void:
 	var active := visible
 	set_process(active)
 	set_process_input(active)
 	mouse_filter = Control.MOUSE_FILTER_STOP if active else Control.MOUSE_FILTER_IGNORE
+	if active:
+		_fit_board()
 
 
 func _build() -> void:
@@ -129,17 +149,19 @@ func _build() -> void:
 	background.set_anchors_preset(Control.PRESET_FULL_RECT)
 	background.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	add_child(background)
+	_board = Control.new()
+	_board.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	_board.size = DESIGN
+	add_child(_board)
 	var margin := MarginContainer.new()
-	margin.set_anchors_preset(Control.PRESET_FULL_RECT)
+	margin.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
 	margin.add_theme_constant_override("margin_left", 28)
 	margin.add_theme_constant_override("margin_top", 12)
 	margin.add_theme_constant_override("margin_right", 28)
 	margin.add_theme_constant_override("margin_bottom", 10)
-	add_child(margin)
+	_board.add_child(margin)
 	var column := VBoxContainer.new()
-	column.set_anchors_preset(Control.PRESET_FULL_RECT)
-	column.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-	column.size_flags_vertical = Control.SIZE_EXPAND_FILL
+	column.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
 	column.add_theme_constant_override("separation", 8)
 	margin.add_child(column)
 	column.add_child(_build_topbar())

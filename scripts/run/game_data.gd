@@ -236,15 +236,16 @@ static func _validate_floor() -> void:
 	_expect_int(rule, "offer_count", 3, "floor_rule")
 	if str(rule.get("first_policy", "")) != "QUOTA_WEIGHTED":
 		errors.append("first_policy 必须为 QUOTA_WEIGHTED")
-	if not (rule.get("choice_slots", []) is Array) or rule.choice_slots != [2, 3, 4]:
+	if not (rule.get("choice_slots", []) is Array) or rule.choice_slots != [1, 2, 3, 4]:
 		# JSON numbers are floats; compare numerically.
 		var slots: Array = rule.get("choice_slots", [])
-		var ok_slots := slots.size() == 3
+		var expected := [1, 2, 3, 4]
+		var ok_slots := slots.size() == expected.size()
 		if ok_slots:
-			for i in 3:
-				ok_slots = ok_slots and int(slots[i]) == [2, 3, 4][i]
+			for i in expected.size():
+				ok_slots = ok_slots and int(slots[i]) == expected[i]
 		if not ok_slots:
-			errors.append("choice_slots 必须为 [2,3,4]")
+			errors.append("choice_slots 必须为 [1,2,3,4]")
 	for pool_id in ["normal_pool_id", "event_pool_id", "boss_pool_id"]:
 		if str(rule.get(pool_id, "")).is_empty():
 			errors.append("floor_rule 缺少 %s" % pool_id)

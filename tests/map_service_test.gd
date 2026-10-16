@@ -23,7 +23,7 @@ func _run() -> void:
 	for seed in ["map-seed-a", "map-seed-b", "tower-seed"]:
 		_paths = 0
 		_test_paths(seed)
-		_check(_paths == 27, "%s should have 27 legal room paths, got %s" % [seed, _paths])
+		_check(_paths == 81, "%s should have 81 legal room paths, got %s" % [seed, _paths])
 	_test_event_quota("quota-seed")
 	_test_roundtrip("round-seed")
 	_test_rng_roundtrip()
@@ -105,7 +105,8 @@ func _test_event_quota(seed: String) -> void:
 func _test_roundtrip(seed: String) -> void:
 	var created := RunService.new_run(seed)
 	var run: RunState = created.run
-	_check(_finish_victory(run).get("ok", false), "Could not reach the first choice")
+	_check(str(run.current_room.get("status", "")) != "ENTERED", "A new day waits on the room choice")
+	_check(run.current_offers.size() == 3, "The first room is a three-way choice")
 	var before: Array = []
 	var contents: Array = []
 	for offer in run.current_offers:
@@ -123,7 +124,9 @@ func _test_roundtrip(seed: String) -> void:
 		third.append(str(offer.get("offer_uid", "")))
 	_check(third == before, "Existing offers must be returned unchanged")
 	var twin := RunService.new_run(seed)
-	_check(_finish_victory(twin.run).get("ok", false), "Twin run failed")
+	_check(twin.get("ok", false), "Twin run failed")
+	if not twin.get("ok", false):
+		return
 	var twin_contents: Array = []
 	for offer in twin.run.current_offers:
 		twin_contents.append(str(offer.get("content_id", "")))

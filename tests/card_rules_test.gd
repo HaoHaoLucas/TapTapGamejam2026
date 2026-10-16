@@ -41,10 +41,11 @@ func _run() -> void:
 		_test_e08_preview_rng()
 		_test_combo_and_vanguard()
 		_test_draw_clock()
+		_test_hand_composition()
 		await _test_card_view_and_lab()
 	await process_frame
 	if _failures == 0:
-		print("PASS: card rules C01-C12, E01-E08, 5+1 draw, starter, preview RNG")
+		print("PASS: card rules C01-C12, E01-E08, 5+1 draw, hand mix, starter, preview RNG")
 	else:
 		push_error("card rules failures: %s" % _failures)
 	quit(1 if _failures else 0)
@@ -799,6 +800,148 @@ func _test_draw_clock() -> void:
 	crossed.battle.advance(3.0)
 	_check(_drew_then_ended(crossed_reasons), "A frame crossing 7.5 and 10 draws before the turn ends, got %s" % str(crossed_reasons))
 	_check(crossed.battle.turn_index == 2 and crossed.battle.phase == "PLAYER_ACTIVE", "That frame then ends the turn")
+
+
+func _hand_roles(run: RunContext) -> Dictionary:
+	var operators := 0
+	var numbers := 0
+	for card_uid in run.library.pile(CardInstance.HAND):
+		var card := run.library.get_card(str(card_uid))
+		var def := _catalog.card(card.def_id)
+		if str(def.get("card_kind", "")) == "NUM":
+			numbers += 1
+		elif str(def.get("operator_code", "")) == "ADD" or str(def.get("operator_code", "")) == "MUL":
+			operators += 1
+	return {"operators": operators, "numbers": numbers}
+
+
+func _test_hand_composition() -> void:
+	var mixed := _fresh(90, "mix")
+	mixed.start_battle(40, 1, false)
+	var numbers: Array = []
+	for _i in 5:
+		numbers.append(_make(mixed, "CARD_N1", [], CardInstance.DRAW))
+	var operator := _make(mixed, "CARD_ADD", ["EN_MAGNET", "EN_GHOST"], CardInstance.DRAW)
+	var partner := _make(mixed, "CARD_N2", ["EN_MAGNET"], CardInstance.DRAW)
+	var mixed_result := mixed.draw_service.draw_count(5, mixed.battle.battle_uid, "TURN_START", mixed.battle.battle_uid)
+	var mixed_reasons: Array = []
+	for event in mixed_result.events:
+		mixed_reasons.append(event.draw_reason)
+	var mixed_hand: Array = mixed.library.pile(CardInstance.HAND)
+	var mixed_counts := _hand_roles(mixed)
+	_check(mixed_reasons == ["NORMAL_DRAW", "NORMAL_DRAW", "NORMAL_DRAW", "NORMAL_DRAW", "NORMAL_DRAW"], "Repairing five numbers does not draw or magnet, got %s" % str(mixed_reasons))
+	_check(mixed_hand.size() == 5 and int(mixed_counts.operators) >= 1 and int(mixed_counts.numbers) >= 2, "A draw pile that still has an operator cannot deal five numbers, got %s" % str(mixed_counts))
+	_check(mixed_hand == [numbers[0].card_uid, numbers[1].card_uid, numbers[2].card_uid, numbers[3].card_uid, operator.card_uid], "The last drawn number is the one swapped for the operator, got %s" % str(mixed_hand))
+	_check(mixed.library.pile(CardInstance.DRAW) == [numbers[4].card_uid, partner.card_uid], "The swapped number takes the operator slot and the magnet partner stays undrawn")
+	var bare := _fresh(91, "bare")
+	bare.start_battle(40, 1, false)
+	for _i in 5:
+		_make(bare, "CARD_N3", [], CardInstance.DRAW)
+	var buried := _make(bare, "CARD_MUL", [], CardInstance.DISCARD)
+	bare.draw_service.draw_count(5, bare.battle.battle_uid, "TURN_START", bare.battle.battle_uid)
+	var bare_counts := _hand_roles(bare)
+	_check(int(bare_counts.operators) == 0 and int(bare_counts.numbers) == 5, "No operator left in the draw pile keeps the shuffled numbers, got %s" % str(bare_counts))
+	_check(buried.zone == CardInstance.DISCARD and bare.library.pile(CardInstance.DRAW).is_empty(), "Discard is not reshuffled just to find an operator")
+	var heavy := _fresh(92, "heavy")
+	heavy.start_battle(40, 1, false)
+	for _i in 5:
+		_make(heavy, "CARD_MUL", [], CardInstance.DRAW)
+	var heavy_one := _make(heavy, "CARD_N1", [], CardInstance.DRAW)
+	var heavy_two := _make(heavy, "CARD_N2", [], CardInstance.DRAW)
+	heavy.draw_service.draw_count(5, heavy.battle.battle_uid, "TURN_START", heavy.battle.battle_uid)
+	var heavy_counts := _hand_roles(heavy)
+	_check(heavy.library.pile(CardInstance.HAND).size() == 5 and int(heavy_counts.operators) >= 1 and int(heavy_counts.numbers) >= 2, "Five operators are repaired with two numbers, got %s" % str(heavy_counts))
+	_check(heavy_one.zone == CardInstance.HAND and heavy_two.zone == CardInstance.HAND and heavy.library.pile(CardInstance.DRAW).size() == 2, "Both numbers come from the draw pile without an extra draw")
+	var no_numbers := _fresh(93, "no_numbers")
+	no_numbers.start_battle(40, 1, false)
+	for _i in 5:
+		_make(no_numbers, "CARD_ADD", [], CardInstance.DRAW)
+	var buried_number := _make(no_numbers, "CARD_N4", [], CardInstance.DISCARD)
+	no_numbers.draw_service.draw_count(5, no_numbers.battle.battle_uid, "TURN_START", no_numbers.battle.battle_uid)
+	var no_counts := _hand_roles(no_numbers)
+	_check(int(no_counts.numbers) == 0 and int(no_counts.operators) == 5 and buried_number.zone == CardInstance.DISCARD, "Numbers left only in discard stay there")
+	var ready := _fresh(94, "ready")
+	ready.start_battle(40, 1, false)
+	var ready_cards: Array = [
+		_make(ready, "CARD_N1", [], CardInstance.DRAW),
+		_make(ready, "CARD_N2", [], CardInstance.DRAW),
+		_make(ready, "CARD_ADD", [], CardInstance.DRAW),
+		_make(ready, "CARD_N3", [], CardInstance.DRAW),
+		_make(ready, "CARD_N4", [], CardInstance.DRAW),
+	]
+	var extra := _make(ready, "CARD_MUL", [], CardInstance.DRAW)
+	ready.draw_service.draw_count(5, ready.battle.battle_uid, "TURN_START", ready.battle.battle_uid)
+	var expected: Array = []
+	for card in ready_cards:
+		expected.append(card.card_uid)
+	_check(ready.library.pile(CardInstance.HAND) == expected and extra.zone == CardInstance.DRAW, "A hand that already has an operator and two numbers stays in draw order")
+	var magnet := _fresh(95, "magnet_spare")
+	magnet.start_battle(40, 1, false)
+	for _i in 4:
+		_make(magnet, "CARD_N1", [], CardInstance.DRAW)
+	var base := _make(magnet, "CARD_N2", ["EN_MAGNET"], CardInstance.DRAW)
+	var magnet_op := _make(magnet, "CARD_ADD", [], CardInstance.DRAW)
+	var magnet_partner := _make(magnet, "CARD_N3", ["EN_MAGNET"], CardInstance.DRAW)
+	var magnet_result := magnet.draw_service.draw_count(5, magnet.battle.battle_uid, "TURN_START", magnet.battle.battle_uid)
+	var magnet_hits := 0
+	for event in magnet_result.events:
+		if str(event.draw_reason) == "MAGNET":
+			magnet_hits += 1
+	_check(magnet_result.events.size() == 6 and magnet_hits == 1, "The base magnet still draws one partner and the swap does not chain, got %s" % magnet_result.events.size())
+	_check(base.zone == CardInstance.DRAW and magnet_partner.zone == CardInstance.HAND and magnet_op.zone == CardInstance.HAND, "The normally drawn magnet is swapped before its partner")
+	_check(magnet.library.pile(CardInstance.HAND).size() == 6, "The magnet extra stays in hand and the swap adds no card")
+	var late := _fresh(96, "late_mix")
+	late.start_battle(50, 1, false)
+	var staying: Array = []
+	for _i in 4:
+		staying.append(_make(late, "CARD_N5", [], CardInstance.HAND))
+	var late_number := _make(late, "CARD_N1", [], CardInstance.DRAW)
+	var late_op := _make(late, "CARD_ADD", [], CardInstance.DRAW)
+	late.battle.advance(7.5)
+	var late_counts := _hand_roles(late)
+	_check(late.battle.delayed_draw_done and late_op.zone == CardInstance.HAND and late_number.zone == CardInstance.DRAW, "The 7.5s draw swaps a surplus number for an operator and stays consumed")
+	_check(late.library.pile(CardInstance.HAND).size() == 5 and int(late_counts.operators) >= 1 and int(late_counts.numbers) >= 2, "The delayed draw does not pull a second card, got %s" % str(late_counts))
+	for card in staying:
+		_check(card.zone == CardInstance.HAND, "Cards already in hand stay when the new number can be swapped")
+	late.battle.advance(1.0)
+	_check(late.library.pile(CardInstance.HAND).size() == 5 and late.battle.delayed_draw_done and late.battle.phase == "PLAYER_ACTIVE", "The swap does not mark the delayed draw unconsumed")
+	var van := _fresh(97, "van_mix")
+	van.start_battle(80, 1, false)
+	var vanguard_one := _make(van, "CARD_N1", ["EN_VANGUARD"], CardInstance.RUN_DECK)
+	var vanguard_two := _make(van, "CARD_N2", ["EN_VANGUARD"], CardInstance.RUN_DECK)
+	for _i in 3:
+		_make(van, "CARD_N3", [], CardInstance.RUN_DECK)
+	var van_op := _make(van, "CARD_ADD", [], CardInstance.RUN_DECK)
+	van.draw_service.opening_deal(van.battle.battle_uid)
+	var van_counts := _hand_roles(van)
+	_check(vanguard_one.zone == CardInstance.HAND and vanguard_two.zone == CardInstance.HAND, "Opening repair keeps the placed vanguards")
+	_check(van_op.zone == CardInstance.HAND and van.library.pile(CardInstance.HAND).size() == 5, "Opening repair brings the operator in without an extra draw")
+	_check(int(van_counts.operators) >= 1 and int(van_counts.numbers) >= 2, "The opening hand meets the minimum, got %s" % str(van_counts))
+	var symbols := _fresh(98, "van_ops")
+	symbols.start_battle(80, 1, false)
+	var symbol_one := _make(symbols, "CARD_ADD", ["EN_VANGUARD"], CardInstance.RUN_DECK)
+	var symbol_two := _make(symbols, "CARD_MUL", ["EN_VANGUARD"], CardInstance.RUN_DECK)
+	for _i in 3:
+		_make(symbols, "CARD_ADD", [], CardInstance.RUN_DECK)
+	_make(symbols, "CARD_N1", [], CardInstance.RUN_DECK)
+	_make(symbols, "CARD_N2", [], CardInstance.RUN_DECK)
+	symbols.draw_service.opening_deal(symbols.battle.battle_uid)
+	var symbol_counts := _hand_roles(symbols)
+	_check(symbol_one.zone == CardInstance.HAND and symbol_two.zone == CardInstance.HAND, "Surplus normal operators are swapped before opening vanguards")
+	_check(symbols.library.pile(CardInstance.HAND).size() == 5 and int(symbol_counts.numbers) >= 2 and int(symbol_counts.operators) >= 1, "An operator-heavy opening still receives two numbers, got %s" % str(symbol_counts))
+	var crowd := _fresh(99, "van_only")
+	crowd.start_battle(80, 1, false)
+	var held: Array = []
+	for _i in 5:
+		held.append(_make(crowd, "CARD_N4", ["EN_VANGUARD"], CardInstance.RUN_DECK))
+	var crowd_op := _make(crowd, "CARD_MUL", [], CardInstance.RUN_DECK)
+	var crowd_deal := crowd.draw_service.opening_deal(crowd.battle.battle_uid)
+	var displaced := 0
+	for card in held:
+		if card.zone == CardInstance.DRAW:
+			displaced += 1
+	_check(crowd_deal.draws.is_empty() and crowd.library.pile(CardInstance.HAND).size() == 5, "Five vanguards still skip the normal opening draw")
+	_check(crowd_op.zone == CardInstance.HAND and displaced == 1, "A vanguard leaves only when no normal card can, got %s" % displaced)
 
 
 func _test_card_view_and_lab() -> void:

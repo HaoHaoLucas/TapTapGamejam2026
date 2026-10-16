@@ -17,12 +17,50 @@ func _check(condition: bool, message: String) -> void:
 
 func _run() -> void:
 	root.size = Vector2i(1440, 900)
+	await _test_menu_enters_room_choice()
 	await _test_battle_choice_opens_combat()
 	await _test_battle_losses()
 	_test_sacrifice_result_is_readable()
 	if _failures == 0:
 		print("PASS: a battle room opens the jam fight and writes zones back")
 	quit(1 if _failures else 0)
+
+
+func _test_menu_enters_room_choice() -> void:
+	var changed := change_scene_to_file("res://scenes/menu/main_menu.tscn")
+	_check(changed == OK, "The main menu must load")
+	await process_frame
+	await process_frame
+	var menu := current_scene
+	_check(menu != null and menu.name == "MainMenu", "Play starts on the main menu")
+	if menu == null:
+		return
+	var start := menu.get_node_or_null("Stage/StartButton") as ArtButton
+	_check(start != null, "开始游戏 is on the main menu")
+	if start == null:
+		return
+	start.pressed.emit()
+	await process_frame
+	await process_frame
+	var shell := current_scene
+	_check(shell != null and shell.name == "RunShell", "开始游戏 enters the tower")
+	if shell == null or shell.run == null:
+		_check(shell != null and shell.run != null, "The tower run did not start from the menu")
+		return
+	_check_first_choice(shell)
+	shell.queue_free()
+	await process_frame
+
+
+func _check_first_choice(shell) -> void:
+	_check(str(shell.run.current_room.get("status", "")) != "ENTERED", "The first day opens on a room choice")
+	_check(shell.run.current_offers.size() == 3, "The first day offers three rooms")
+	_check(shell._battle == null or not shell._battle.visible, "The fight stays hidden until a room is chosen")
+	var choices := 0
+	for child in shell._body.get_children():
+		if child is Button and (str(child.text) == "战斗" or str(child.text) == "奇遇"):
+			choices += 1
+	_check(choices == 3, "The room list shows three choices, got %s" % choices)
 
 
 func _test_battle_choice_opens_combat() -> void:
@@ -35,6 +73,7 @@ func _test_battle_choice_opens_combat() -> void:
 		shell.queue_free()
 		await process_frame
 		return
+	_check_first_choice(shell)
 	var reached := _reach_choice(shell)
 	_check(reached, "Could not reach a room choice")
 	if not reached:

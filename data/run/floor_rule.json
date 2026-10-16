@@ -9,7 +9,7 @@
       "normal_quota": 2,
       "event_quota": 2,
       "boss_slot": 5,
-      "choice_slots": [2, 3, 4],
+      "choice_slots": [1, 2, 3, 4],
       "offer_count": 3,
       "first_policy": "QUOTA_WEIGHTED",
       "repeats_in_floor": false,

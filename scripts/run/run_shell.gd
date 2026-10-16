@@ -1,5 +1,5 @@
 extends Control
-## Playable tower entry. F5 stays on the collection prototype.
+## Tower after the main menu. A new run opens on the first room choice.
 
 const DISPLAY := {
 	"ROOM_NORMAL": "战斗",
@@ -12,8 +12,10 @@ var _session: CombatSession
 var _battle: RunBattle
 var _battle_room := ""
 var _body: VBoxContainer
+var _scroll: ScrollContainer
 var _header: Label
 var _status: Label
+var _fit_queued := false
 var _selected_offer := ""
 var _selected_cards: Array = []
 var _pizza_done := false
@@ -52,14 +54,16 @@ func _ready() -> void:
 	_status.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	_status.add_theme_color_override("font_color", Color(0.78, 0.82, 0.74))
 	column.add_child(_status)
-	var scroll := ScrollContainer.new()
-	scroll.size_flags_vertical = Control.SIZE_EXPAND_FILL
-	scroll.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-	column.add_child(scroll)
+	_scroll = ScrollContainer.new()
+	_scroll.size_flags_vertical = Control.SIZE_EXPAND_FILL
+	_scroll.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	_scroll.horizontal_scroll_mode = ScrollContainer.SCROLL_MODE_DISABLED
+	_scroll.resized.connect(_queue_fit)
+	column.add_child(_scroll)
 	_body = VBoxContainer.new()
 	_body.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	_body.add_theme_constant_override("separation", 8)
-	scroll.add_child(_body)
+	_scroll.add_child(_body)
 	_battle = load(SceneRegistry.path_for("battle")).instantiate() as RunBattle
 	_battle.visible = false
 	_battle.returned_to_tower.connect(_on_return_to_tower)
@@ -658,11 +662,9 @@ func _button(text: String) -> Button:
 	button.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	button.clip_text = false
 	button.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-	var rows := 0
-	for line in text.split("\n"):
-		rows += maxi(1, int(ceil(float(line.length()) / 18.0)))
-	button.custom_minimum_size = Vector2(0, 20 + rows * 30)
+	button.custom_minimum_size = Vector2(0, 44)
 	button.add_theme_font_size_override("font_size", 18)
+	_queue_fit()
 	return button
 
 
@@ -746,5 +748,56 @@ func _hint(text: String) -> Label:
 	var label := Label.new()
 	label.text = text
 	label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	label.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	label.add_theme_color_override("font_color", Color(0.86, 0.84, 0.72))
+	_queue_fit()
 	return label
+
+
+func _queue_fit() -> void:
+	if _fit_queued:
+		return
+	_fit_queued = true
+	call_deferred("_fit_text")
+
+
+func _fit_text() -> void:
+	_fit_queued = false
+	if _scroll == null or _body == null or _scroll.size.x < 80.0:
+		return
+	var width := _scroll.size.x
+	var bar := _scroll.get_v_scroll_bar()
+	if bar != null and bar.visible:
+		width -= bar.size.x
+	width = maxf(40.0, width)
+	_body.custom_minimum_size.x = width
+	_grow_label(_status, width)
+	for child in _body.get_children():
+		if child is Button:
+			_grow_button(child, width)
+		elif child is Label:
+			_grow_label(child, width)
+
+
+func _grow_button(button: Button, width: float) -> void:
+	var font := button.get_theme_font("font")
+	var font_size := button.get_theme_font_size("font_size")
+	if font == null:
+		return
+	var inner := maxf(40.0, width - 24.0)
+	var measured := font.get_multiline_string_size(button.text, HORIZONTAL_ALIGNMENT_LEFT, inner, font_size)
+	var need := measured.y + 22.0
+	if absf(button.custom_minimum_size.y - need) > 1.0:
+		button.custom_minimum_size.y = need
+
+
+func _grow_label(label: Label, width: float) -> void:
+	if label == null or label.autowrap_mode == TextServer.AUTOWRAP_OFF or label.text == "":
+		return
+	var font := label.get_theme_font("font")
+	var font_size := label.get_theme_font_size("font_size")
+	if font == null:
+		return
+	var measured := font.get_multiline_string_size(label.text, HORIZONTAL_ALIGNMENT_LEFT, maxf(40.0, width), font_size)
+	if absf(label.custom_minimum_size.y - measured.y) > 1.0:
+		label.custom_minimum_size.y = measured.y
