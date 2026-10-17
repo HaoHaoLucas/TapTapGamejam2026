@@ -10,6 +10,7 @@
       "delayed_draw_at": 7.5,
       "delayed_draw_count": 1,
       "hand_limit": 0,
+      "discard_at_turn_end": 0,
       "initial_deck_size": 15,
       "max_hp": 100,
       "damage_scale": 2.0,

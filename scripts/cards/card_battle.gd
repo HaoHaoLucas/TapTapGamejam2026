@@ -194,12 +194,6 @@ func resolve_enemy_turn() -> void:
 		phase = "DEFEAT"
 		_release_detained()
 		return
-	var hand: Array = ctx.library.pile(CardInstance.HAND)
-	for card_uid in hand:
-		var card := ctx.library.get_card(str(card_uid))
-		if card.is_frozen(turn_index):
-			continue
-		ctx.library.move(card, CardInstance.DISCARD, "END_TURN", battle_uid, ctx)
 	turn_index += 1
 	ctx.library.turn_index = turn_index
 	combo_streak = 0
