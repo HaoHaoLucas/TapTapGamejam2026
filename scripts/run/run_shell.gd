@@ -9,7 +9,7 @@ const DISPLAY := {
 
 var run: RunState
 var _session: CombatSession
-var _battle: RunBattle
+@onready var _battle: RunBattle = $Battle
 var _battle_room := ""
 var _body: VBoxContainer
 var _scroll: ScrollContainer
@@ -35,6 +35,7 @@ func _ready() -> void:
 	backdrop.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
 	backdrop.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	add_child(backdrop)
+	move_child(backdrop, 0)
 	var margin := MarginContainer.new()
 	margin.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
 	margin.add_theme_constant_override("margin_left", 28)
@@ -64,10 +65,8 @@ func _ready() -> void:
 	_body.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	_body.add_theme_constant_override("separation", 8)
 	_scroll.add_child(_body)
-	_battle = load(SceneRegistry.path_for("battle")).instantiate() as RunBattle
-	_battle.visible = false
 	_battle.returned_to_tower.connect(_on_return_to_tower)
-	add_child(_battle)
+	move_child(_battle, -1)
 	_start_run(str(Time.get_unix_time_from_system()))
 
 
