@@ -1,0 +1,1376 @@
+{
+	"checkpoints": {
+		"a_adopt": {
+			"cards": {
+				"equation": [],
+				"hand": [
+					{
+						"c": "PanelContainer",
+						"face": "+",
+						"mark": "",
+						"state": ""
+					},
+					{
+						"c": "PanelContainer",
+						"face": "−5",
+						"mark": "",
+						"state": ""
+					},
+					{
+						"c": "PanelContainer",
+						"face": "5",
+						"mark": "",
+						"state": ""
+					},
+					{
+						"c": "PanelContainer",
+						"face": "0",
+						"mark": "",
+						"state": ""
+					},
+					{
+						"c": "PanelContainer",
+						"face": "×",
+						"mark": "",
+						"state": ""
+					}
+				]
+			},
+			"links": {
+				"count": 8,
+				"unique": [
+					"Button.pressed -> _burn",
+					"Button.pressed -> _clear_selection",
+					"Button.pressed -> _combo_click",
+					"Button.pressed -> _commit",
+					"Button.pressed -> _end_turn",
+					"Button.pressed -> _toggle_pause",
+					"ColorRect.gui_input -> _on_combo_input",
+					"Control.resized -> _fit_board"
+				]
+			},
+			"readouts": {
+				"_board": true,
+				"_combo_dot_a": [
+					0.35,
+					0.42,
+					0.4,
+					1.0
+				],
+				"_combo_dot_b": [
+					0.35,
+					0.42,
+					0.4,
+					1.0
+				],
+				"_combo_label": "追击时刻",
+				"_combo_layer": false,
+				"_combo_status": "两次正数加法可追击\n乘法会打断",
+				"_discard_label": "弃牌堆\n0",
+				"_draw_label": "抽牌堆\n10",
+				"_enemy_hp_fill": 1.0,
+				"_enemy_hp_label": "60 / 60",
+				"_enemy_name": "锈刃哥布林",
+				"_eq_box": 0,
+				"_eq_result": "—",
+				"_floor_label": "第 1 层    第 1 回合    玩家行动",
+				"_hand_box": 5,
+				"_hand_caption": "手牌 5",
+				"_hp_fill": 1.0,
+				"_hp_label": "100 / 100",
+				"_incoming": "攻击 10",
+				"_intent_label": "攻击 10",
+				"_log": "组好算式后提交。连击窗口里点击画面。",
+				"_pause_button": "暂停",
+				"_preview": "点数字和符号交替组成算式，再发射。",
+				"_round_label": "第 1 回合 · 玩家行动",
+				"_timer_extra": "7.5 秒再抽 1 张",
+				"_timer_label": "10.0",
+				"_warning": ""
+			},
+			"tree": [
+				{
+					"c": "Control",
+					"d": 0,
+					"fo": 2,
+					"kids": 3
+				},
+				{
+					"c": "ColorRect",
+					"col": [
+						0.027,
+						0.067,
+						0.09,
+						1.0
+					],
+					"d": 1,
+					"kids": 0,
+					"mf": 2
+				},
+				{
+					"c": "Control",
+					"d": 1,
+					"kids": 1,
+					"mf": 2
+				},
+				{
+					"c": "MarginContainer",
+					"d": 2,
+					"kids": 1,
+					"mf": 1
+				},
+				{
+					"c": "VBoxContainer",
+					"d": 3,
+					"kids": 5,
+					"mf": 1
+				},
+				{
+					"c": "PanelContainer",
+					"d": 4,
+					"kids": 1,
+					"min": [
+						0.0,
+						64.0
+					],
+					"sb": 3991319933
+				},
+				{
+					"c": "HBoxContainer",
+					"d": 5,
+					"kids": 4,
+					"mf": 1
+				},
+				{
+					"c": "VBoxContainer",
+					"d": 6,
+					"kids": 2,
+					"mf": 1,
+					"min": [
+						120.0,
+						0.0
+					]
+				},
+				{
+					"aw": 0,
+					"c": "Label",
+					"d": 7,
+					"fc": [
+						0.91,
+						0.86,
+						0.72,
+						1.0
+					],
+					"fs": 22,
+					"ha": 0,
+					"kids": 0,
+					"mf": 2,
+					"sfv": 4,
+					"t": "涌现",
+					"va": 0
+				},
+				{
+					"aw": 0,
+					"c": "Label",
+					"d": 7,
+					"fc": [
+						0.706,
+						0.725,
+						0.655,
+						1.0
+					],
+					"fs": 12,
+					"ha": 0,
+					"kids": 0,
+					"mf": 2,
+					"sfv": 4,
+					"t": "限时对战",
+					"va": 0
+				},
+				{
+					"c": "VBoxContainer",
+					"d": 6,
+					"kids": 2,
+					"mf": 1,
+					"min": [
+						220.0,
+						0.0
+					],
+					"sfv": 4
+				},
+				{
+					"c": "HBoxContainer",
+					"d": 7,
+					"kids": 2,
+					"mf": 1
+				},
+				{
+					"aw": 0,
+					"c": "Label",
+					"d": 8,
+					"fc": [
+						0.62,
+						0.7,
+						0.66,
+						1.0
+					],
+					"fs": 13,
+					"ha": 0,
+					"kids": 0,
+					"mf": 2,
+					"sfv": 4,
+					"t": "生命",
+					"va": 0
+				},
+				{
+					"aw": 0,
+					"c": "Label",
+					"d": 8,
+					"fc": [
+						0.91,
+						0.86,
+						0.72,
+						1.0
+					],
+					"fs": 16,
+					"ha": 0,
+					"kids": 0,
+					"mf": 2,
+					"sfv": 4,
+					"t": "100 / 100",
+					"va": 0
+				},
+				{
+					"c": "ColorRect",
+					"col": [
+						0.12,
+						0.18,
+						0.2,
+						1.0
+					],
+					"d": 7,
+					"kids": 1,
+					"min": [
+						160.0,
+						8.0
+					],
+					"sfh": 3
+				},
+				{
+					"c": "ColorRect",
+					"col": [
+						0.72,
+						0.42,
+						0.38,
+						1.0
+					],
+					"d": 8,
+					"kids": 0,
+					"mf": 2
+				},
+				{
+					"aw": 0,
+					"c": "Label",
+					"d": 6,
+					"fc": [
+						0.82,
+						0.84,
+						0.74,
+						1.0
+					],
+					"fs": 14,
+					"ha": 0,
+					"kids": 0,
+					"mf": 2,
+					"sfh": 3,
+					"sfv": 4,
+					"t": "第 1 层    第 1 回合    玩家行动",
+					"va": 1
+				},
+				{
+					"c": "Button",
+					"d": 6,
+					"kids": 0,
+					"min": [
+						88.0,
+						40.0
+					],
+					"sb": 2003203193,
+					"t": "暂停"
+				},
+				{
+					"c": "HBoxContainer",
+					"d": 4,
+					"kids": 3,
+					"mf": 1,
+					"sfv": 3
+				},
+				{
+					"c": "VBoxContainer",
+					"d": 5,
+					"kids": 2,
+					"mf": 1,
+					"min": [
+						240.0,
+						0.0
+					],
+					"sfv": 3
+				},
+				{
+					"c": "TextureRect",
+					"d": 6,
+					"em": 1,
+					"kids": 0,
+					"mf": 2,
+					"min": [
+						220.0,
+						180.0
+					],
+					"sfv": 3,
+					"sm": 5,
+					"tex": "res://assets/battle/hero.png"
+				},
+				{
+					"aw": 0,
+					"c": "Label",
+					"d": 6,
+					"fc": [
+						0.784,
+						0.8,
+						0.718,
+						1.0
+					],
+					"fs": 14,
+					"ha": 1,
+					"kids": 0,
+					"mf": 2,
+					"sfv": 4,
+					"t": "实验员",
+					"va": 0
+				},
+				{
+					"c": "VBoxContainer",
+					"d": 5,
+					"kids": 7,
+					"mf": 1,
+					"sfh": 3,
+					"sfv": 3
+				},
+				{
+					"aw": 0,
+					"c": "Label",
+					"d": 6,
+					"fc": [
+						0.51,
+						0.6,
+						0.565,
+						1.0
+					],
+					"fs": 12,
+					"ha": 0,
+					"kids": 0,
+					"mf": 2,
+					"sfv": 4,
+					"t": "每回合 10 秒",
+					"va": 0
+				},
+				{
+					"aw": 0,
+					"c": "Label",
+					"d": 6,
+					"fc": [
+						0.824,
+						0.816,
+						0.722,
+						1.0
+					],
+					"fs": 18,
+					"ha": 1,
+					"kids": 0,
+					"mf": 2,
+					"sfv": 4,
+					"t": "用算式击败对手",
+					"va": 0
+				},
+				{
+					"aw": 0,
+					"c": "Label",
+					"d": 6,
+					"fc": [
+						0.72,
+						0.78,
+						0.7,
+						1.0
+					],
+					"fs": 13,
+					"ha": 1,
+					"kids": 0,
+					"mf": 2,
+					"sfv": 4,
+					"t": "第 1 回合 · 玩家行动",
+					"va": 0
+				},
+				{
+					"aw": 0,
+					"c": "Label",
+					"d": 6,
+					"fc": [
+						0.91,
+						0.86,
+						0.72,
+						1.0
+					],
+					"fs": 48,
+					"ha": 1,
+					"kids": 0,
+					"mf": 2,
+					"sfv": 4,
+					"t": "10.0",
+					"va": 0
+				},
+				{
+					"aw": 0,
+					"c": "Label",
+					"d": 6,
+					"fc": [
+						0.7,
+						0.76,
+						0.68,
+						1.0
+					],
+					"fs": 13,
+					"ha": 1,
+					"kids": 0,
+					"mf": 2,
+					"sfv": 4,
+					"t": "7.5 秒再抽 1 张",
+					"va": 0
+				},
+				{
+					"aw": 3,
+					"c": "Label",
+					"d": 6,
+					"fc": [
+						0.933,
+						0.835,
+						0.651,
+						1.0
+					],
+					"fs": 14,
+					"ha": 1,
+					"kids": 0,
+					"mf": 2,
+					"sfv": 4,
+					"t": "组好算式后提交。连击窗口里点击画面。",
+					"va": 0
+				},
+				{
+					"aw": 3,
+					"c": "Label",
+					"d": 6,
+					"fc": [
+						0.95,
+						0.72,
+						0.45,
+						1.0
+					],
+					"fs": 13,
+					"ha": 1,
+					"kids": 0,
+					"mf": 2,
+					"sfv": 4,
+					"t": "",
+					"va": 0
+				},
+				{
+					"c": "VBoxContainer",
+					"d": 5,
+					"kids": 5,
+					"mf": 1,
+					"min": [
+						280.0,
+						0.0
+					],
+					"sfv": 3
+				},
+				{
+					"aw": 3,
+					"c": "Label",
+					"d": 6,
+					"fc": [
+						0.91,
+						0.86,
+						0.72,
+						1.0
+					],
+					"fs": 14,
+					"ha": 1,
+					"kids": 0,
+					"mf": 2,
+					"sfv": 4,
+					"t": "攻击 10",
+					"va": 0
+				},
+				{
+					"c": "TextureRect",
+					"d": 6,
+					"em": 1,
+					"kids": 0,
+					"mf": 2,
+					"min": [
+						240.0,
+						160.0
+					],
+					"sfv": 3,
+					"sm": 5,
+					"tex": "res://assets/battle/enemy.png"
+				},
+				{
+					"aw": 0,
+					"c": "Label",
+					"d": 6,
+					"fc": [
+						0.82,
+						0.84,
+						0.74,
+						1.0
+					],
+					"fs": 16,
+					"ha": 1,
+					"kids": 0,
+					"mf": 2,
+					"sfv": 4,
+					"t": "锈刃哥布林",
+					"va": 0
+				},
+				{
+					"c": "ColorRect",
+					"col": [
+						0.12,
+						0.18,
+						0.2,
+						1.0
+					],
+					"d": 6,
+					"kids": 1,
+					"min": [
+						160.0,
+						8.0
+					],
+					"sfh": 3
+				},
+				{
+					"c": "ColorRect",
+					"col": [
+						0.72,
+						0.38,
+						0.36,
+						1.0
+					],
+					"d": 7,
+					"kids": 0,
+					"mf": 2
+				},
+				{
+					"aw": 0,
+					"c": "Label",
+					"d": 6,
+					"fc": [
+						0.86,
+						0.84,
+						0.72,
+						1.0
+					],
+					"fs": 13,
+					"ha": 1,
+					"kids": 0,
+					"mf": 2,
+					"sfv": 4,
+					"t": "60 / 60",
+					"va": 0
+				},
+				{
+					"c": "HBoxContainer",
+					"d": 4,
+					"kids": 4,
+					"mf": 1,
+					"min": [
+						0.0,
+						132.0
+					]
+				},
+				{
+					"c": "Button",
+					"d": 5,
+					"kids": 0,
+					"min": [
+						150.0,
+						64.0
+					],
+					"sb": 2003203193,
+					"t": "烧掉回血\n|点数| × 10"
+				},
+				{
+					"c": "PanelContainer",
+					"d": 5,
+					"kids": 1,
+					"sb": 982381903,
+					"sfh": 3
+				},
+				{
+					"c": "MarginContainer",
+					"d": 6,
+					"kids": 1,
+					"mf": 1
+				},
+				{
+					"c": "VBoxContainer",
+					"d": 7,
+					"kids": 3,
+					"mf": 1
+				},
+				{
+					"c": "HBoxContainer",
+					"d": 8,
+					"kids": 2,
+					"mf": 1
+				},
+				{
+					"aw": 0,
+					"c": "Label",
+					"d": 9,
+					"fc": [
+						0.64,
+						0.71,
+						0.65,
+						1.0
+					],
+					"fs": 13,
+					"ha": 0,
+					"kids": 0,
+					"mf": 2,
+					"sfh": 3,
+					"sfv": 4,
+					"t": "算式",
+					"va": 0
+				},
+				{
+					"c": "Button",
+					"d": 9,
+					"kids": 0,
+					"min": [
+						64.0,
+						28.0
+					],
+					"sb": 2003203193,
+					"t": "清空"
+				},
+				{
+					"c": "ScrollContainer",
+					"d": 8,
+					"kids": 1,
+					"mf": 1,
+					"min": [
+						0.0,
+						116.0
+					]
+				},
+				{
+					"c": "HBoxContainer",
+					"d": 9,
+					"kids": 0,
+					"mf": 1
+				},
+				{
+					"c": "HBoxContainer",
+					"d": 8,
+					"kids": 3,
+					"mf": 1
+				},
+				{
+					"aw": 3,
+					"c": "Label",
+					"d": 9,
+					"fc": [
+						0.75,
+						0.78,
+						0.7,
+						1.0
+					],
+					"fs": 13,
+					"ha": 0,
+					"kids": 0,
+					"mf": 2,
+					"sfh": 3,
+					"sfv": 4,
+					"t": "点数字和符号交替组成算式，再发射。",
+					"va": 1
+				},
+				{
+					"aw": 0,
+					"c": "Label",
+					"d": 9,
+					"fc": [
+						0.93,
+						0.85,
+						0.62,
+						1.0
+					],
+					"fs": 22,
+					"ha": 0,
+					"kids": 0,
+					"mf": 2,
+					"sfv": 4,
+					"t": "—",
+					"va": 1
+				},
+				{
+					"c": "Button",
+					"d": 9,
+					"kids": 0,
+					"min": [
+						108.0,
+						44.0
+					],
+					"sb": 2003203193,
+					"t": "发射  ↵"
+				},
+				{
+					"c": "VBoxContainer",
+					"d": 5,
+					"kids": 3,
+					"mf": 1,
+					"min": [
+						150.0,
+						0.0
+					]
+				},
+				{
+					"aw": 0,
+					"c": "Label",
+					"d": 6,
+					"fc": [
+						0.64,
+						0.71,
+						0.65,
+						1.0
+					],
+					"fs": 12,
+					"ha": 0,
+					"kids": 0,
+					"mf": 2,
+					"sfv": 4,
+					"t": "加法追击",
+					"va": 0
+				},
+				{
+					"c": "HBoxContainer",
+					"d": 6,
+					"kids": 2,
+					"mf": 1
+				},
+				{
+					"c": "Panel",
+					"d": 7,
+					"kids": 0,
+					"min": [
+						16.0,
+						16.0
+					],
+					"mod": [
+						0.35,
+						0.42,
+						0.4,
+						1.0
+					],
+					"sb": 1209222498
+				},
+				{
+					"c": "Panel",
+					"d": 7,
+					"kids": 0,
+					"min": [
+						16.0,
+						16.0
+					],
+					"mod": [
+						0.35,
+						0.42,
+						0.4,
+						1.0
+					],
+					"sb": 1209222498
+				},
+				{
+					"aw": 3,
+					"c": "Label",
+					"d": 6,
+					"fc": [
+						0.82,
+						0.84,
+						0.74,
+						1.0
+					],
+					"fs": 12,
+					"ha": 1,
+					"kids": 0,
+					"mf": 2,
+					"sfv": 4,
+					"t": "两次正数加法可追击\n乘法会打断",
+					"va": 0
+				},
+				{
+					"c": "VBoxContainer",
+					"d": 5,
+					"kids": 2,
+					"mf": 1,
+					"min": [
+						168.0,
+						0.0
+					]
+				},
+				{
+					"c": "Button",
+					"d": 6,
+					"kids": 0,
+					"min": [
+						168.0,
+						56.0
+					],
+					"sb": 2003203193,
+					"t": "结束回合\n可提前结束 · E"
+				},
+				{
+					"aw": 3,
+					"c": "Label",
+					"d": 6,
+					"fc": [
+						0.78,
+						0.7,
+						0.58,
+						1.0
+					],
+					"fs": 12,
+					"ha": 1,
+					"kids": 0,
+					"mf": 2,
+					"sfv": 4,
+					"t": "攻击 10",
+					"va": 0
+				},
+				{
+					"c": "VBoxContainer",
+					"d": 4,
+					"kids": 2,
+					"mf": 1
+				},
+				{
+					"c": "HBoxContainer",
+					"d": 5,
+					"kids": 2,
+					"mf": 1
+				},
+				{
+					"aw": 0,
+					"c": "Label",
+					"d": 6,
+					"fc": [
+						0.82,
+						0.86,
+						0.78,
+						1.0
+					],
+					"fs": 13,
+					"ha": 0,
+					"kids": 0,
+					"mf": 2,
+					"sfh": 3,
+					"sfv": 4,
+					"t": "手牌 5",
+					"va": 0
+				},
+				{
+					"aw": 0,
+					"c": "Label",
+					"d": 6,
+					"fc": [
+						0.62,
+						0.7,
+						0.66,
+						1.0
+					],
+					"fs": 12,
+					"ha": 2,
+					"kids": 0,
+					"mf": 2,
+					"sfv": 4,
+					"t": "出牌后本回合不补牌",
+					"va": 0
+				},
+				{
+					"c": "HBoxContainer",
+					"d": 5,
+					"kids": 3,
+					"mf": 1
+				},
+				{
+					"c": "PanelContainer",
+					"d": 6,
+					"kids": 1,
+					"min": [
+						96.0,
+						120.0
+					],
+					"sb": 824984203,
+					"sfv": 4
+				},
+				{
+					"aw": 0,
+					"c": "Label",
+					"d": 7,
+					"fc": [
+						0.86,
+						0.84,
+						0.72,
+						1.0
+					],
+					"fs": 14,
+					"ha": 1,
+					"kids": 0,
+					"mf": 2,
+					"sfv": 4,
+					"t": "抽牌堆\n10",
+					"va": 1
+				},
+				{
+					"c": "ScrollContainer",
+					"d": 6,
+					"kids": 1,
+					"mf": 1,
+					"min": [
+						0.0,
+						176.0
+					],
+					"sfh": 3
+				},
+				{
+					"c": "HBoxContainer",
+					"d": 7,
+					"kids": 5,
+					"mf": 1,
+					"sfh": 3
+				},
+				{
+					"c": "PanelContainer",
+					"d": 6,
+					"kids": 1,
+					"min": [
+						96.0,
+						120.0
+					],
+					"sb": 824984203,
+					"sfv": 4
+				},
+				{
+					"aw": 0,
+					"c": "Label",
+					"d": 7,
+					"fc": [
+						0.86,
+						0.84,
+						0.72,
+						1.0
+					],
+					"fs": 14,
+					"ha": 1,
+					"kids": 0,
+					"mf": 2,
+					"sfv": 4,
+					"t": "弃牌堆\n0",
+					"va": 1
+				},
+				{
+					"aw": 0,
+					"c": "Label",
+					"d": 4,
+					"fc": [
+						0.62,
+						0.7,
+						0.66,
+						1.0
+					],
+					"fs": 12,
+					"ha": 1,
+					"kids": 0,
+					"mf": 2,
+					"sfv": 4,
+					"t": "Enter / 空格 提交    B 烧牌    E 结束回合    Esc 清空    P 暂停",
+					"va": 0
+				},
+				{
+					"c": "ColorRect",
+					"col": [
+						0.027,
+						0.078,
+						0.114,
+						0.72
+					],
+					"d": 1,
+					"kids": 1,
+					"vis": false
+				},
+				{
+					"c": "PanelContainer",
+					"d": 2,
+					"kids": 1,
+					"min": [
+						320.0,
+						180.0
+					],
+					"sb": 982381903
+				},
+				{
+					"c": "MarginContainer",
+					"d": 3,
+					"kids": 1,
+					"mf": 1
+				},
+				{
+					"c": "VBoxContainer",
+					"d": 4,
+					"kids": 3,
+					"mf": 1
+				},
+				{
+					"aw": 0,
+					"c": "Label",
+					"d": 5,
+					"fc": [
+						0.82,
+						0.76,
+						0.55,
+						1.0
+					],
+					"fs": 12,
+					"ha": 0,
+					"kids": 0,
+					"mf": 2,
+					"sfv": 4,
+					"t": "追击",
+					"va": 0
+				},
+				{
+					"aw": 0,
+					"c": "Label",
+					"d": 5,
+					"fc": [
+						0.937,
+						0.855,
+						0.678,
+						1.0
+					],
+					"fs": 24,
+					"ha": 1,
+					"kids": 0,
+					"mf": 2,
+					"sfv": 4,
+					"t": "追击时刻",
+					"va": 0
+				},
+				{
+					"c": "Button",
+					"d": 5,
+					"kids": 0,
+					"min": [
+						0.0,
+						44.0
+					],
+					"sb": 2003203193,
+					"t": "连点追击"
+				}
+			]
+		},
+		"b_formula": {
+			"cards": {
+				"equation": [
+					{
+						"c": "PanelContainer",
+						"face": "−5",
+						"mark": "",
+						"state": ""
+					},
+					{
+						"c": "PanelContainer",
+						"face": "+",
+						"mark": "",
+						"state": ""
+					},
+					{
+						"c": "PanelContainer",
+						"face": "5",
+						"mark": "",
+						"state": ""
+					}
+				],
+				"hand": [
+					{
+						"c": "PanelContainer",
+						"face": "+",
+						"mark": "",
+						"state": ""
+					},
+					{
+						"c": "PanelContainer",
+						"face": "−5",
+						"mark": "",
+						"state": ""
+					},
+					{
+						"c": "PanelContainer",
+						"face": "5",
+						"mark": "",
+						"state": ""
+					},
+					{
+						"c": "PanelContainer",
+						"face": "0",
+						"mark": "",
+						"state": ""
+					},
+					{
+						"c": "PanelContainer",
+						"face": "×",
+						"mark": "",
+						"state": ""
+					}
+				]
+			},
+			"readouts": {
+				"_board": true,
+				"_combo_dot_a": [
+					0.35,
+					0.42,
+					0.4,
+					1.0
+				],
+				"_combo_dot_b": [
+					0.35,
+					0.42,
+					0.4,
+					1.0
+				],
+				"_combo_label": "追击时刻",
+				"_combo_layer": false,
+				"_combo_status": "两次正数加法可追击\n乘法会打断",
+				"_discard_label": "弃牌堆\n0",
+				"_draw_label": "抽牌堆\n10",
+				"_enemy_hp_fill": 1.0,
+				"_enemy_hp_label": "60 / 60",
+				"_enemy_name": "锈刃哥布林",
+				"_eq_box": 3,
+				"_eq_result": "0",
+				"_floor_label": "第 1 层    第 1 回合    玩家行动",
+				"_hand_box": 5,
+				"_hand_caption": "手牌 5",
+				"_hp_fill": 1.0,
+				"_hp_label": "100 / 100",
+				"_incoming": "攻击 10",
+				"_intent_label": "攻击 10",
+				"_log": "组好算式后提交。连击窗口里点击画面。",
+				"_pause_button": "暂停",
+				"_preview": "ADD  结果 0",
+				"_round_label": "第 1 回合 · 玩家行动",
+				"_timer_extra": "7.5 秒再抽 1 张",
+				"_timer_label": "10.0",
+				"_warning": ""
+			}
+		},
+		"c_commit": {
+			"cards": {
+				"equation": [],
+				"hand": [
+					{
+						"c": "PanelContainer",
+						"face": "0",
+						"mark": "",
+						"state": ""
+					},
+					{
+						"c": "PanelContainer",
+						"face": "×",
+						"mark": "",
+						"state": ""
+					}
+				]
+			},
+			"readouts": {
+				"_board": true,
+				"_combo_dot_a": [
+					0.35,
+					0.42,
+					0.4,
+					1.0
+				],
+				"_combo_dot_b": [
+					0.35,
+					0.42,
+					0.4,
+					1.0
+				],
+				"_combo_label": "追击时刻",
+				"_combo_layer": false,
+				"_combo_status": "两次正数加法可追击\n乘法会打断",
+				"_discard_label": "弃牌堆\n3",
+				"_draw_label": "抽牌堆\n10",
+				"_enemy_hp_fill": 1.0,
+				"_enemy_hp_label": "60 / 60",
+				"_enemy_name": "锈刃哥布林",
+				"_eq_box": 0,
+				"_eq_result": "—",
+				"_floor_label": "第 1 层    第 1 回合    玩家行动",
+				"_hand_box": 2,
+				"_hand_caption": "手牌 2",
+				"_hp_fill": 1.0,
+				"_hp_label": "100 / 100",
+				"_incoming": "攻击 10",
+				"_intent_label": "攻击 10",
+				"_log": "算式伤害 0。",
+				"_pause_button": "暂停",
+				"_preview": "点数字和符号交替组成算式，再发射。",
+				"_round_label": "第 1 回合 · 玩家行动",
+				"_timer_extra": "7.5 秒再抽 1 张",
+				"_timer_label": "10.0",
+				"_warning": ""
+			}
+		},
+		"d_burn": {
+			"cards": {
+				"equation": [],
+				"hand": [
+					{
+						"c": "PanelContainer",
+						"face": "×",
+						"mark": "",
+						"state": ""
+					}
+				]
+			},
+			"readouts": {
+				"_board": true,
+				"_combo_dot_a": [
+					0.35,
+					0.42,
+					0.4,
+					1.0
+				],
+				"_combo_dot_b": [
+					0.35,
+					0.42,
+					0.4,
+					1.0
+				],
+				"_combo_label": "追击时刻",
+				"_combo_layer": false,
+				"_combo_status": "两次正数加法可追击\n乘法会打断",
+				"_discard_label": "弃牌堆\n3",
+				"_draw_label": "抽牌堆\n10",
+				"_enemy_hp_fill": 1.0,
+				"_enemy_hp_label": "60 / 60",
+				"_enemy_name": "锈刃哥布林",
+				"_eq_box": 0,
+				"_eq_result": "—",
+				"_floor_label": "第 1 层    第 1 回合    玩家行动",
+				"_hand_box": 1,
+				"_hand_caption": "手牌 1",
+				"_hp_fill": 1.0,
+				"_hp_label": "100 / 100",
+				"_incoming": "攻击 10",
+				"_intent_label": "攻击 10",
+				"_log": "牌已消耗，但没有回复生命。",
+				"_pause_button": "暂停",
+				"_preview": "点数字和符号交替组成算式，再发射。",
+				"_round_label": "第 1 回合 · 玩家行动",
+				"_timer_extra": "7.5 秒再抽 1 张",
+				"_timer_label": "10.0",
+				"_warning": ""
+			}
+		},
+		"e_end_turn": {
+			"cards": {
+				"equation": [],
+				"hand": [
+					{
+						"c": "PanelContainer",
+						"face": "−3",
+						"mark": "",
+						"state": ""
+					},
+					{
+						"c": "PanelContainer",
+						"face": "−4",
+						"mark": "",
+						"state": ""
+					},
+					{
+						"c": "PanelContainer",
+						"face": "−1",
+						"mark": "",
+						"state": ""
+					},
+					{
+						"c": "PanelContainer",
+						"face": "3",
+						"mark": "",
+						"state": ""
+					},
+					{
+						"c": "PanelContainer",
+						"face": "×",
+						"mark": "",
+						"state": ""
+					}
+				]
+			},
+			"readouts": {
+				"_board": true,
+				"_combo_dot_a": [
+					0.35,
+					0.42,
+					0.4,
+					1.0
+				],
+				"_combo_dot_b": [
+					0.35,
+					0.42,
+					0.4,
+					1.0
+				],
+				"_combo_label": "追击时刻",
+				"_combo_layer": false,
+				"_combo_status": "两次正数加法可追击\n乘法会打断",
+				"_discard_label": "弃牌堆\n4",
+				"_draw_label": "抽牌堆\n5",
+				"_enemy_hp_fill": 1.0,
+				"_enemy_hp_label": "60 / 60",
+				"_enemy_name": "锈刃哥布林",
+				"_eq_box": 0,
+				"_eq_result": "—",
+				"_floor_label": "第 1 层    第 2 回合    玩家行动",
+				"_hand_box": 5,
+				"_hand_caption": "手牌 5",
+				"_hp_fill": 0.9,
+				"_hp_label": "90 / 100",
+				"_incoming": "攻击 10",
+				"_intent_label": "攻击 10",
+				"_log": "牌已消耗，但没有回复生命。",
+				"_pause_button": "暂停",
+				"_preview": "点数字和符号交替组成算式，再发射。",
+				"_round_label": "第 2 回合 · 玩家行动",
+				"_timer_extra": "7.5 秒再抽 1 张",
+				"_timer_label": "10.0",
+				"_warning": ""
+			}
+		}
+	},
+	"view": "res://scenes/run/run_battle.tscn"
+}
