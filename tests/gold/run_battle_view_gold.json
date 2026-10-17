@@ -37,7 +37,7 @@
 				]
 			},
 			"links": {
-				"count": 8,
+				"count": 7,
 				"unique": [
 					"Button.pressed -> _burn",
 					"Button.pressed -> _clear_selection",
@@ -45,8 +45,7 @@
 					"Button.pressed -> _commit",
 					"Button.pressed -> _end_turn",
 					"Button.pressed -> _toggle_pause",
-					"ColorRect.gui_input -> _on_combo_input",
-					"Control.resized -> _fit_board"
+					"ColorRect.gui_input -> _on_combo_input"
 				]
 			},
 			"readouts": {

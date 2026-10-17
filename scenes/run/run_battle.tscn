@@ -56,6 +56,7 @@ corner_radius_bottom_left = 4
 
 [sub_resource type="SystemFont" id="SystemFont_3qb5e"]
 font_names = PackedStringArray("Microsoft YaHei UI", "Microsoft YaHei", "Noto Sans CJK SC", "Segoe UI")
+subpixel_positioning = 0
 
 [sub_resource type="Theme" id="Theme_l7cur"]
 default_font = SubResource("SystemFont_3qb5e")
@@ -184,8 +185,8 @@ layout_mode = 1
 anchors_preset = 15
 anchor_right = 1.0
 anchor_bottom = 1.0
-offset_right = 1156.0
-offset_bottom = 795.0
+offset_right = 1920.0
+offset_bottom = 1080.0
 grow_horizontal = 2
 grow_vertical = 2
 theme_override_constants/margin_left = 28
@@ -640,7 +641,6 @@ layout_mode = 2
 focus_mode = 0
 text = "连点追击"
 
-[connection signal="resized" from="." to="." method="_fit_board"]
 [connection signal="pressed" from="Board/Margin/Column/TopBar/Row/PauseButton" to="." method="_toggle_pause"]
 [connection signal="pressed" from="Board/Margin/Column/Controls/Button" to="." method="_burn"]
 [connection signal="pressed" from="Board/Margin/Column/Controls/Equation/Pad/Box/HBoxContainer/Button" to="." method="_clear_selection"]

@@ -53,7 +53,7 @@ func _test_connections_and_minimums() -> void:
 	for line in text.split("\n"):
 		if str(line).begins_with("[connection"):
 			links += 1
-	_check(links == 8, "信号连接应为 8 条，实际 %d" % links)
+	_check(links == 7, "信号连接应为 7 条，实际 %d" % links)
 	# 保命尺寸：不写就塌成 0 尺寸的元素必须有 custom_minimum_size
 	var minimums := 0
 	for line in text.split("\n"):

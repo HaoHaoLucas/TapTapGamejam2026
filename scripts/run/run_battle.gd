@@ -5,7 +5,6 @@ extends Control
 const CARD_SCENE := preload("res://scenes/cards/card_view.tscn")
 const HERO_TEX := preload("res://assets/battle/hero.png")
 const ENEMY_TEX := preload("res://assets/battle/enemy.png")
-const DESIGN := Vector2(1440, 900)
 const PHASE_NAME := {
 	"PLAYER_ACTIVE": "玩家行动",
 	"COMBO": "连击窗口",
@@ -57,11 +56,9 @@ var _ready_done: bool = false
 
 
 func _ready() -> void:
-	set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
 	focus_mode = Control.FOCUS_ALL
 	_ready_done = true
 	_apply_host_state()
-	call_deferred("_fit_board")
 
 
 func _notification(what: int) -> void:
@@ -122,28 +119,11 @@ func adopt(session: CombatSession) -> void:
 	_sync_cards(true)
 
 
-func _fit_board() -> void:
-	if not _ready_done:
-		return
-	assert(_board != null, "RunBattle: $Board 丢了")
-	var view := size
-	if view.x < 8.0 or view.y < 8.0:
-		view = get_viewport_rect().size
-	if view.x < 8.0 or view.y < 8.0:
-		return
-	var fitted := minf(view.x / DESIGN.x, view.y / DESIGN.y)
-	_board.scale = Vector2(fitted, fitted)
-	_board.size = DESIGN
-	_board.position = (view - DESIGN * fitted) * 0.5
-
-
 func _apply_host_state() -> void:
 	var active := visible
 	set_process(active)
 	set_process_input(active)
 	mouse_filter = Control.MOUSE_FILTER_STOP if active else Control.MOUSE_FILTER_IGNORE
-	if active:
-		_fit_board()
 
 
 func _refresh_hud() -> void:
