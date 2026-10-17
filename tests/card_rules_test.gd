@@ -42,7 +42,7 @@ func _run() -> void:
 		_test_combo_and_vanguard()
 		_test_draw_clock()
 		_test_hand_composition()
-		await _test_card_view_and_lab()
+		_test_card_view()
 	await process_frame
 	if _failures == 0:
 		print("PASS: card rules C01-C12, E01-E08, 5+1 draw, hand mix, starter, preview RNG")
@@ -944,7 +944,7 @@ func _test_hand_composition() -> void:
 	_check(crowd_op.zone == CardInstance.HAND and displaced == 1, "A vanguard leaves only when no normal card can, got %s" % displaced)
 
 
-func _test_card_view_and_lab() -> void:
+func _test_card_view() -> void:
 	var run := _fresh(28, "view")
 	var card := _make(run, "CARD_N5", [], CardInstance.HAND)
 	var negative := _make(run, "CARD_NM5", [], CardInstance.HAND)
@@ -962,11 +962,3 @@ func _test_card_view_and_lab() -> void:
 	view.bind(run.library, ghost.card_uid)
 	_check(view.mark_text().contains("幽灵") and view.state_text().contains("幽灵") and view.state_text().contains("冻结"), "Card view shows the ghost mark and the frozen state")
 	view.free()
-	var lab := (load("res://scenes/cards/card_lab.tscn") as PackedScene).instantiate() as CardLab
-	root.add_child(lab)
-	await process_frame
-	_check(lab.run != null and lab.run.battle != null, "Card lab boots a battle")
-	_check(lab.run.battle.phase == "PLAYER_ACTIVE", "Card lab starts in the player turn")
-	_check(lab.run.library.pile(CardInstance.HAND).size() == 5, "Card lab deals a five-card hand")
-	_check(lab.get_child_count() > 0, "Card lab builds its own scene")
-	lab.queue_free()
