@@ -30,6 +30,7 @@ func _run() -> void:
 	_test_hidden_stays_dormant()
 	_test_second_adopt_is_clean()
 	_test_lone_instance_does_not_crash()
+	_test_mounted_under_run_shell()
 	if _failures == 0:
 		print("PASS: battle scene keeps structure only, sleeps when hidden, and resets between fights")
 	quit(1 if _failures else 0)
@@ -152,3 +153,19 @@ func _test_lone_instance_does_not_crash() -> void:
 	view.visible = false
 	view.visible = true
 	view.queue_free()
+
+
+func _test_mounted_under_run_shell() -> void:
+	# 战斗屏必须挂在跑图壳下面、名字是 RunBattle、平时隐藏；且它是最后一个子节点（z 序在最上）。
+	var shell: Control = (load("res://scenes/run/run_shell.tscn") as PackedScene).instantiate() as Control
+	root.add_child(shell)
+	var battle = shell.get("_battle")
+	_check(battle != null, "跑图壳没有创建战斗屏")
+	if battle == null:
+		shell.queue_free()
+		return
+	_check(battle.name == "RunBattle", "战斗屏根节点名应为 RunBattle，实际 %s" % str(battle.name))
+	_check(battle.get_parent() == shell, "战斗屏应挂在跑图壳下，实际挂在 %s" % str(battle.get_parent().name))
+	_check(not battle.visible, "战斗屏开局必须隐藏")
+	_check(battle.get_index() == shell.get_child_count() - 1, "战斗屏应是最后一个子节点（z 序在最上）")
+	shell.queue_free()

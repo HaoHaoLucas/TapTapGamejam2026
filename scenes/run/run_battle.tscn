@@ -157,7 +157,7 @@ corner_radius_top_right = 7
 corner_radius_bottom_right = 7
 corner_radius_bottom_left = 7
 
-[node name="@Control@2" type="Control" unique_id=1191252069]
+[node name="RunBattle" type="Control" unique_id=1191252069]
 layout_mode = 3
 anchors_preset = 15
 anchor_right = 1.0
