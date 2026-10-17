@@ -188,6 +188,8 @@ func _validate_battle_rule() -> void:
 	_expect_int(row_data, "delayed_draw_count", "battle_rule", 1, 20)
 	if not _is_int_number(row_data.get("hand_limit", null)) or int(row_data.get("hand_limit", -1)) != 0:
 		errors.append("battle_rule.hand_limit 必须为 0")
+	if not _is_int_number(row_data.get("discard_at_turn_end", null)) or int(row_data.get("discard_at_turn_end", -1)) != 0:
+		errors.append("battle_rule.discard_at_turn_end 必须为 0")
 	_expect_int(row_data, "initial_deck_size", "battle_rule", 1, 99)
 	_expect_int(row_data, "max_hp", "battle_rule", 1, 999999)
 	_expect_number(row_data, "damage_scale", "battle_rule")

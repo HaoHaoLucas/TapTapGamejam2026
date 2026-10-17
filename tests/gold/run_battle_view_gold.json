@@ -1300,6 +1300,12 @@
 				"hand": [
 					{
 						"c": "PanelContainer",
+						"face": "×",
+						"mark": "",
+						"state": ""
+					},
+					{
+						"c": "PanelContainer",
 						"face": "−3",
 						"mark": "",
 						"state": ""
@@ -1324,7 +1330,7 @@
 					},
 					{
 						"c": "PanelContainer",
-						"face": "×",
+						"face": "−2",
 						"mark": "",
 						"state": ""
 					}
@@ -1347,7 +1353,7 @@
 				"_combo_label": "追击时刻",
 				"_combo_layer": false,
 				"_combo_status": "两次正数加法可追击\n乘法会打断",
-				"_discard_label": "弃牌堆\n4",
+				"_discard_label": "弃牌堆\n3",
 				"_draw_label": "抽牌堆\n5",
 				"_enemy_hp_fill": 1.0,
 				"_enemy_hp_label": "60 / 60",
@@ -1355,8 +1361,8 @@
 				"_eq_box": 0,
 				"_eq_result": "—",
 				"_floor_label": "第 1 层    第 2 回合    玩家行动",
-				"_hand_box": 5,
-				"_hand_caption": "手牌 5",
+				"_hand_box": 6,
+				"_hand_caption": "手牌 6",
 				"_hp_fill": 0.9,
 				"_hp_label": "90 / 100",
 				"_incoming": "攻击 10",

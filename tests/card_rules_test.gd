@@ -95,6 +95,7 @@ func _test_config_and_starter() -> void:
 	_check(is_equal_approx(float(_catalog.rule().get("delayed_draw_at", 0.0)), 7.5), "Delayed draw is at 7.5s")
 	_check(int(_catalog.rule().get("delayed_draw_count", 0)) == 1, "Delayed draw count is 1")
 	_check(int(_catalog.rule().get("hand_limit", -1)) == 0, "Hand limit is 0")
+	_check(int(_catalog.rule().get("discard_at_turn_end", -1)) == 0, "Turn end does not discard the hand")
 	_check(is_equal_approx(float(_catalog.rule().damage_scale), 2.0), "Damage scale must be 2")
 	_check(int(_catalog.rule().max_equation_damage) == 2000000, "Damage cap must be 2000000")
 	_check(int(_catalog.enh("EN_NUM1").params.add) == 1, "EN_NUM1 adds 1")
@@ -445,11 +446,14 @@ func _test_e03_frozen() -> void:
 	var blocked := _commit(run, [frozen, op, low], "e03block")
 	_check(not blocked.ok and blocked.reason_code == "FROZEN", "E03 cannot play a frozen card")
 	_check(frozen.zone == CardInstance.HAND and run.rng_of("COMBAT").state() == state, "A frozen refusal consumes nothing")
+	var before_end := run.library.pile(CardInstance.HAND).size()
 	run.battle.end_player_turn()
+	_check(op.zone == CardInstance.HAND and low.zone == CardInstance.HAND and high.zone == CardInstance.HAND, "E03 the three normal cards stay in hand")
 	_check(frozen.zone == CardInstance.HAND, "E03 frozen card stays through the enemy turn")
 	_check(run.battle.turn_index == 2 and not frozen.is_frozen(run.battle.turn_index), "E03 unlocks on the next player turn")
-	_check(run.library.pile(CardInstance.HAND).size() == 6, "E03 keeps the frozen card and still draws 5")
-	_check(op.zone == CardInstance.DISCARD and low.zone == CardInstance.DISCARD and high.zone == CardInstance.DISCARD, "E03 discards the unfrozen hand")
+	_check(run.library.pile(CardInstance.HAND).size() == before_end + 5, "E03 hand is the previous hand plus 5, got %s" % run.library.pile(CardInstance.HAND).size())
+	run.battle.end_player_turn()
+	_check(run.battle.turn_index == 3 and frozen.zone == CardInstance.HAND and not frozen.is_frozen(run.battle.turn_index), "E03 the unlocked frozen card stays unfrozen on the next turn")
 	var play_op := _make(run, "CARD_ADD", [], CardInstance.HAND)
 	var play_low := _make(run, "CARD_N1", [], CardInstance.HAND)
 	var played := _commit(run, [frozen, play_op, play_low], "e03play")
@@ -717,17 +721,18 @@ func _listen(run: RunContext) -> Array:
 	return moves
 
 
-func _drew_then_ended(moves: Array) -> bool:
-	var drew := false
-	var ends := 0
+## delayed is 0 or 1. Those draws come first, the hand is kept, then five new cards are drawn. Nothing is discarded.
+func _drew_then_ended(moves: Array, delayed: int) -> bool:
+	var arrivals := 0
 	for move in moves:
-		if str(move.reason) == "END_TURN":
-			if not drew:
+		var reason := str(move.reason)
+		if reason == "END_TURN" or str(move.to) == CardInstance.DISCARD:
+			return false
+		if str(move.to) == CardInstance.HAND:
+			if reason != "NORMAL_DRAW":
 				return false
-			ends += 1
-		elif not drew and str(move.to) == CardInstance.HAND:
-			drew = true
-	return drew and ends == 6
+			arrivals += 1
+	return arrivals == delayed + 5
 
 
 func _stock(run: RunContext) -> void:
@@ -783,14 +788,14 @@ func _test_draw_clock() -> void:
 	early.battle.advance(7.4)
 	_check(early.library.pile(CardInstance.HAND).size() == 5, "Time before 7.5 does not draw")
 	early.battle.end_player_turn()
-	_check(not _drew_then_ended(early_reasons), "Ending before 7.5 does not grant the extra card, got %s" % str(early_reasons))
+	_check(_drew_then_ended(early_reasons, 0) and early.library.pile(CardInstance.HAND).size() == 10, "Ending before 7.5 keeps 5 and draws 5 with no delayed card, got %s" % str(early_reasons))
 	var exact := _fresh(44, "exact_end")
 	_stock(exact)
 	exact.start_battle(300, 1, true, 100)
 	var exact_reasons := _listen(exact)
 	exact.battle.player_elapsed_s = 7.5
 	exact.battle.end_player_turn()
-	_check(_drew_then_ended(exact_reasons), "Ending at 7.5 draws before the turn ends, got %s" % str(exact_reasons))
+	_check(_drew_then_ended(exact_reasons, 1) and exact.library.pile(CardInstance.HAND).size() == 11, "Ending at 7.5 draws 1, keeps the hand, then draws 5, got %s" % str(exact_reasons))
 	var crossed := _fresh(45, "cross_frame")
 	_stock(crossed)
 	crossed.start_battle(300, 1, true, 100)
@@ -798,8 +803,21 @@ func _test_draw_clock() -> void:
 	crossed.battle.advance(7.0)
 	_check(crossed.library.pile(CardInstance.HAND).size() == 5, "7.0 seconds has not drawn yet")
 	crossed.battle.advance(3.0)
-	_check(_drew_then_ended(crossed_reasons), "A frame crossing 7.5 and 10 draws before the turn ends, got %s" % str(crossed_reasons))
+	_check(_drew_then_ended(crossed_reasons, 1) and crossed.library.pile(CardInstance.HAND).size() == 11, "A frame crossing 7.5 and 10 draws 1 first, keeps the hand, then draws 5, got %s" % str(crossed_reasons))
 	_check(crossed.battle.turn_index == 2 and crossed.battle.phase == "PLAYER_ACTIVE", "That frame then ends the turn")
+	var empty_source := _fresh(46, "empty_source")
+	empty_source.start_battle(300, 1, false, 100)
+	var held: Array = []
+	for _i in 15:
+		held.append(_make(empty_source, "CARD_N1", [], CardInstance.HAND))
+	var start_draw := empty_source.draw_service.draw_count(int(empty_source.catalog.rule().get("turn_start_draw", 5)), empty_source.battle.battle_uid, "TURN_START", empty_source.battle.battle_uid)
+	_check(start_draw.events.is_empty(), "Turn-start draw draws 0 when every card is already in hand, got %s" % start_draw.events.size())
+	var delayed_moves := _listen(empty_source)
+	empty_source.battle.advance(7.5)
+	_check(delayed_moves.is_empty() and empty_source.battle.delayed_draw_done, "The 7.5s draw draws 0 when the source is empty, got %s" % str(delayed_moves))
+	_check(empty_source.library.pile(CardInstance.HAND).size() == 15, "The hand remains those 15 cards")
+	for held_card in held:
+		_check(held_card.zone == CardInstance.HAND, "A card already in hand stays there when nothing can be drawn")
 
 
 func _hand_roles(run: RunContext) -> Dictionary:
@@ -821,18 +839,18 @@ func _test_hand_composition() -> void:
 	var numbers: Array = []
 	for _i in 5:
 		numbers.append(_make(mixed, "CARD_N1", [], CardInstance.DRAW))
-	var operator := _make(mixed, "CARD_ADD", ["EN_MAGNET", "EN_GHOST"], CardInstance.DRAW)
-	var partner := _make(mixed, "CARD_N2", ["EN_MAGNET"], CardInstance.DRAW)
+	var operator := _make(mixed, "CARD_ADD", [], CardInstance.DRAW)
 	var mixed_result := mixed.draw_service.draw_count(5, mixed.battle.battle_uid, "TURN_START", mixed.battle.battle_uid)
 	var mixed_reasons: Array = []
 	for event in mixed_result.events:
 		mixed_reasons.append(event.draw_reason)
-	var mixed_hand: Array = mixed.library.pile(CardInstance.HAND)
+	var expected_numbers: Array = []
+	for card in numbers:
+		expected_numbers.append(card.card_uid)
 	var mixed_counts := _hand_roles(mixed)
-	_check(mixed_reasons == ["NORMAL_DRAW", "NORMAL_DRAW", "NORMAL_DRAW", "NORMAL_DRAW", "NORMAL_DRAW"], "Repairing five numbers does not draw or magnet, got %s" % str(mixed_reasons))
-	_check(mixed_hand.size() == 5 and int(mixed_counts.operators) >= 1 and int(mixed_counts.numbers) >= 2, "A draw pile that still has an operator cannot deal five numbers, got %s" % str(mixed_counts))
-	_check(mixed_hand == [numbers[0].card_uid, numbers[1].card_uid, numbers[2].card_uid, numbers[3].card_uid, operator.card_uid], "The last drawn number is the one swapped for the operator, got %s" % str(mixed_hand))
-	_check(mixed.library.pile(CardInstance.DRAW) == [numbers[4].card_uid, partner.card_uid], "The swapped number takes the operator slot and the magnet partner stays undrawn")
+	_check(mixed_reasons == ["NORMAL_DRAW", "NORMAL_DRAW", "NORMAL_DRAW", "NORMAL_DRAW", "NORMAL_DRAW"], "Five numbers are drawn as five numbers, got %s" % str(mixed_reasons))
+	_check(mixed.library.pile(CardInstance.HAND) == expected_numbers and int(mixed_counts.operators) == 0 and int(mixed_counts.numbers) == 5, "Five numbers stay five numbers, got %s" % str(mixed_counts))
+	_check(operator.zone == CardInstance.DRAW and mixed.library.pile(CardInstance.DRAW) == [operator.card_uid], "The later operator stays in the draw pile")
 	var bare := _fresh(91, "bare")
 	bare.start_battle(40, 1, false)
 	for _i in 5:
@@ -840,56 +858,31 @@ func _test_hand_composition() -> void:
 	var buried := _make(bare, "CARD_MUL", [], CardInstance.DISCARD)
 	bare.draw_service.draw_count(5, bare.battle.battle_uid, "TURN_START", bare.battle.battle_uid)
 	var bare_counts := _hand_roles(bare)
-	_check(int(bare_counts.operators) == 0 and int(bare_counts.numbers) == 5, "No operator left in the draw pile keeps the shuffled numbers, got %s" % str(bare_counts))
+	_check(int(bare_counts.operators) == 0 and int(bare_counts.numbers) == 5, "No operator left in the draw pile keeps the numbers, got %s" % str(bare_counts))
 	_check(buried.zone == CardInstance.DISCARD and bare.library.pile(CardInstance.DRAW).is_empty(), "Discard is not reshuffled just to find an operator")
-	var heavy := _fresh(92, "heavy")
-	heavy.start_battle(40, 1, false)
-	for _i in 5:
-		_make(heavy, "CARD_MUL", [], CardInstance.DRAW)
-	var heavy_one := _make(heavy, "CARD_N1", [], CardInstance.DRAW)
-	var heavy_two := _make(heavy, "CARD_N2", [], CardInstance.DRAW)
-	heavy.draw_service.draw_count(5, heavy.battle.battle_uid, "TURN_START", heavy.battle.battle_uid)
-	var heavy_counts := _hand_roles(heavy)
-	_check(heavy.library.pile(CardInstance.HAND).size() == 5 and int(heavy_counts.operators) >= 1 and int(heavy_counts.numbers) >= 2, "Five operators are repaired with two numbers, got %s" % str(heavy_counts))
-	_check(heavy_one.zone == CardInstance.HAND and heavy_two.zone == CardInstance.HAND and heavy.library.pile(CardInstance.DRAW).size() == 2, "Both numbers come from the draw pile without an extra draw")
-	var no_numbers := _fresh(93, "no_numbers")
-	no_numbers.start_battle(40, 1, false)
-	for _i in 5:
-		_make(no_numbers, "CARD_ADD", [], CardInstance.DRAW)
-	var buried_number := _make(no_numbers, "CARD_N4", [], CardInstance.DISCARD)
-	no_numbers.draw_service.draw_count(5, no_numbers.battle.battle_uid, "TURN_START", no_numbers.battle.battle_uid)
-	var no_counts := _hand_roles(no_numbers)
-	_check(int(no_counts.numbers) == 0 and int(no_counts.operators) == 5 and buried_number.zone == CardInstance.DISCARD, "Numbers left only in discard stay there")
-	var ready := _fresh(94, "ready")
-	ready.start_battle(40, 1, false)
-	var ready_cards: Array = [
-		_make(ready, "CARD_N1", [], CardInstance.DRAW),
-		_make(ready, "CARD_N2", [], CardInstance.DRAW),
-		_make(ready, "CARD_ADD", [], CardInstance.DRAW),
-		_make(ready, "CARD_N3", [], CardInstance.DRAW),
-		_make(ready, "CARD_N4", [], CardInstance.DRAW),
-	]
-	var extra := _make(ready, "CARD_MUL", [], CardInstance.DRAW)
-	ready.draw_service.draw_count(5, ready.battle.battle_uid, "TURN_START", ready.battle.battle_uid)
-	var expected: Array = []
-	for card in ready_cards:
-		expected.append(card.card_uid)
-	_check(ready.library.pile(CardInstance.HAND) == expected and extra.zone == CardInstance.DRAW, "A hand that already has an operator and two numbers stays in draw order")
 	var magnet := _fresh(95, "magnet_spare")
 	magnet.start_battle(40, 1, false)
+	var plains: Array = []
 	for _i in 4:
-		_make(magnet, "CARD_N1", [], CardInstance.DRAW)
+		plains.append(_make(magnet, "CARD_N1", [], CardInstance.DRAW))
 	var base := _make(magnet, "CARD_N2", ["EN_MAGNET"], CardInstance.DRAW)
+	var partner_a := _make(magnet, "CARD_N3", ["EN_MAGNET"], CardInstance.DRAW)
+	var partner_b := _make(magnet, "CARD_N4", ["EN_MAGNET"], CardInstance.DRAW)
 	var magnet_op := _make(magnet, "CARD_ADD", [], CardInstance.DRAW)
-	var magnet_partner := _make(magnet, "CARD_N3", ["EN_MAGNET"], CardInstance.DRAW)
 	var magnet_result := magnet.draw_service.draw_count(5, magnet.battle.battle_uid, "TURN_START", magnet.battle.battle_uid)
 	var magnet_hits := 0
 	for event in magnet_result.events:
 		if str(event.draw_reason) == "MAGNET":
 			magnet_hits += 1
-	_check(magnet_result.events.size() == 6 and magnet_hits == 1, "The base magnet still draws one partner and the swap does not chain, got %s" % magnet_result.events.size())
-	_check(base.zone == CardInstance.DRAW and magnet_partner.zone == CardInstance.HAND and magnet_op.zone == CardInstance.HAND, "The normally drawn magnet is swapped before its partner")
-	_check(magnet.library.pile(CardInstance.HAND).size() == 6, "The magnet extra stays in hand and the swap adds no card")
+	var partners_in_hand := 0
+	if partner_a.zone == CardInstance.HAND:
+		partners_in_hand += 1
+	if partner_b.zone == CardInstance.HAND:
+		partners_in_hand += 1
+	_check(magnet_result.events.size() == 6 and magnet_hits == 1 and partners_in_hand == 1, "Magnet draws exactly one extra partner and does not chain, got %s" % magnet_result.events.size())
+	_check(base.zone == CardInstance.HAND and magnet_op.zone == CardInstance.DRAW and magnet.library.pile(CardInstance.HAND).size() == 6, "The drawn magnet stays in hand and the later operator stays in the draw pile")
+	for card in plains:
+		_check(card.zone == CardInstance.HAND, "Plain cards drawn before the magnet stay in hand")
 	var late := _fresh(96, "late_mix")
 	late.start_battle(50, 1, false)
 	var staying: Array = []
@@ -897,14 +890,16 @@ func _test_hand_composition() -> void:
 		staying.append(_make(late, "CARD_N5", [], CardInstance.HAND))
 	var late_number := _make(late, "CARD_N1", [], CardInstance.DRAW)
 	var late_op := _make(late, "CARD_ADD", [], CardInstance.DRAW)
-	late.battle.advance(7.5)
-	var late_counts := _hand_roles(late)
-	_check(late.battle.delayed_draw_done and late_op.zone == CardInstance.HAND and late_number.zone == CardInstance.DRAW, "The 7.5s draw swaps a surplus number for an operator and stays consumed")
-	_check(late.library.pile(CardInstance.HAND).size() == 5 and int(late_counts.operators) >= 1 and int(late_counts.numbers) >= 2, "The delayed draw does not pull a second card, got %s" % str(late_counts))
+	var staying_uids: Array = []
 	for card in staying:
-		_check(card.zone == CardInstance.HAND, "Cards already in hand stay when the new number can be swapped")
+		staying_uids.append(card.card_uid)
+	var late_moves := _listen(late)
+	late.battle.advance(7.5)
+	_check(late.battle.delayed_draw_done and late_number.zone == CardInstance.HAND and late_op.zone == CardInstance.DRAW, "The 7.5s draw takes only the next card")
+	_check(late.library.pile(CardInstance.HAND) == staying_uids + [late_number.card_uid], "The 7.5s draw does not move cards already in hand, got %s" % str(late.library.pile(CardInstance.HAND)))
+	_check(late_moves.size() == 1 and str(late_moves[0].to) == CardInstance.HAND and str(late_moves[0].reason) == "NORMAL_DRAW", "The 7.5s draw moves only the next card, got %s" % str(late_moves))
 	late.battle.advance(1.0)
-	_check(late.library.pile(CardInstance.HAND).size() == 5 and late.battle.delayed_draw_done and late.battle.phase == "PLAYER_ACTIVE", "The swap does not mark the delayed draw unconsumed")
+	_check(late.library.pile(CardInstance.HAND).size() == 5 and late.battle.delayed_draw_done and late.battle.phase == "PLAYER_ACTIVE", "The delayed draw happens once")
 	var van := _fresh(97, "van_mix")
 	van.start_battle(80, 1, false)
 	var vanguard_one := _make(van, "CARD_N1", ["EN_VANGUARD"], CardInstance.RUN_DECK)
@@ -912,36 +907,50 @@ func _test_hand_composition() -> void:
 	for _i in 3:
 		_make(van, "CARD_N3", [], CardInstance.RUN_DECK)
 	var van_op := _make(van, "CARD_ADD", [], CardInstance.RUN_DECK)
+	var trail: Array = []
+	van.card_zone_changed.connect(func(card_uid: String, _from_zone: String, to_zone: String, reason: String, _txn: String) -> void:
+		trail.append({"uid": card_uid, "to": to_zone, "reason": reason})
+	)
 	van.draw_service.opening_deal(van.battle.battle_uid)
-	var van_counts := _hand_roles(van)
-	_check(vanguard_one.zone == CardInstance.HAND and vanguard_two.zone == CardInstance.HAND, "Opening repair keeps the placed vanguards")
-	_check(van_op.zone == CardInstance.HAND and van.library.pile(CardInstance.HAND).size() == 5, "Opening repair brings the operator in without an extra draw")
-	_check(int(van_counts.operators) >= 1 and int(van_counts.numbers) >= 2, "The opening hand meets the minimum, got %s" % str(van_counts))
-	var symbols := _fresh(98, "van_ops")
-	symbols.start_battle(80, 1, false)
-	var symbol_one := _make(symbols, "CARD_ADD", ["EN_VANGUARD"], CardInstance.RUN_DECK)
-	var symbol_two := _make(symbols, "CARD_MUL", ["EN_VANGUARD"], CardInstance.RUN_DECK)
-	for _i in 3:
-		_make(symbols, "CARD_ADD", [], CardInstance.RUN_DECK)
-	_make(symbols, "CARD_N1", [], CardInstance.RUN_DECK)
-	_make(symbols, "CARD_N2", [], CardInstance.RUN_DECK)
-	symbols.draw_service.opening_deal(symbols.battle.battle_uid)
-	var symbol_counts := _hand_roles(symbols)
-	_check(symbol_one.zone == CardInstance.HAND and symbol_two.zone == CardInstance.HAND, "Surplus normal operators are swapped before opening vanguards")
-	_check(symbols.library.pile(CardInstance.HAND).size() == 5 and int(symbol_counts.numbers) >= 2 and int(symbol_counts.operators) >= 1, "An operator-heavy opening still receives two numbers, got %s" % str(symbol_counts))
+	var ordered: Array = [vanguard_one, vanguard_two]
+	ordered.sort_custom(func(a, b) -> bool: return str(a.card_uid) < str(b.card_uid))
+	var shuffle_order: Array = []
+	var entered: Array = []
+	var drawn_order: Array = []
+	var swapped := false
+	for move in trail:
+		var reason := str(move.reason)
+		if reason == "COMPOSITION":
+			swapped = true
+		elif reason == "BATTLE_SHUFFLE":
+			shuffle_order.append(str(move.uid))
+		elif reason == "VANGUARD":
+			entered.append(str(move.uid))
+		elif reason == "NORMAL_DRAW":
+			drawn_order.append(str(move.uid))
+	var hand_expected: Array = [ordered[0].card_uid, ordered[1].card_uid]
+	hand_expected.append_array(shuffle_order.slice(0, 3))
+	_check(shuffle_order.has(van_op.card_uid), "The later operator is shuffled into the draw pile")
+	_check(not swapped and entered == [ordered[0].card_uid, ordered[1].card_uid], "Opening vanguards enter in uid order and are not swapped, got %s" % str(entered))
+	_check(drawn_order == shuffle_order.slice(0, 3), "The opening refill follows draw order, got %s vs %s" % [str(drawn_order), str(shuffle_order)])
+	_check(van.library.pile(CardInstance.HAND) == hand_expected, "Opening hand is vanguards plus draw order, got %s" % str(van.library.pile(CardInstance.HAND)))
+	_check(vanguard_one.zone == CardInstance.HAND and vanguard_two.zone == CardInstance.HAND, "Opening vanguards are not swapped out to fill operator or number minimums")
+	_check(van.library.pile(CardInstance.DRAW) == shuffle_order.slice(3), "Cards past the opening draw stay in the pile")
 	var crowd := _fresh(99, "van_only")
 	crowd.start_battle(80, 1, false)
-	var held: Array = []
+	var crowd_held: Array = []
 	for _i in 5:
-		held.append(_make(crowd, "CARD_N4", ["EN_VANGUARD"], CardInstance.RUN_DECK))
+		crowd_held.append(_make(crowd, "CARD_N4", ["EN_VANGUARD"], CardInstance.RUN_DECK))
 	var crowd_op := _make(crowd, "CARD_MUL", [], CardInstance.RUN_DECK)
 	var crowd_deal := crowd.draw_service.opening_deal(crowd.battle.battle_uid)
-	var displaced := 0
-	for card in held:
-		if card.zone == CardInstance.DRAW:
-			displaced += 1
-	_check(crowd_deal.draws.is_empty() and crowd.library.pile(CardInstance.HAND).size() == 5, "Five vanguards still skip the normal opening draw")
-	_check(crowd_op.zone == CardInstance.HAND and displaced == 1, "A vanguard leaves only when no normal card can, got %s" % displaced)
+	var ordered_crowd: Array = crowd_held.duplicate()
+	ordered_crowd.sort_custom(func(a, b) -> bool: return str(a.card_uid) < str(b.card_uid))
+	var crowd_uids: Array = []
+	for card in ordered_crowd:
+		crowd_uids.append(card.card_uid)
+		_check(card.zone == CardInstance.HAND, "Opening vanguards are not swapped out to fill an operator")
+	_check(crowd_deal.draws.is_empty() and crowd.library.pile(CardInstance.HAND) == crowd_uids, "Five vanguards enter in uid order and skip the normal draw, got %s" % str(crowd.library.pile(CardInstance.HAND)))
+	_check(crowd_op.zone == CardInstance.DRAW and crowd.library.pile(CardInstance.DRAW) == [crowd_op.card_uid], "The operator stays in the draw pile instead of replacing a vanguard")
 
 
 func _test_card_view_and_lab() -> void:
