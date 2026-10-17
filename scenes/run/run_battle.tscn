@@ -1,13 +1,643 @@
-[gd_scene load_steps=2 format=3]
+[gd_scene format=3]
 
-[ext_resource type="Script" path="res://scripts/run/run_battle.gd" id="1"]
+[ext_resource type="Script" path="res://scripts/run/run_battle.gd" id="1_126m8"]
+[ext_resource type="Texture2D" path="res://assets/battle/hero.png" id="2_sb5ml"]
+[ext_resource type="Texture2D" path="res://assets/battle/enemy.png" id="3_u3cmk"]
 
-[node name="RunBattle" type="Control"]
+[sub_resource type="StyleBoxEmpty" id="StyleBoxEmpty_b6hvi"]
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_o660k"]
+content_margin_left = 10.0
+content_margin_top = 8.0
+content_margin_right = 10.0
+content_margin_bottom = 8.0
+bg_color = Color(0.22, 0.32, 0.33, 1)
+border_width_left = 1
+border_width_top = 1
+border_width_right = 1
+border_width_bottom = 1
+border_color = Color(0.85, 0.76, 0.52, 0.8)
+corner_radius_top_left = 4
+corner_radius_top_right = 4
+corner_radius_bottom_right = 4
+corner_radius_bottom_left = 4
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_m1vec"]
+content_margin_left = 10.0
+content_margin_top = 8.0
+content_margin_right = 10.0
+content_margin_bottom = 8.0
+bg_color = Color(0.12, 0.2, 0.22, 0.94)
+border_width_left = 1
+border_width_top = 1
+border_width_right = 1
+border_width_bottom = 1
+border_color = Color(0.71, 0.63, 0.42, 0.7)
+corner_radius_top_left = 4
+corner_radius_top_right = 4
+corner_radius_bottom_right = 4
+corner_radius_bottom_left = 4
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_j3iga"]
+content_margin_left = 10.0
+content_margin_top = 8.0
+content_margin_right = 10.0
+content_margin_bottom = 8.0
+bg_color = Color(0.1, 0.16, 0.18, 1)
+border_width_left = 1
+border_width_top = 1
+border_width_right = 1
+border_width_bottom = 1
+border_color = Color(0.85, 0.76, 0.52, 1)
+corner_radius_top_left = 4
+corner_radius_top_right = 4
+corner_radius_bottom_right = 4
+corner_radius_bottom_left = 4
+
+[sub_resource type="SystemFont" id="SystemFont_3qb5e"]
+font_names = PackedStringArray("Microsoft YaHei UI", "Microsoft YaHei", "Noto Sans CJK SC", "Segoe UI")
+
+[sub_resource type="Theme" id="Theme_l7cur"]
+default_font = SubResource("SystemFont_3qb5e")
+default_font_size = 15
+Button/colors/font_color = Color(0.91, 0.86, 0.72, 1)
+Button/colors/font_hover_color = Color(0.97, 0.93, 0.82, 1)
+Button/styles/focus = SubResource("StyleBoxEmpty_b6hvi")
+Button/styles/hover = SubResource("StyleBoxFlat_o660k")
+Button/styles/normal = SubResource("StyleBoxFlat_m1vec")
+Button/styles/pressed = SubResource("StyleBoxFlat_j3iga")
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_hwbvc"]
+content_margin_left = 10.0
+content_margin_top = 8.0
+content_margin_right = 10.0
+content_margin_bottom = 8.0
+bg_color = Color(0.043, 0.086, 0.125, 0.96)
+border_width_left = 1
+border_width_top = 1
+border_width_right = 1
+border_width_bottom = 1
+border_color = Color(0.55, 0.58, 0.45, 0.35)
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_twyu1"]
+content_margin_left = 10.0
+content_margin_top = 8.0
+content_margin_right = 10.0
+content_margin_bottom = 8.0
+bg_color = Color(0.125, 0.2, 0.22, 0.94)
+border_width_left = 1
+border_width_top = 1
+border_width_right = 1
+border_width_bottom = 1
+border_color = Color(0.71, 0.63, 0.42, 0.53)
+corner_radius_top_left = 7
+corner_radius_top_right = 7
+corner_radius_bottom_right = 7
+corner_radius_bottom_left = 7
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_tv6bu"]
+bg_color = Color(0.93, 0.82, 0.52, 1)
+corner_radius_top_left = 8
+corner_radius_top_right = 8
+corner_radius_bottom_right = 8
+corner_radius_bottom_left = 8
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_bdnlp"]
+bg_color = Color(0.93, 0.82, 0.52, 1)
+corner_radius_top_left = 8
+corner_radius_top_right = 8
+corner_radius_bottom_right = 8
+corner_radius_bottom_left = 8
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_n0t68"]
+content_margin_left = 10.0
+content_margin_top = 8.0
+content_margin_right = 10.0
+content_margin_bottom = 8.0
+bg_color = Color(0.17, 0.26, 0.255, 1)
+border_width_left = 1
+border_width_top = 1
+border_width_right = 1
+border_width_bottom = 1
+border_color = Color(0.55, 0.58, 0.42, 0.53)
+corner_radius_top_left = 4
+corner_radius_top_right = 4
+corner_radius_bottom_right = 4
+corner_radius_bottom_left = 4
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_yteae"]
+content_margin_left = 10.0
+content_margin_top = 8.0
+content_margin_right = 10.0
+content_margin_bottom = 8.0
+bg_color = Color(0.17, 0.26, 0.255, 1)
+border_width_left = 1
+border_width_top = 1
+border_width_right = 1
+border_width_bottom = 1
+border_color = Color(0.55, 0.58, 0.42, 0.53)
+corner_radius_top_left = 4
+corner_radius_top_right = 4
+corner_radius_bottom_right = 4
+corner_radius_bottom_left = 4
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_wldi0"]
+content_margin_left = 10.0
+content_margin_top = 8.0
+content_margin_right = 10.0
+content_margin_bottom = 8.0
+bg_color = Color(0.125, 0.2, 0.22, 0.94)
+border_width_left = 1
+border_width_top = 1
+border_width_right = 1
+border_width_bottom = 1
+border_color = Color(0.71, 0.63, 0.42, 0.53)
+corner_radius_top_left = 7
+corner_radius_top_right = 7
+corner_radius_bottom_right = 7
+corner_radius_bottom_left = 7
+
+[node name="@Control@2" type="Control" unique_id=1191252069]
 layout_mode = 3
 anchors_preset = 15
 anchor_right = 1.0
 anchor_bottom = 1.0
-grow_horizontal = 2
-grow_vertical = 2
-mouse_filter = 0
-script = ExtResource("1")
+focus_mode = 2
+theme = SubResource("Theme_l7cur")
+script = ExtResource("1_126m8")
+
+[node name="ColorRect" type="ColorRect" parent="." unique_id=1021058360]
+layout_mode = 0
+anchor_right = 1.0
+anchor_bottom = 1.0
+mouse_filter = 2
+color = Color(0.027, 0.067, 0.09, 1)
+
+[node name="Board" type="Control" parent="." unique_id=1215898554]
+anchors_preset = 0
+mouse_filter = 2
+
+[node name="Margin" type="MarginContainer" parent="Board" unique_id=1006471082]
+layout_mode = 0
+anchor_right = 1.0
+anchor_bottom = 1.0
+theme_override_constants/margin_left = 28
+theme_override_constants/margin_top = 12
+theme_override_constants/margin_right = 28
+theme_override_constants/margin_bottom = 10
+
+[node name="Column" type="VBoxContainer" parent="Board/Margin" unique_id=619172931]
+layout_mode = 2
+
+[node name="TopBar" type="PanelContainer" parent="Board/Margin/Column" unique_id=1325850780]
+custom_minimum_size = Vector2(0, 64)
+layout_mode = 2
+theme_override_styles/panel = SubResource("StyleBoxFlat_hwbvc")
+
+[node name="Row" type="HBoxContainer" parent="Board/Margin/Column/TopBar" unique_id=42063625]
+layout_mode = 2
+
+[node name="VBoxContainer" type="VBoxContainer" parent="Board/Margin/Column/TopBar/Row" unique_id=937773000]
+custom_minimum_size = Vector2(120, 0)
+layout_mode = 2
+
+[node name="Label" type="Label" parent="Board/Margin/Column/TopBar/Row/VBoxContainer" unique_id=932439494]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.91, 0.86, 0.72, 1)
+theme_override_font_sizes/font_size = 22
+text = "涌现"
+
+[node name="Label2" type="Label" parent="Board/Margin/Column/TopBar/Row/VBoxContainer" unique_id=1020211504]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.706, 0.725, 0.655, 1)
+theme_override_font_sizes/font_size = 12
+text = "限时对战"
+
+[node name="Life" type="VBoxContainer" parent="Board/Margin/Column/TopBar/Row" unique_id=1830247661]
+custom_minimum_size = Vector2(220, 0)
+layout_mode = 2
+size_flags_vertical = 4
+
+[node name="Row" type="HBoxContainer" parent="Board/Margin/Column/TopBar/Row/Life" unique_id=597982264]
+layout_mode = 2
+
+[node name="Label" type="Label" parent="Board/Margin/Column/TopBar/Row/Life/Row" unique_id=962717858]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.62, 0.7, 0.66, 1)
+theme_override_font_sizes/font_size = 13
+text = "生命"
+
+[node name="HpValue" type="Label" parent="Board/Margin/Column/TopBar/Row/Life/Row" unique_id=1315107675]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.91, 0.86, 0.72, 1)
+theme_override_font_sizes/font_size = 16
+text = "0 / 0"
+
+[node name="Track" type="ColorRect" parent="Board/Margin/Column/TopBar/Row/Life" unique_id=730308835]
+custom_minimum_size = Vector2(160, 8)
+layout_mode = 2
+size_flags_horizontal = 3
+color = Color(0.12, 0.18, 0.2, 1)
+
+[node name="Fill" type="ColorRect" parent="Board/Margin/Column/TopBar/Row/Life/Track" unique_id=1364207143]
+layout_mode = 0
+anchor_right = 1.0
+anchor_bottom = 1.0
+mouse_filter = 2
+color = Color(0.72, 0.42, 0.38, 1)
+
+[node name="Floor" type="Label" parent="Board/Margin/Column/TopBar/Row" unique_id=1448241918]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_colors/font_color = Color(0.82, 0.84, 0.74, 1)
+theme_override_font_sizes/font_size = 14
+vertical_alignment = 1
+
+[node name="PauseButton" type="Button" parent="Board/Margin/Column/TopBar/Row" unique_id=1250076121]
+custom_minimum_size = Vector2(88, 40)
+layout_mode = 2
+focus_mode = 0
+text = "暂停"
+
+[node name="Stage" type="HBoxContainer" parent="Board/Margin/Column" unique_id=1067865202]
+layout_mode = 2
+size_flags_vertical = 3
+
+[node name="VBoxContainer" type="VBoxContainer" parent="Board/Margin/Column/Stage" unique_id=2130634560]
+custom_minimum_size = Vector2(240, 0)
+layout_mode = 2
+size_flags_vertical = 3
+
+[node name="TextureRect" type="TextureRect" parent="Board/Margin/Column/Stage/VBoxContainer" unique_id=1663942399]
+custom_minimum_size = Vector2(220, 180)
+layout_mode = 2
+size_flags_vertical = 3
+mouse_filter = 2
+texture = ExtResource("2_sb5ml")
+expand_mode = 1
+stretch_mode = 5
+
+[node name="Label" type="Label" parent="Board/Margin/Column/Stage/VBoxContainer" unique_id=1325178126]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.784, 0.8, 0.718, 1)
+theme_override_font_sizes/font_size = 14
+text = "实验员"
+horizontal_alignment = 1
+
+[node name="Center" type="VBoxContainer" parent="Board/Margin/Column/Stage" unique_id=1689372805]
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 3
+alignment = 1
+
+[node name="Label" type="Label" parent="Board/Margin/Column/Stage/Center" unique_id=552439176]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.51, 0.6, 0.565, 1)
+theme_override_font_sizes/font_size = 12
+text = "每回合 10 秒"
+
+[node name="Label2" type="Label" parent="Board/Margin/Column/Stage/Center" unique_id=1216128816]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.824, 0.816, 0.722, 1)
+theme_override_font_sizes/font_size = 18
+text = "用算式击败对手"
+horizontal_alignment = 1
+
+[node name="Round" type="Label" parent="Board/Margin/Column/Stage/Center" unique_id=2081890725]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.72, 0.78, 0.7, 1)
+theme_override_font_sizes/font_size = 13
+text = "第 1 回合"
+horizontal_alignment = 1
+
+[node name="Timer" type="Label" parent="Board/Margin/Column/Stage/Center" unique_id=1636104247]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.91, 0.86, 0.72, 1)
+theme_override_font_sizes/font_size = 48
+text = "10.0"
+horizontal_alignment = 1
+
+[node name="TimerExtra" type="Label" parent="Board/Margin/Column/Stage/Center" unique_id=1238649240]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.7, 0.76, 0.68, 1)
+theme_override_font_sizes/font_size = 13
+text = "7.5 秒再抽 1 张"
+horizontal_alignment = 1
+
+[node name="Log" type="Label" parent="Board/Margin/Column/Stage/Center" unique_id=1612844915]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.933, 0.835, 0.651, 1)
+theme_override_font_sizes/font_size = 14
+horizontal_alignment = 1
+autowrap_mode = 3
+
+[node name="Warning" type="Label" parent="Board/Margin/Column/Stage/Center" unique_id=299085687]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.95, 0.72, 0.45, 1)
+theme_override_font_sizes/font_size = 13
+horizontal_alignment = 1
+autowrap_mode = 3
+
+[node name="Enemy" type="VBoxContainer" parent="Board/Margin/Column/Stage" unique_id=848476468]
+custom_minimum_size = Vector2(280, 0)
+layout_mode = 2
+size_flags_vertical = 3
+
+[node name="Intent" type="Label" parent="Board/Margin/Column/Stage/Enemy" unique_id=47115685]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.91, 0.86, 0.72, 1)
+theme_override_font_sizes/font_size = 14
+text = "意图"
+horizontal_alignment = 1
+autowrap_mode = 3
+
+[node name="TextureRect" type="TextureRect" parent="Board/Margin/Column/Stage/Enemy" unique_id=410076289]
+custom_minimum_size = Vector2(240, 160)
+layout_mode = 2
+size_flags_vertical = 3
+mouse_filter = 2
+texture = ExtResource("3_u3cmk")
+expand_mode = 1
+stretch_mode = 5
+
+[node name="Name" type="Label" parent="Board/Margin/Column/Stage/Enemy" unique_id=1613275970]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.82, 0.84, 0.74, 1)
+theme_override_font_sizes/font_size = 16
+text = "敌人"
+horizontal_alignment = 1
+
+[node name="Track" type="ColorRect" parent="Board/Margin/Column/Stage/Enemy" unique_id=2133754381]
+custom_minimum_size = Vector2(160, 8)
+layout_mode = 2
+size_flags_horizontal = 3
+color = Color(0.12, 0.18, 0.2, 1)
+
+[node name="Fill" type="ColorRect" parent="Board/Margin/Column/Stage/Enemy/Track" unique_id=217792662]
+layout_mode = 0
+anchor_right = 1.0
+anchor_bottom = 1.0
+mouse_filter = 2
+color = Color(0.72, 0.38, 0.36, 1)
+
+[node name="HpValue" type="Label" parent="Board/Margin/Column/Stage/Enemy" unique_id=1730940113]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.86, 0.84, 0.72, 1)
+theme_override_font_sizes/font_size = 13
+text = "0 / 0"
+horizontal_alignment = 1
+
+[node name="Controls" type="HBoxContainer" parent="Board/Margin/Column" unique_id=1756187848]
+custom_minimum_size = Vector2(0, 132)
+layout_mode = 2
+
+[node name="Button" type="Button" parent="Board/Margin/Column/Controls" unique_id=1995097860]
+custom_minimum_size = Vector2(150, 64)
+layout_mode = 2
+focus_mode = 0
+text = "烧掉回血
+|点数| × 10"
+
+[node name="Equation" type="PanelContainer" parent="Board/Margin/Column/Controls" unique_id=1286598502]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_styles/panel = SubResource("StyleBoxFlat_twyu1")
+
+[node name="Pad" type="MarginContainer" parent="Board/Margin/Column/Controls/Equation" unique_id=471183360]
+layout_mode = 2
+theme_override_constants/margin_left = 10
+theme_override_constants/margin_top = 6
+theme_override_constants/margin_right = 10
+theme_override_constants/margin_bottom = 6
+
+[node name="Box" type="VBoxContainer" parent="Board/Margin/Column/Controls/Equation/Pad" unique_id=1175679714]
+layout_mode = 2
+
+[node name="HBoxContainer" type="HBoxContainer" parent="Board/Margin/Column/Controls/Equation/Pad/Box" unique_id=2092281441]
+layout_mode = 2
+
+[node name="Label" type="Label" parent="Board/Margin/Column/Controls/Equation/Pad/Box/HBoxContainer" unique_id=2099595582]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_colors/font_color = Color(0.64, 0.71, 0.65, 1)
+theme_override_font_sizes/font_size = 13
+text = "算式"
+
+[node name="Button" type="Button" parent="Board/Margin/Column/Controls/Equation/Pad/Box/HBoxContainer" unique_id=1887378537]
+custom_minimum_size = Vector2(64, 28)
+layout_mode = 2
+focus_mode = 0
+text = "清空"
+
+[node name="Scroll" type="ScrollContainer" parent="Board/Margin/Column/Controls/Equation/Pad/Box" unique_id=640855185]
+custom_minimum_size = Vector2(0, 116)
+layout_mode = 2
+vertical_scroll_mode = 0
+
+[node name="EqRow" type="HBoxContainer" parent="Board/Margin/Column/Controls/Equation/Pad/Box/Scroll" unique_id=884793983]
+layout_mode = 2
+
+[node name="Bottom" type="HBoxContainer" parent="Board/Margin/Column/Controls/Equation/Pad/Box" unique_id=1901500261]
+layout_mode = 2
+
+[node name="Preview" type="Label" parent="Board/Margin/Column/Controls/Equation/Pad/Box/Bottom" unique_id=8312836]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_colors/font_color = Color(0.75, 0.78, 0.7, 1)
+theme_override_font_sizes/font_size = 13
+text = "从数字开始，数字和符号交替。"
+vertical_alignment = 1
+autowrap_mode = 3
+
+[node name="Result" type="Label" parent="Board/Margin/Column/Controls/Equation/Pad/Box/Bottom" unique_id=1340554278]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.93, 0.85, 0.62, 1)
+theme_override_font_sizes/font_size = 22
+text = "—"
+vertical_alignment = 1
+
+[node name="Button" type="Button" parent="Board/Margin/Column/Controls/Equation/Pad/Box/Bottom" unique_id=1193882678]
+custom_minimum_size = Vector2(108, 44)
+layout_mode = 2
+focus_mode = 0
+text = "发射  ↵"
+
+[node name="Combo" type="VBoxContainer" parent="Board/Margin/Column/Controls" unique_id=1730503138]
+custom_minimum_size = Vector2(150, 0)
+layout_mode = 2
+alignment = 1
+
+[node name="Label" type="Label" parent="Board/Margin/Column/Controls/Combo" unique_id=581600174]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.64, 0.71, 0.65, 1)
+theme_override_font_sizes/font_size = 12
+text = "加法追击"
+
+[node name="Dots" type="HBoxContainer" parent="Board/Margin/Column/Controls/Combo" unique_id=1325787030]
+layout_mode = 2
+alignment = 1
+
+[node name="A" type="Panel" parent="Board/Margin/Column/Controls/Combo/Dots" unique_id=850626639]
+modulate = Color(0.35, 0.42, 0.4, 1)
+custom_minimum_size = Vector2(16, 16)
+layout_mode = 2
+theme_override_styles/panel = SubResource("StyleBoxFlat_tv6bu")
+
+[node name="B" type="Panel" parent="Board/Margin/Column/Controls/Combo/Dots" unique_id=735533798]
+modulate = Color(0.35, 0.42, 0.4, 1)
+custom_minimum_size = Vector2(16, 16)
+layout_mode = 2
+theme_override_styles/panel = SubResource("StyleBoxFlat_bdnlp")
+
+[node name="Status" type="Label" parent="Board/Margin/Column/Controls/Combo" unique_id=307863001]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.82, 0.84, 0.74, 1)
+theme_override_font_sizes/font_size = 12
+text = "两次正数加法可追击
+乘法会打断"
+horizontal_alignment = 1
+autowrap_mode = 3
+
+[node name="End" type="VBoxContainer" parent="Board/Margin/Column/Controls" unique_id=1534193972]
+custom_minimum_size = Vector2(168, 0)
+layout_mode = 2
+
+[node name="Button" type="Button" parent="Board/Margin/Column/Controls/End" unique_id=852829456]
+custom_minimum_size = Vector2(168, 56)
+layout_mode = 2
+focus_mode = 0
+text = "结束回合
+可提前结束 · E"
+
+[node name="Incoming" type="Label" parent="Board/Margin/Column/Controls/End" unique_id=617605503]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.78, 0.7, 0.58, 1)
+theme_override_font_sizes/font_size = 12
+horizontal_alignment = 1
+autowrap_mode = 3
+
+[node name="Hand" type="VBoxContainer" parent="Board/Margin/Column" unique_id=1906505806]
+layout_mode = 2
+
+[node name="Caption" type="HBoxContainer" parent="Board/Margin/Column/Hand" unique_id=1565955424]
+layout_mode = 2
+
+[node name="Count" type="Label" parent="Board/Margin/Column/Hand/Caption" unique_id=290683915]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_colors/font_color = Color(0.82, 0.86, 0.78, 1)
+theme_override_font_sizes/font_size = 13
+text = "手牌 0"
+
+[node name="Label2" type="Label" parent="Board/Margin/Column/Hand/Caption" unique_id=697988227]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.62, 0.7, 0.66, 1)
+theme_override_font_sizes/font_size = 12
+text = "出牌后本回合不补牌"
+horizontal_alignment = 2
+
+[node name="Zone" type="HBoxContainer" parent="Board/Margin/Column/Hand" unique_id=510336635]
+layout_mode = 2
+
+[node name="DrawPile" type="PanelContainer" parent="Board/Margin/Column/Hand/Zone" unique_id=580534522]
+custom_minimum_size = Vector2(96, 120)
+layout_mode = 2
+size_flags_vertical = 4
+theme_override_styles/panel = SubResource("StyleBoxFlat_n0t68")
+
+[node name="DrawLabel" type="Label" parent="Board/Margin/Column/Hand/Zone/DrawPile" unique_id=1096032152]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.86, 0.84, 0.72, 1)
+theme_override_font_sizes/font_size = 14
+text = "抽牌堆
+0"
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="Scroll" type="ScrollContainer" parent="Board/Margin/Column/Hand/Zone" unique_id=1113347889]
+custom_minimum_size = Vector2(0, 176)
+layout_mode = 2
+size_flags_horizontal = 3
+vertical_scroll_mode = 0
+
+[node name="HandRow" type="HBoxContainer" parent="Board/Margin/Column/Hand/Zone/Scroll" unique_id=2033476918]
+layout_mode = 2
+size_flags_horizontal = 3
+alignment = 1
+
+[node name="DiscardPile" type="PanelContainer" parent="Board/Margin/Column/Hand/Zone" unique_id=171769267]
+custom_minimum_size = Vector2(96, 120)
+layout_mode = 2
+size_flags_vertical = 4
+theme_override_styles/panel = SubResource("StyleBoxFlat_yteae")
+
+[node name="DiscardLabel" type="Label" parent="Board/Margin/Column/Hand/Zone/DiscardPile" unique_id=1854609528]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.86, 0.84, 0.72, 1)
+theme_override_font_sizes/font_size = 14
+text = "弃牌堆
+0"
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="Label" type="Label" parent="Board/Margin/Column" unique_id=2092388912]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.62, 0.7, 0.66, 1)
+theme_override_font_sizes/font_size = 12
+text = "Enter / 空格 提交    B 烧牌    E 结束回合    Esc 清空    P 暂停"
+horizontal_alignment = 1
+
+[node name="ComboLayer" type="ColorRect" parent="." unique_id=428145994]
+visible = false
+layout_mode = 0
+anchor_right = 1.0
+anchor_bottom = 1.0
+color = Color(0.027, 0.078, 0.114, 0.72)
+
+[node name="Burst" type="PanelContainer" parent="ComboLayer" unique_id=775793256]
+custom_minimum_size = Vector2(320, 180)
+layout_mode = 0
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+theme_override_styles/panel = SubResource("StyleBoxFlat_wldi0")
+
+[node name="Pad" type="MarginContainer" parent="ComboLayer/Burst" unique_id=1043852114]
+layout_mode = 2
+theme_override_constants/margin_left = 18
+theme_override_constants/margin_top = 14
+theme_override_constants/margin_right = 18
+theme_override_constants/margin_bottom = 14
+
+[node name="Box" type="VBoxContainer" parent="ComboLayer/Burst/Pad" unique_id=824823101]
+layout_mode = 2
+alignment = 1
+
+[node name="Label" type="Label" parent="ComboLayer/Burst/Pad/Box" unique_id=1535247042]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.82, 0.76, 0.55, 1)
+theme_override_font_sizes/font_size = 12
+text = "追击"
+
+[node name="Time" type="Label" parent="ComboLayer/Burst/Pad/Box" unique_id=1742285898]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.937, 0.855, 0.678, 1)
+theme_override_font_sizes/font_size = 24
+text = "追击时刻"
+horizontal_alignment = 1
+
+[node name="Button" type="Button" parent="ComboLayer/Burst/Pad/Box" unique_id=893070833]
+custom_minimum_size = Vector2(0, 44)
+layout_mode = 2
+focus_mode = 0
+text = "连点追击"
+
+[connection signal="resized" from="." to="." method="_fit_board"]
+[connection signal="pressed" from="Board/Margin/Column/TopBar/Row/PauseButton" to="." method="_toggle_pause"]
+[connection signal="pressed" from="Board/Margin/Column/Controls/Button" to="." method="_burn"]
+[connection signal="pressed" from="Board/Margin/Column/Controls/Equation/Pad/Box/HBoxContainer/Button" to="." method="_clear_selection"]
+[connection signal="pressed" from="Board/Margin/Column/Controls/Equation/Pad/Box/Bottom/Button" to="." method="_commit"]
+[connection signal="pressed" from="Board/Margin/Column/Controls/End/Button" to="." method="_end_turn"]
+[connection signal="gui_input" from="ComboLayer" to="." method="_on_combo_input"]
+[connection signal="pressed" from="ComboLayer/Burst/Pad/Box/Button" to="." method="_combo_click"]

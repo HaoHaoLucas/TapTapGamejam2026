@@ -1,0 +1,154 @@
+extends SceneTree
+## 批 1 的结构判据：S4 场景里不许有布局几何 / S6 隐藏时休眠 / S7 跨局无残留 / S8 无 session 不崩。
+## 数值对拍在 tests/run_battle_view_test.gd，本份只管结构。
+
+const VIEW_PATH := "res://scenes/run/run_battle.tscn"
+const FORBIDDEN := [
+	"offset_left", "offset_top", "offset_right", "offset_bottom",
+	"position", "size", "scale", "pivot_offset",
+	"grow_horizontal", "grow_vertical",
+	"theme_override_constants/separation",
+]
+
+var _failures: int = 0
+
+
+func _initialize() -> void:
+	call_deferred("_run")
+
+
+func _check(condition: bool, message: String) -> void:
+	if not condition:
+		_failures += 1
+		push_error(message)
+
+
+func _run() -> void:
+	root.size = Vector2i(1440, 900)
+	_test_no_layout_geometry()
+	_test_connections_and_minimums()
+	_test_hidden_stays_dormant()
+	_test_second_adopt_is_clean()
+	_test_lone_instance_does_not_crash()
+	if _failures == 0:
+		print("PASS: battle scene keeps structure only, sleeps when hidden, and resets between fights")
+	quit(1 if _failures else 0)
+
+
+func _scene_text() -> String:
+	var file := FileAccess.open(VIEW_PATH, FileAccess.READ)
+	if file == null:
+		return ""
+	var text := file.get_as_text()
+	file.close()
+	return text
+
+
+func _test_no_layout_geometry() -> void:
+	var text := _scene_text()
+	_check(text != "", "读不到 %s" % VIEW_PATH)
+	if text == "":
+		return
+	var offenders: Array = []
+	var lines := text.split("\n")
+	for index in lines.size():
+		var line := str(lines[index]).strip_edges()
+		if line.begins_with("["):
+			continue
+		for key in FORBIDDEN:
+			var field := str(key)
+			if line.begins_with(field + " =") or line.begins_with(field + "/"):
+				offenders.append("%d: %s" % [index + 1, line])
+	_check(offenders.is_empty(), "场景里仍有布局几何：%s" % " | ".join(offenders))
+
+
+func _test_connections_and_minimums() -> void:
+	var text := _scene_text()
+	var links := 0
+	for line in text.split("\n"):
+		if str(line).begins_with("[connection"):
+			links += 1
+	_check(links == 8, "信号连接应为 8 条，实际 %d" % links)
+	# 保命尺寸：不写就塌成 0 尺寸的元素必须有 custom_minimum_size
+	var minimums := 0
+	for line in text.split("\n"):
+		if str(line).contains("custom_minimum_size"):
+			minimums += 1
+	_check(minimums >= 12, "custom_minimum_size 太少（%d），滚动区/血条/立绘会塌掉" % minimums)
+
+
+func _make_view(session: CombatSession) -> RunBattle:
+	var view: RunBattle = (load(VIEW_PATH) as PackedScene).instantiate() as RunBattle
+	root.add_child(view)
+	if session != null:
+		view.adopt(session)
+	return view
+
+
+func _new_session(seed_text: String) -> CombatSession:
+	var created := RunService.new_run(seed_text)
+	if not created.get("ok", false):
+		return null
+	var run: RunState = created.run
+	run.current_room = {
+		"room_uid": "R_SHAPE", "room_id": "RM_NORMAL", "content_id": "ENC_RUST",
+		"room_kind": "ROOM_NORMAL", "display_key": "ROOM_NORMAL",
+		"scene_key": "battle", "status": "ENTERED",
+	}
+	var session := CombatSession.new()
+	session.start(run)
+	return session
+
+
+func _test_hidden_stays_dormant() -> void:
+	var session := _new_session("shape-hide")
+	_check(session != null, "休眠用例开不了局")
+	if session == null:
+		return
+	var view := _make_view(session)
+	view.visible = true
+	_check(view.is_processing(), "显示时必须处理帧")
+	view.visible = false
+	_check(not view.is_processing(), "隐藏时必须停掉 _process")
+	view.visible = true
+	_check(view.is_processing(), "重新显示必须恢复 _process")
+	view.queue_free()
+
+
+func _test_second_adopt_is_clean() -> void:
+	var first := _new_session("shape-first")
+	var second := _new_session("shape-second")
+	_check(first != null and second != null, "跨局用例开不了局")
+	if first == null or second == null:
+		return
+	var view := _make_view(first)
+	var before := _snapshot(view)
+	view.adopt(second)
+	var after := _snapshot(view)
+	for key in before.keys():
+		_check(str(before[key]) == str(after[key]), "跨局残留 %s：第一局 %s，第二局 %s" % [
+			key, str(before[key]), str(after[key]),
+		])
+	view.queue_free()
+
+
+func _snapshot(view: RunBattle) -> Dictionary:
+	return {
+		"hp": view._hp_label.text,
+		"enemy": view._enemy_hp_label.text,
+		"turn": view._round_label.text,
+		"log": view._log.text,
+		"preview": view._preview.text,
+		"combo_hidden": view._combo_layer.visible,
+		"warning": view._warning.text,
+		"incoming": view._incoming.text,
+	}
+
+
+func _test_lone_instance_does_not_crash() -> void:
+	# F6 单跑：没有 session，界面只有静态文字，不许有脚本错误。
+	var view := _make_view(null)
+	_check(view._hand_box.get_child_count() == 0, "无 session 时不该有手牌")
+	view.visible = false
+	view.visible = true
+	view.queue_free()
