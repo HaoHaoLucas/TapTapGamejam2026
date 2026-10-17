@@ -1,8 +1,8 @@
-[gd_scene format=3]
+[gd_scene format=3 uid="uid://se2ek7juoxuj"]
 
-[ext_resource type="Script" path="res://scripts/run/run_battle.gd" id="1_126m8"]
-[ext_resource type="Texture2D" path="res://assets/battle/hero.png" id="2_sb5ml"]
-[ext_resource type="Texture2D" path="res://assets/battle/enemy.png" id="3_u3cmk"]
+[ext_resource type="Script" uid="uid://ixo5h6y4lhih" path="res://scripts/run/run_battle.gd" id="1_126m8"]
+[ext_resource type="Texture2D" uid="uid://b2olidqx7vhl" path="res://assets/battle/hero.png" id="2_sb5ml"]
+[ext_resource type="Texture2D" uid="uid://bhmppwoomj26y" path="res://assets/battle/enemy.png" id="3_u3cmk"]
 
 [sub_resource type="StyleBoxEmpty" id="StyleBoxEmpty_b6hvi"]
 
@@ -162,6 +162,8 @@ layout_mode = 3
 anchors_preset = 15
 anchor_right = 1.0
 anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
 focus_mode = 2
 theme = SubResource("Theme_l7cur")
 script = ExtResource("1_126m8")
@@ -178,9 +180,14 @@ anchors_preset = 0
 mouse_filter = 2
 
 [node name="Margin" type="MarginContainer" parent="Board" unique_id=1006471082]
-layout_mode = 0
+layout_mode = 1
+anchors_preset = 15
 anchor_right = 1.0
 anchor_bottom = 1.0
+offset_right = 1156.0
+offset_bottom = 795.0
+grow_horizontal = 2
+grow_vertical = 2
 theme_override_constants/margin_left = 28
 theme_override_constants/margin_top = 12
 theme_override_constants/margin_right = 28

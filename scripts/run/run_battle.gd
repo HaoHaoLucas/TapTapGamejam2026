@@ -587,4 +587,3 @@ func _reason(code: String) -> String:
 			return "这张牌现在动不了。"
 		_:
 			return code
-
