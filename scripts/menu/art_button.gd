@@ -39,8 +39,7 @@ func _init() -> void:
 func _ready() -> void:
 	_normal = get_node_or_null("Normal") as TextureRect
 	_hover = get_node_or_null("Hover") as TextureRect
-	if _normal == null or _hover == null:
-		_build_layers()
+	assert(_normal != null and _hover != null, "ArtButton: 场景里缺 Normal / Hover 两层贴图")
 	apply_textures()
 	_apply_enabled(true)
 
@@ -163,24 +162,6 @@ func _apply_enabled(instant: bool) -> void:
 	if is_inside_tree() and has_focus():
 		release_focus()
 	set_hovering(false, true)
-
-
-func _build_layers() -> void:
-	_normal = _make_layer("Normal", 1.0)
-	_hover = _make_layer("Hover", 0.0)
-	add_child(_normal)
-	add_child(_hover)
-
-
-func _make_layer(node_name: String, alpha: float) -> TextureRect:
-	var rect := TextureRect.new()
-	rect.name = node_name
-	rect.mouse_filter = Control.MOUSE_FILTER_IGNORE
-	rect.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
-	rect.stretch_mode = TextureRect.STRETCH_SCALE
-	rect.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
-	rect.modulate.a = alpha
-	return rect
 
 
 func _rebuild_mask() -> void:
