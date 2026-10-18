@@ -1,7 +1,7 @@
 [gd_scene load_steps=3 format=3]
 
 [ext_resource type="Script" path="res://scripts/cards/card_view.gd" id="1"]
-[ext_resource type="Script" path="res://scripts/cards/card_hover_anim.gd" id="2"]
+[ext_resource type="Script" path="res://scripts/anim/card_hover_anim.gd" id="2"]
 
 [node name="CardView" type="PanelContainer"]
 custom_minimum_size = Vector2(116, 168)
