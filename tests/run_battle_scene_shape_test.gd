@@ -141,7 +141,7 @@ func _test_lone_instance_does_not_crash() -> void:
 
 func _test_mounted_under_run_shell() -> void:
 	# 战斗屏必须是 run_shell.tscn 里的实例节点：挂在跑图壳下、名字 RunBattle、
-	# 平时隐藏、最后一个子节点（z 序在最上），且全屏底色被压到 index 0。
+	# 平时隐藏、最后一个子节点（z 序在最上），且全屏背景压在 index 0。
 	var shell_text := _read("res://scenes/run/run_shell.tscn")
 	_check(shell_text.contains("instance=ExtResource"), "run_shell.tscn 里战斗屏应是场景实例")
 	_check(shell_text.contains("run_battle.tscn"), "run_shell.tscn 里应引用 run_battle.tscn")
@@ -159,7 +159,10 @@ func _test_mounted_under_run_shell() -> void:
 	_check(battle.get_parent() == shell, "战斗屏应挂在跑图壳下，实际挂在 %s" % str(battle.get_parent().name))
 	_check(not battle.visible, "战斗屏开局必须隐藏")
 	_check(battle.get_index() == shell.get_child_count() - 1, "战斗屏应是最后一个子节点（z 序在最上）")
-	_check(shell.get_child(0) is ColorRect, "全屏底色应被压到 index 0，实际是 %s" % shell.get_child(0).get_class())
+	_check(shell.get_child(0) is TextureRect, "全屏背景应压在 index 0，实际是 %s" % shell.get_child(0).get_class())
+	var bg := shell.get_child(0) as TextureRect
+	var bg_path := "" if bg == null or bg.texture == null else bg.texture.resource_path
+	_check(bg_path.ends_with("map_bg_1.JPG"), "index 0 应是 map_bg_1.JPG，实际 %s" % bg_path)
 	shell.queue_free()
 
 

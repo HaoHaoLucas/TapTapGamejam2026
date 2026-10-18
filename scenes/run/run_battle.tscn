@@ -106,13 +106,6 @@ focus_mode = 2
 theme = ExtResource("4_theme")
 script = ExtResource("1_126m8")
 
-[node name="ColorRect" type="ColorRect" parent="." unique_id=1021058360]
-layout_mode = 0
-anchor_right = 1.0
-anchor_bottom = 1.0
-mouse_filter = 2
-color = Color(0.027, 0.067, 0.09, 1)
-
 [node name="Board" type="Control" parent="." unique_id=1215898554]
 anchors_preset = 0
 mouse_filter = 2

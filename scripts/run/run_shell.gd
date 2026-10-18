@@ -30,12 +30,6 @@ func _ready() -> void:
 	ui.default_font = font
 	ui.default_font_size = 18
 	theme = ui
-	var backdrop := ColorRect.new()
-	backdrop.color = Color(0.035, 0.055, 0.09)
-	backdrop.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
-	backdrop.mouse_filter = Control.MOUSE_FILTER_IGNORE
-	add_child(backdrop)
-	move_child(backdrop, 0)
 	var margin := MarginContainer.new()
 	margin.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
 	margin.add_theme_constant_override("margin_left", 28)
