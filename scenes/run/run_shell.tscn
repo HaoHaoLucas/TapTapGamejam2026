@@ -24,5 +24,42 @@ mouse_filter = 2
 texture = ExtResource("3_bg")
 expand_mode = 1
 
+[node name="Layout" type="MarginContainer" parent="." unique_id=1894402057]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_constants/margin_left = 28
+theme_override_constants/margin_top = 20
+theme_override_constants/margin_right = 28
+theme_override_constants/margin_bottom = 20
+
+[node name="Column" type="VBoxContainer" parent="Layout"]
+layout_mode = 2
+theme_override_constants/separation = 12
+
+[node name="Header" type="Label" parent="Layout/Column"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.93, 0.86, 0.68, 1)
+theme_override_font_sizes/font_size = 22
+
+[node name="Status" type="Label" parent="Layout/Column"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.78, 0.82, 0.74, 1)
+autowrap_mode = 3
+
+[node name="Scroll" type="ScrollContainer" parent="Layout/Column"]
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 3
+horizontal_scroll_mode = 0
+
+[node name="Body" type="VBoxContainer" parent="Layout/Column/Scroll"]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_constants/separation = 8
+
 [node name="Battle" parent="." unique_id=1555426995 instance=ExtResource("2")]
 layout_mode = 1

@@ -11,10 +11,10 @@ var run: RunState
 var _session: CombatSession
 @onready var _battle: RunBattle = $Battle
 var _battle_room := ""
-var _body: VBoxContainer
-var _scroll: ScrollContainer
-var _header: Label
-var _status: Label
+@onready var _body: VBoxContainer = $Layout/Column/Scroll/Body
+@onready var _scroll: ScrollContainer = $Layout/Column/Scroll
+@onready var _header: Label = $Layout/Column/Header
+@onready var _status: Label = $Layout/Column/Status
 var _fit_queued := false
 var _selected_offer := ""
 var _selected_cards: Array = []
@@ -30,35 +30,7 @@ func _ready() -> void:
 	ui.default_font = font
 	ui.default_font_size = 18
 	theme = ui
-	var margin := MarginContainer.new()
-	margin.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
-	margin.add_theme_constant_override("margin_left", 28)
-	margin.add_theme_constant_override("margin_right", 28)
-	margin.add_theme_constant_override("margin_top", 20)
-	margin.add_theme_constant_override("margin_bottom", 20)
-	add_child(margin)
-	var column := VBoxContainer.new()
-	column.add_theme_constant_override("separation", 12)
-	column.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
-	margin.add_child(column)
-	_header = Label.new()
-	_header.add_theme_font_size_override("font_size", 22)
-	_header.add_theme_color_override("font_color", Color(0.93, 0.86, 0.68))
-	column.add_child(_header)
-	_status = Label.new()
-	_status.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
-	_status.add_theme_color_override("font_color", Color(0.78, 0.82, 0.74))
-	column.add_child(_status)
-	_scroll = ScrollContainer.new()
-	_scroll.size_flags_vertical = Control.SIZE_EXPAND_FILL
-	_scroll.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-	_scroll.horizontal_scroll_mode = ScrollContainer.SCROLL_MODE_DISABLED
 	_scroll.resized.connect(_queue_fit)
-	column.add_child(_scroll)
-	_body = VBoxContainer.new()
-	_body.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-	_body.add_theme_constant_override("separation", 8)
-	_scroll.add_child(_body)
 	_battle.returned_to_tower.connect(_on_return_to_tower)
 	move_child(_battle, -1)
 	_start_run(str(Time.get_unix_time_from_system()))
