@@ -97,7 +97,6 @@ func _test_battle_choice_opens_combat() -> void:
 	await process_frame
 	_check(str(shell.run.current_room.get("status", "")) == "ENTERED", "Choosing a room must enter it")
 	_check(str(shell.run.current_room.get("scene_key", "")) == "battle", "The battle button must enter a battle")
-	_check(SceneRegistry.path_for("battle") == "res://scenes/run/run_battle.tscn", "Battle uses the jam equation scene")
 	_check(shell._battle != null and shell._battle.visible and shell._battle is RunBattle, "The jam battle view must be shown")
 	_check(shell._session != null and shell._session.ctx != null and shell._session.ctx.battle.phase == "PLAYER_ACTIVE", "Combat must be in the player turn")
 	if shell._session == null or shell._session.ctx == null:

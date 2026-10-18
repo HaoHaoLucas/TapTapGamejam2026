@@ -22,9 +22,8 @@ func _run() -> void:
 	_test_hosted_deck()
 	_test_write_back_outcomes()
 	_test_room_multipliers()
-	_test_default_start()
 	if _failures == 0:
-		print("PASS: jam battle write-back, thief return, room multipliers, v0.3 default start")
+		print("PASS: jam battle write-back, thief return, room multipliers")
 	quit(1 if _failures else 0)
 
 
@@ -103,17 +102,6 @@ func _test_room_multipliers() -> void:
 		return
 	var sword: CardBattle = boss.ctx.battle
 	_check(sword.enemy_max_hp == 160 and sword.intent_damage == 16, "A boss stays 160/16 when normal_used is 2, got %s/%s" % [sword.enemy_max_hp, sword.intent_damage])
-
-
-func _test_default_start() -> void:
-	var engine := CombatEngine.new()
-	engine.start()
-	_check(engine.seed == 20261009, "Default seed stays 20261009")
-	_check(engine.s.hp == 80 and engine.s.maxHp == 100, "Standalone start stays at 80/100")
-	_check(int(engine.s.enemies[0].hp) == 120, "Standalone enemy stays at 120")
-	_check(engine.s.allIds.size() == 15 and engine.s.hand.size() == 5, "Standalone deck stays 15 cards and draws 5")
-	_check(engine.s.hand[0].id == "n3", "Standalone shuffle for seed 20261009 is unchanged")
-	_check(engine.invariant(), "Default invariant still expects 15 cards")
 
 
 func _run_for(seed: String) -> RunState:

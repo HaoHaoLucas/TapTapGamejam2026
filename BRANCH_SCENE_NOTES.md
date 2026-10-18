@@ -40,17 +40,13 @@ godot --headless --path . --script tests/<name>.gd
 
 - 逻辑层一律没动：`CombatSession` / `RunContext` / `CardBattle` / `MonsterRules` / `CardService` / `DrawService` / `EquationService`。
 - `run_shell` **自己的 UI** 仍是代码建的（`_header` / `_status` / `_body` 那一套），这次没场景化。
-- 旧栈（`CombatEngine` / `BattleCard` / `card_demo`）一个都没删。
 
 ## 五、已知遗留（不是这次引入的）
 
 | 项 | 说明 |
 |---|---|
-| 旧栈仍是死代码 | `CombatEngine` / `BattleCard` / `card_demo.gd`（2039 行）已无人路由，但 `combat_engine_test` / `battle_demo_test` 还在跑 |
-| `card_lab` 是孤儿场景 | 只能 F6 单跑，生产代码零引用 |
 | 样式源有四处 | `run_battle.tscn` 的局部 `Theme`、`run_shell.gd` 自建的 `Theme`、`card_view.gd` 自建的 `StyleBoxFlat`、`main_menu` 的贴图按钮 ⇒ 换一套美术要改四处 |
 | 字体是 `SystemFont` | 依赖本机"微软雅黑"，导出到别的机器字形会变 |
-| `SceneRegistry.path_for("battle")` | 场景实例化后只剩测试一个调用者（铁律「不写死路径」的已接受例外） |
 
 ## 六、需要确认的一件事
 
