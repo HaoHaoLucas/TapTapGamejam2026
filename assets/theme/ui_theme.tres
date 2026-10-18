@@ -1,8 +1,4 @@
-[gd_resource type="Theme" load_steps=6 format=3]
-
-[sub_resource type="SystemFont" id="SystemFont_ui"]
-font_names = PackedStringArray("Microsoft YaHei UI", "Microsoft YaHei", "Noto Sans CJK SC", "Segoe UI")
-subpixel_positioning = 0
+[gd_resource type="Theme" format=3 uid="uid://trle8mouk54k"]
 
 [sub_resource type="StyleBoxEmpty" id="StyleBoxEmpty_focus"]
 
@@ -53,6 +49,10 @@ corner_radius_top_left = 4
 corner_radius_top_right = 4
 corner_radius_bottom_right = 4
 corner_radius_bottom_left = 4
+
+[sub_resource type="SystemFont" id="SystemFont_ui"]
+font_names = PackedStringArray("Microsoft YaHei UI", "Microsoft YaHei", "Noto Sans CJK SC", "Segoe UI")
+subpixel_positioning = 0
 
 [resource]
 default_font = SubResource("SystemFont_ui")
