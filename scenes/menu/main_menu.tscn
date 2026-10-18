@@ -1,27 +1,27 @@
-[gd_scene load_steps=19 format=3]
+[gd_scene format=3 uid="uid://4wiv3k4c5b2b"]
 
-[ext_resource type="Script" path="res://scripts/menu/main_menu.gd" id="1"]
-[ext_resource type="Script" path="res://scripts/menu/art_button.gd" id="2"]
-[ext_resource type="Texture2D" path="res://assets/ui/menu/bg_menu.jpg" id="3"]
-[ext_resource type="Texture2D" path="res://assets/ui/menu/btn_start_normal.png" id="4"]
-[ext_resource type="Texture2D" path="res://assets/ui/menu/btn_start_hover.png" id="5"]
-[ext_resource type="Texture2D" path="res://assets/ui/menu/btn_new_normal.png" id="6"]
-[ext_resource type="Texture2D" path="res://assets/ui/menu/btn_new_hover.png" id="7"]
-[ext_resource type="Texture2D" path="res://assets/ui/menu/btn_options_normal.png" id="8"]
-[ext_resource type="Texture2D" path="res://assets/ui/menu/btn_options_hover.png" id="9"]
-[ext_resource type="Texture2D" path="res://assets/ui/menu/btn_quit_normal.png" id="10"]
-[ext_resource type="Texture2D" path="res://assets/ui/menu/btn_quit_hover.png" id="11"]
-[ext_resource type="Texture2D" path="res://assets/ui/menu/dlg_newgame.png" id="12"]
-[ext_resource type="Texture2D" path="res://assets/ui/menu/btn_cancel_normal.png" id="13"]
-[ext_resource type="Texture2D" path="res://assets/ui/menu/btn_cancel_hover.png" id="14"]
-[ext_resource type="Texture2D" path="res://assets/ui/menu/btn_confirm_normal.png" id="15"]
-[ext_resource type="Texture2D" path="res://assets/ui/menu/btn_confirm_hover.png" id="16"]
-[ext_resource type="Texture2D" path="res://assets/ui/menu/bg_settings.png" id="17"]
+[ext_resource type="Script" uid="uid://bdiftc4fogrss" path="res://scripts/menu/main_menu.gd" id="1"]
+[ext_resource type="Script" uid="uid://qxlis2gsbdt6" path="res://scripts/menu/art_button.gd" id="2"]
+[ext_resource type="Texture2D" uid="uid://diutbp3oanla8" path="res://assets/ui/menu/bg_menu.jpg" id="3"]
+[ext_resource type="Texture2D" uid="uid://dsp6jhocwbols" path="res://assets/ui/menu/btn_start_normal.png" id="4"]
+[ext_resource type="Texture2D" uid="uid://3f472hpqog7e" path="res://assets/ui/menu/btn_start_hover.png" id="5"]
+[ext_resource type="Texture2D" uid="uid://cp5papslhntrq" path="res://assets/ui/menu/btn_new_normal.png" id="6"]
+[ext_resource type="Texture2D" uid="uid://dv62crc530ief" path="res://assets/ui/menu/btn_new_hover.png" id="7"]
+[ext_resource type="Texture2D" uid="uid://bgbw22flqle4r" path="res://assets/ui/menu/btn_options_normal.png" id="8"]
+[ext_resource type="Texture2D" uid="uid://bduxaqsf2cu0b" path="res://assets/ui/menu/btn_options_hover.png" id="9"]
+[ext_resource type="Texture2D" uid="uid://iarsqvf0u7fe" path="res://assets/ui/menu/btn_quit_normal.png" id="10"]
+[ext_resource type="Texture2D" uid="uid://dgrpq8j8k6qq3" path="res://assets/ui/menu/btn_quit_hover.png" id="11"]
+[ext_resource type="Texture2D" uid="uid://dmfy4wblrpkso" path="res://assets/ui/menu/dlg_newgame.png" id="12"]
+[ext_resource type="Texture2D" uid="uid://cpeb4ru5bvso4" path="res://assets/ui/menu/btn_cancel_normal.png" id="13"]
+[ext_resource type="Texture2D" uid="uid://k85lvt8sjrut" path="res://assets/ui/menu/btn_cancel_hover.png" id="14"]
+[ext_resource type="Texture2D" uid="uid://bg2ggya85jfog" path="res://assets/ui/menu/btn_confirm_normal.png" id="15"]
+[ext_resource type="Texture2D" uid="uid://h0ytphsn4ilq" path="res://assets/ui/menu/btn_confirm_hover.png" id="16"]
+[ext_resource type="Texture2D" uid="uid://beuvv0bthoiua" path="res://assets/ui/menu/bg_settings.png" id="17"]
 
 [sub_resource type="SystemFont" id="SystemFont_menu"]
 font_names = PackedStringArray("Microsoft YaHei UI", "Microsoft YaHei", "Noto Sans CJK SC", "Segoe UI")
 
-[node name="MainMenu" type="Control"]
+[node name="MainMenu" type="Control" unique_id=1228835916]
 layout_mode = 3
 anchors_preset = 15
 anchor_right = 1.0
@@ -30,28 +30,26 @@ grow_horizontal = 2
 grow_vertical = 2
 script = ExtResource("1")
 
-[node name="Stage" type="Control" parent="."]
-layout_mode = 0
+[node name="Stage" type="Control" parent="." unique_id=1965768891]
+anchors_preset = 0
 offset_right = 2560.0
 offset_bottom = 1440.0
 mouse_filter = 2
 
-[node name="Background" type="TextureRect" parent="Stage"]
+[node name="Background" type="TextureRect" parent="Stage" unique_id=394552887]
 layout_mode = 0
 offset_right = 2560.0
 offset_bottom = 1440.0
 mouse_filter = 2
 texture = ExtResource("3")
 expand_mode = 1
-stretch_mode = 0
 
-[node name="StartButton" type="Control" parent="Stage"]
-layout_mode = 0
+[node name="StartButton" type="Control" parent="Stage" unique_id=1382114611]
+anchors_preset = 0
 offset_left = 1849.32
 offset_top = 135.66
 offset_right = 2460.0
 offset_bottom = 421.68
-mouse_filter = 0
 focus_neighbor_left = NodePath(".")
 focus_neighbor_top = NodePath(".")
 focus_neighbor_right = NodePath(".")
@@ -60,13 +58,12 @@ script = ExtResource("2")
 normal_texture = ExtResource("4")
 hover_texture = ExtResource("5")
 
-[node name="NewButton" type="Control" parent="Stage"]
-layout_mode = 0
+[node name="NewButton" type="Control" parent="Stage" unique_id=162891091]
+anchors_preset = 0
 offset_left = 1844.28
 offset_top = 453.68
 offset_right = 2460.0
 offset_bottom = 701.9
-mouse_filter = 0
 focus_neighbor_left = NodePath(".")
 focus_neighbor_top = NodePath("../StartButton")
 focus_neighbor_right = NodePath(".")
@@ -75,13 +72,12 @@ script = ExtResource("2")
 normal_texture = ExtResource("6")
 hover_texture = ExtResource("7")
 
-[node name="OptionsButton" type="Control" parent="Stage"]
-layout_mode = 0
+[node name="OptionsButton" type="Control" parent="Stage" unique_id=870077562]
+anchors_preset = 0
 offset_left = 1853.94
 offset_top = 733.9
 offset_right = 2460.0
 offset_bottom = 1016.14
-mouse_filter = 0
 focus_neighbor_left = NodePath(".")
 focus_neighbor_top = NodePath("../NewButton")
 focus_neighbor_right = NodePath(".")
@@ -90,13 +86,12 @@ script = ExtResource("2")
 normal_texture = ExtResource("8")
 hover_texture = ExtResource("9")
 
-[node name="QuitButton" type="Control" parent="Stage"]
-layout_mode = 0
+[node name="QuitButton" type="Control" parent="Stage" unique_id=2076169828]
+anchors_preset = 0
 offset_left = 1848.9
 offset_top = 1048.14
 offset_right = 2460.0
 offset_bottom = 1304.34
-mouse_filter = 0
 focus_neighbor_left = NodePath(".")
 focus_neighbor_top = NodePath("../OptionsButton")
 focus_neighbor_right = NodePath(".")
@@ -105,33 +100,31 @@ script = ExtResource("2")
 normal_texture = ExtResource("10")
 hover_texture = ExtResource("11")
 
-[node name="NewGameLayer" type="Control" parent="Stage"]
+[node name="NewGameLayer" type="Control" parent="Stage" unique_id=1150430217]
 visible = false
-layout_mode = 0
+anchors_preset = 0
 offset_right = 2560.0
 offset_bottom = 1440.0
 mouse_filter = 2
 
-[node name="Dimmer" type="ColorRect" parent="Stage/NewGameLayer"]
+[node name="Dimmer" type="ColorRect" parent="Stage/NewGameLayer" unique_id=1375312786]
 layout_mode = 0
 offset_right = 2560.0
 offset_bottom = 1440.0
 color = Color(0, 0, 0, 0.45)
 
-[node name="Dialog" type="TextureRect" parent="Stage/NewGameLayer"]
+[node name="Dialog" type="TextureRect" parent="Stage/NewGameLayer" unique_id=1935657204]
 layout_mode = 0
 offset_right = 2560.0
 offset_bottom = 1440.0
 mouse_filter = 2
 texture = ExtResource("12")
 expand_mode = 1
-stretch_mode = 0
 
-[node name="CancelButton" type="Control" parent="Stage/NewGameLayer"]
-layout_mode = 0
+[node name="CancelButton" type="Control" parent="Stage/NewGameLayer" unique_id=626755429]
+anchors_preset = 0
 offset_right = 2560.0
 offset_bottom = 1440.0
-mouse_filter = 0
 focus_neighbor_left = NodePath(".")
 focus_neighbor_top = NodePath(".")
 focus_neighbor_right = NodePath("../ConfirmButton")
@@ -140,11 +133,10 @@ script = ExtResource("2")
 normal_texture = ExtResource("13")
 hover_texture = ExtResource("14")
 
-[node name="ConfirmButton" type="Control" parent="Stage/NewGameLayer"]
-layout_mode = 0
+[node name="ConfirmButton" type="Control" parent="Stage/NewGameLayer" unique_id=2147242792]
+anchors_preset = 0
 offset_right = 2560.0
 offset_bottom = 1440.0
-mouse_filter = 0
 focus_neighbor_left = NodePath("../CancelButton")
 focus_neighbor_top = NodePath(".")
 focus_neighbor_right = NodePath(".")
@@ -153,23 +145,22 @@ script = ExtResource("2")
 normal_texture = ExtResource("15")
 hover_texture = ExtResource("16")
 
-[node name="SettingsLayer" type="Control" parent="Stage"]
+[node name="SettingsLayer" type="Control" parent="Stage" unique_id=1158572852]
 visible = false
-layout_mode = 0
+anchors_preset = 0
 offset_right = 2560.0
 offset_bottom = 1440.0
 mouse_filter = 2
 
-[node name="SettingsBackground" type="TextureRect" parent="Stage/SettingsLayer"]
+[node name="SettingsBackground" type="TextureRect" parent="Stage/SettingsLayer" unique_id=22711473]
 layout_mode = 0
 offset_right = 2560.0
 offset_bottom = 1440.0
 mouse_filter = 0
 texture = ExtResource("17")
 expand_mode = 1
-stretch_mode = 0
 
-[node name="BackButton" type="Button" parent="Stage/SettingsLayer"]
+[node name="BackButton" type="Button" parent="Stage/SettingsLayer" unique_id=697048309]
 layout_mode = 0
 offset_left = 48.0
 offset_top = 1320.0
@@ -178,6 +169,144 @@ offset_bottom = 1404.0
 theme_override_fonts/font = SubResource("SystemFont_menu")
 theme_override_font_sizes/font_size = 42
 text = "返回"
+
+[node name="Normal" type="TextureRect" parent="Stage/StartButton"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+texture = ExtResource("4")
+expand_mode = 1
+
+[node name="Hover" type="TextureRect" parent="Stage/StartButton"]
+modulate = Color(1, 1, 1, 0)
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+texture = ExtResource("5")
+expand_mode = 1
+
+[node name="Normal" type="TextureRect" parent="Stage/NewButton"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+texture = ExtResource("6")
+expand_mode = 1
+
+[node name="Hover" type="TextureRect" parent="Stage/NewButton"]
+modulate = Color(1, 1, 1, 0)
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+texture = ExtResource("7")
+expand_mode = 1
+
+[node name="Normal" type="TextureRect" parent="Stage/OptionsButton"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+texture = ExtResource("8")
+expand_mode = 1
+
+[node name="Hover" type="TextureRect" parent="Stage/OptionsButton"]
+modulate = Color(1, 1, 1, 0)
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+texture = ExtResource("9")
+expand_mode = 1
+
+[node name="Normal" type="TextureRect" parent="Stage/QuitButton"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+texture = ExtResource("10")
+expand_mode = 1
+
+[node name="Hover" type="TextureRect" parent="Stage/QuitButton"]
+modulate = Color(1, 1, 1, 0)
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+texture = ExtResource("11")
+expand_mode = 1
+
+[node name="Normal" type="TextureRect" parent="Stage/NewGameLayer/CancelButton"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+texture = ExtResource("13")
+expand_mode = 1
+
+[node name="Hover" type="TextureRect" parent="Stage/NewGameLayer/CancelButton"]
+modulate = Color(1, 1, 1, 0)
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+texture = ExtResource("14")
+expand_mode = 1
+
+[node name="Normal" type="TextureRect" parent="Stage/NewGameLayer/ConfirmButton"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+texture = ExtResource("15")
+expand_mode = 1
+
+[node name="Hover" type="TextureRect" parent="Stage/NewGameLayer/ConfirmButton"]
+modulate = Color(1, 1, 1, 0)
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+texture = ExtResource("16")
+expand_mode = 1
 
 [connection signal="pressed" from="Stage/StartButton" to="." method="_start_run"]
 [connection signal="pressed" from="Stage/NewButton" to="." method="_open_new_game"]

@@ -37,7 +37,9 @@ func _init() -> void:
 
 
 func _ready() -> void:
-	if _normal == null:
+	_normal = get_node_or_null("Normal") as TextureRect
+	_hover = get_node_or_null("Hover") as TextureRect
+	if _normal == null or _hover == null:
 		_build_layers()
 	apply_textures()
 	_apply_enabled(true)
