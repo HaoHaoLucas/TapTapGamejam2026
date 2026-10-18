@@ -92,7 +92,7 @@
 					"c": "Control",
 					"d": 0,
 					"fo": 2,
-					"kids": 3
+					"kids": 4
 				},
 				{
 					"c": "ColorRect",
@@ -121,7 +121,7 @@
 				{
 					"c": "VBoxContainer",
 					"d": 3,
-					"kids": 5,
+					"kids": 3,
 					"mf": 1
 				},
 				{
@@ -302,7 +302,10 @@
 					"d": 4,
 					"kids": 3,
 					"mf": 1,
-					"sfv": 3
+					"min": [
+						0.0,
+						528.0
+					]
 				},
 				{
 					"c": "VBoxContainer",
@@ -859,20 +862,20 @@
 				},
 				{
 					"c": "VBoxContainer",
-					"d": 4,
-					"kids": 2,
+					"d": 1,
+					"kids": 3,
 					"mf": 1
 				},
 				{
 					"c": "HBoxContainer",
-					"d": 5,
+					"d": 2,
 					"kids": 2,
 					"mf": 1
 				},
 				{
 					"aw": 0,
 					"c": "Label",
-					"d": 6,
+					"d": 3,
 					"fc": [
 						0.82,
 						0.86,
@@ -891,7 +894,7 @@
 				{
 					"aw": 0,
 					"c": "Label",
-					"d": 6,
+					"d": 3,
 					"fc": [
 						0.62,
 						0.7,
@@ -908,13 +911,13 @@
 				},
 				{
 					"c": "HBoxContainer",
-					"d": 5,
+					"d": 2,
 					"kids": 3,
 					"mf": 1
 				},
 				{
 					"c": "PanelContainer",
-					"d": 6,
+					"d": 3,
 					"kids": 1,
 					"min": [
 						96.0,
@@ -926,7 +929,7 @@
 				{
 					"aw": 0,
 					"c": "Label",
-					"d": 7,
+					"d": 4,
 					"fc": [
 						0.86,
 						0.84,
@@ -943,7 +946,7 @@
 				},
 				{
 					"c": "ScrollContainer",
-					"d": 6,
+					"d": 3,
 					"kids": 1,
 					"mf": 1,
 					"min": [
@@ -954,14 +957,14 @@
 				},
 				{
 					"c": "HBoxContainer",
-					"d": 7,
+					"d": 4,
 					"kids": 5,
 					"mf": 1,
 					"sfh": 3
 				},
 				{
 					"c": "PanelContainer",
-					"d": 6,
+					"d": 3,
 					"kids": 1,
 					"min": [
 						96.0,
@@ -973,7 +976,7 @@
 				{
 					"aw": 0,
 					"c": "Label",
-					"d": 7,
+					"d": 4,
 					"fc": [
 						0.86,
 						0.84,
@@ -991,7 +994,7 @@
 				{
 					"aw": 0,
 					"c": "Label",
-					"d": 4,
+					"d": 2,
 					"fc": [
 						0.62,
 						0.7,

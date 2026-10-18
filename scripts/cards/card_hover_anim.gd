@@ -27,11 +27,13 @@ func _center_pivot() -> void:
 
 
 func _on_mouse_entered() -> void:
+	_face.z_index = 1
 	_run(Vector2.ONE * HOVER_SCALE, deg_to_rad(HOVER_ROTATION_DEG), Tween.EASE_OUT)
 
 
 ## EASE_IN 是 EASE_OUT 的时间反演，所以这一程就是上一程的原路返回。
 func _on_mouse_exited() -> void:
+	_face.z_index = 0
 	_run(Vector2.ONE, 0.0, Tween.EASE_IN)
 
 

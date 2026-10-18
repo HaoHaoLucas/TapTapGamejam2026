@@ -205,8 +205,8 @@ focus_mode = 0
 text = "暂停"
 
 [node name="Stage" type="HBoxContainer" parent="Board/Margin/Column" unique_id=1067865202]
+custom_minimum_size = Vector2(0, 528)
 layout_mode = 2
-size_flags_vertical = 3
 
 [node name="VBoxContainer" type="VBoxContainer" parent="Board/Margin/Column/Stage" unique_id=2130634560]
 custom_minimum_size = Vector2(240, 0)
@@ -461,36 +461,46 @@ theme_override_font_sizes/font_size = 12
 horizontal_alignment = 1
 autowrap_mode = 3
 
-[node name="Hand" type="VBoxContainer" parent="Board/Margin/Column" unique_id=1906505806]
+[node name="Hand" type="VBoxContainer" parent="." unique_id=1906505806]
+layout_mode = 1
+anchors_preset = 12
+anchor_top = 1.0
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = 28.0
+offset_top = -229.0
+offset_right = -28.0
+offset_bottom = -10.0
+grow_horizontal = 2
+grow_vertical = 0
+
+[node name="Caption" type="HBoxContainer" parent="Hand" unique_id=1565955424]
 layout_mode = 2
 
-[node name="Caption" type="HBoxContainer" parent="Board/Margin/Column/Hand" unique_id=1565955424]
-layout_mode = 2
-
-[node name="Count" type="Label" parent="Board/Margin/Column/Hand/Caption" unique_id=290683915]
+[node name="Count" type="Label" parent="Hand/Caption" unique_id=290683915]
 layout_mode = 2
 size_flags_horizontal = 3
 theme_override_colors/font_color = Color(0.82, 0.86, 0.78, 1)
 theme_override_font_sizes/font_size = 13
 text = "手牌 0"
 
-[node name="Label2" type="Label" parent="Board/Margin/Column/Hand/Caption" unique_id=697988227]
+[node name="Label2" type="Label" parent="Hand/Caption" unique_id=697988227]
 layout_mode = 2
 theme_override_colors/font_color = Color(0.62, 0.7, 0.66, 1)
 theme_override_font_sizes/font_size = 12
 text = "出牌后本回合不补牌"
 horizontal_alignment = 2
 
-[node name="Zone" type="HBoxContainer" parent="Board/Margin/Column/Hand" unique_id=510336635]
+[node name="Zone" type="HBoxContainer" parent="Hand" unique_id=510336635]
 layout_mode = 2
 
-[node name="DrawPile" type="PanelContainer" parent="Board/Margin/Column/Hand/Zone" unique_id=580534522]
+[node name="DrawPile" type="PanelContainer" parent="Hand/Zone" unique_id=580534522]
 custom_minimum_size = Vector2(96, 120)
 layout_mode = 2
 size_flags_vertical = 4
 theme_override_styles/panel = SubResource("StyleBoxFlat_n0t68")
 
-[node name="DrawLabel" type="Label" parent="Board/Margin/Column/Hand/Zone/DrawPile" unique_id=1096032152]
+[node name="DrawLabel" type="Label" parent="Hand/Zone/DrawPile" unique_id=1096032152]
 layout_mode = 2
 theme_override_colors/font_color = Color(0.86, 0.84, 0.72, 1)
 theme_override_font_sizes/font_size = 14
@@ -499,24 +509,25 @@ text = "抽牌堆
 horizontal_alignment = 1
 vertical_alignment = 1
 
-[node name="Scroll" type="ScrollContainer" parent="Board/Margin/Column/Hand/Zone" unique_id=1113347889]
+[node name="Scroll" type="ScrollContainer" parent="Hand/Zone" unique_id=1113347889]
 custom_minimum_size = Vector2(0, 176)
 layout_mode = 2
 size_flags_horizontal = 3
 vertical_scroll_mode = 0
+clip_contents = false
 
-[node name="HandRow" type="HBoxContainer" parent="Board/Margin/Column/Hand/Zone/Scroll" unique_id=2033476918]
+[node name="HandRow" type="HBoxContainer" parent="Hand/Zone/Scroll" unique_id=2033476918]
 layout_mode = 2
 size_flags_horizontal = 3
 alignment = 1
 
-[node name="DiscardPile" type="PanelContainer" parent="Board/Margin/Column/Hand/Zone" unique_id=171769267]
+[node name="DiscardPile" type="PanelContainer" parent="Hand/Zone" unique_id=171769267]
 custom_minimum_size = Vector2(96, 120)
 layout_mode = 2
 size_flags_vertical = 4
 theme_override_styles/panel = SubResource("StyleBoxFlat_yteae")
 
-[node name="DiscardLabel" type="Label" parent="Board/Margin/Column/Hand/Zone/DiscardPile" unique_id=1854609528]
+[node name="DiscardLabel" type="Label" parent="Hand/Zone/DiscardPile" unique_id=1854609528]
 layout_mode = 2
 theme_override_colors/font_color = Color(0.86, 0.84, 0.72, 1)
 theme_override_font_sizes/font_size = 14
@@ -525,7 +536,7 @@ text = "弃牌堆
 horizontal_alignment = 1
 vertical_alignment = 1
 
-[node name="Label" type="Label" parent="Board/Margin/Column" unique_id=2092388912]
+[node name="Label" type="Label" parent="Hand" unique_id=2092388912]
 layout_mode = 2
 theme_override_colors/font_color = Color(0.62, 0.7, 0.66, 1)
 theme_override_font_sizes/font_size = 12

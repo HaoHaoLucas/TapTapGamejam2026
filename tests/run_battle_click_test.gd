@@ -6,8 +6,8 @@ extends SceneTree
 
 const VIEW_SIZE := Vector2i(1920, 1080)
 const END_TURN_PATH := "Board/Margin/Column/Controls/End/Button"
-const HAND_CAPTION_PATH := "Board/Margin/Column/Hand/Caption/Count"
-const HAND_ROW_PATH := "Board/Margin/Column/Hand/Zone/Scroll/HandRow"
+const HAND_CAPTION_PATH := "Hand/Caption/Count"
+const HAND_ROW_PATH := "Hand/Zone/Scroll/HandRow"
 
 var _failures: PackedStringArray = []
 var _log: PackedStringArray = []

@@ -47,10 +47,10 @@ var _ready_done: bool = false
 @onready var _combo_dot_b: Panel = $Board/Margin/Column/Controls/Combo/Dots/B
 @onready var _combo_status: Label = $Board/Margin/Column/Controls/Combo/Status
 @onready var _incoming: Label = $Board/Margin/Column/Controls/End/Incoming
-@onready var _hand_caption: Label = $Board/Margin/Column/Hand/Caption/Count
-@onready var _draw_label: Label = $Board/Margin/Column/Hand/Zone/DrawPile/DrawLabel
-@onready var _hand_box: HBoxContainer = $Board/Margin/Column/Hand/Zone/Scroll/HandRow
-@onready var _discard_label: Label = $Board/Margin/Column/Hand/Zone/DiscardPile/DiscardLabel
+@onready var _hand_caption: Label = $Hand/Caption/Count
+@onready var _draw_label: Label = $Hand/Zone/DrawPile/DrawLabel
+@onready var _hand_box: HBoxContainer = $Hand/Zone/Scroll/HandRow
+@onready var _discard_label: Label = $Hand/Zone/DiscardPile/DiscardLabel
 @onready var _combo_layer: Control = $ComboLayer
 @onready var _combo_label: Label = $ComboLayer/Burst/Pad/Box/Time
 
