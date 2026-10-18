@@ -1,7 +1,6 @@
-[gd_scene format=3]
+[gd_scene format=3 uid="uid://cp1kujxk8vhmb"]
 
-[node name="Layout" type="MarginContainer"]
-layout_mode = 3
+[node name="Layout" type="MarginContainer" unique_id=945442200]
 anchors_preset = 15
 anchor_right = 1.0
 anchor_bottom = 1.0
@@ -12,27 +11,30 @@ theme_override_constants/margin_top = 20
 theme_override_constants/margin_right = 28
 theme_override_constants/margin_bottom = 20
 
-[node name="Column" type="VBoxContainer" parent="."]
+[node name="Column" type="VBoxContainer" parent="." unique_id=1480566178]
 layout_mode = 2
 theme_override_constants/separation = 12
 
-[node name="Header" type="Label" parent="Column"]
+[node name="Header" type="Label" parent="Column" unique_id=632216009]
+custom_minimum_size = Vector2(0, 100)
 layout_mode = 2
 theme_override_colors/font_color = Color(0.93, 0.86, 0.68, 1)
 theme_override_font_sizes/font_size = 22
 
-[node name="Status" type="Label" parent="Column"]
+[node name="Status" type="Label" parent="Column" unique_id=2037233521]
+custom_minimum_size = Vector2(0, 150)
 layout_mode = 2
 theme_override_colors/font_color = Color(0.78, 0.82, 0.74, 1)
 autowrap_mode = 3
 
-[node name="Scroll" type="ScrollContainer" parent="Column"]
+[node name="Scroll" type="ScrollContainer" parent="Column" unique_id=1182856506]
+custom_minimum_size = Vector2(0, 300)
 layout_mode = 2
 size_flags_horizontal = 3
 size_flags_vertical = 3
 horizontal_scroll_mode = 0
 
-[node name="Body" type="VBoxContainer" parent="Column/Scroll"]
+[node name="Body" type="VBoxContainer" parent="Column/Scroll" unique_id=1570274706]
 layout_mode = 2
 size_flags_horizontal = 3
 theme_override_constants/separation = 8

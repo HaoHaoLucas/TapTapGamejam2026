@@ -3,7 +3,7 @@
 [ext_resource type="Script" uid="uid://ixo5h6y4lhih" path="res://scripts/run/run_battle.gd" id="1_126m8"]
 [ext_resource type="Texture2D" uid="uid://b2olidqx7vhl" path="res://assets/battle/hero.png" id="2_sb5ml"]
 [ext_resource type="Texture2D" uid="uid://bhmppwoomj26y" path="res://assets/battle/enemy.png" id="3_u3cmk"]
-[ext_resource type="Theme" path="res://assets/theme/ui_theme.tres" id="4_theme"]
+[ext_resource type="Theme" uid="uid://trle8mouk54k" path="res://assets/theme/ui_theme.tres" id="4_theme"]
 
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_hwbvc"]
 content_margin_left = 10.0
@@ -125,10 +125,12 @@ theme_override_constants/margin_right = 28
 theme_override_constants/margin_bottom = 10
 
 [node name="Column" type="VBoxContainer" parent="Board/Margin" unique_id=619172931]
+custom_maximum_size = Vector2(1920, 810)
 layout_mode = 2
+alignment = 1
 
 [node name="TopBar" type="PanelContainer" parent="Board/Margin/Column" unique_id=1325850780]
-custom_minimum_size = Vector2(0, 64)
+custom_minimum_size = Vector2(0, 100)
 layout_mode = 2
 theme_override_styles/panel = SubResource("StyleBoxFlat_hwbvc")
 
@@ -198,15 +200,17 @@ focus_mode = 0
 text = "暂停"
 
 [node name="Stage" type="HBoxContainer" parent="Board/Margin/Column" unique_id=1067865202]
-custom_minimum_size = Vector2(0, 528)
+custom_minimum_size = Vector2(0, 550)
+custom_maximum_size = Vector2(1920, -1)
 layout_mode = 2
+alignment = 1
 
-[node name="VBoxContainer" type="VBoxContainer" parent="Board/Margin/Column/Stage" unique_id=2130634560]
-custom_minimum_size = Vector2(240, 0)
+[node name="Player" type="VBoxContainer" parent="Board/Margin/Column/Stage" unique_id=2130634560]
+custom_minimum_size = Vector2(300, 0)
 layout_mode = 2
 size_flags_vertical = 3
 
-[node name="TextureRect" type="TextureRect" parent="Board/Margin/Column/Stage/VBoxContainer" unique_id=1663942399]
+[node name="TextureRect" type="TextureRect" parent="Board/Margin/Column/Stage/Player" unique_id=1663942399]
 custom_minimum_size = Vector2(220, 180)
 layout_mode = 2
 size_flags_vertical = 3
@@ -215,7 +219,7 @@ texture = ExtResource("2_sb5ml")
 expand_mode = 1
 stretch_mode = 5
 
-[node name="Label" type="Label" parent="Board/Margin/Column/Stage/VBoxContainer" unique_id=1325178126]
+[node name="Label" type="Label" parent="Board/Margin/Column/Stage/Player" unique_id=1325178126]
 layout_mode = 2
 theme_override_colors/font_color = Color(0.784, 0.8, 0.718, 1)
 theme_override_font_sizes/font_size = 14
@@ -223,6 +227,8 @@ text = "实验员"
 horizontal_alignment = 1
 
 [node name="Center" type="VBoxContainer" parent="Board/Margin/Column/Stage" unique_id=1689372805]
+custom_minimum_size = Vector2(420, 550)
+custom_maximum_size = Vector2(810, 550)
 layout_mode = 2
 size_flags_horizontal = 3
 size_flags_vertical = 3
@@ -289,7 +295,7 @@ text = "意图"
 horizontal_alignment = 1
 autowrap_mode = 3
 
-[node name="TextureRect" type="TextureRect" parent="Board/Margin/Column/Stage/Enemy" unique_id=410076289]
+[node name="Enemy" type="TextureRect" parent="Board/Margin/Column/Stage/Enemy" unique_id=410076289]
 custom_minimum_size = Vector2(240, 160)
 layout_mode = 2
 size_flags_vertical = 3
@@ -504,10 +510,10 @@ vertical_alignment = 1
 
 [node name="Scroll" type="ScrollContainer" parent="Hand/Zone" unique_id=1113347889]
 custom_minimum_size = Vector2(0, 176)
+clip_contents = false
 layout_mode = 2
 size_flags_horizontal = 3
 vertical_scroll_mode = 0
-clip_contents = false
 
 [node name="HandRow" type="HBoxContainer" parent="Hand/Zone/Scroll" unique_id=2033476918]
 layout_mode = 2
