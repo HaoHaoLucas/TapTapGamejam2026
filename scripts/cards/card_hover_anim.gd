@@ -4,7 +4,7 @@ extends Node
 
 const HOVER_SCALE := 1.15
 const HOVER_ROTATION_DEG := 15.0
-const HOVER_LIFT := 10.0
+const HOVER_LIFT := 30.0
 const DURATION := 0.55
 
 var _face: Control
