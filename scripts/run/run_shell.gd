@@ -736,7 +736,6 @@ func _fit_text() -> void:
 		width -= bar.size.x
 	width = maxf(40.0, width)
 	_body.custom_minimum_size.x = width
-	_grow_label(_status, width)
 	for child in _body.get_children():
 		if child is Button:
 			_grow_button(child, width)
