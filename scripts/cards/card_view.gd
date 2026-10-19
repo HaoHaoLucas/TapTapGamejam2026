@@ -12,6 +12,8 @@ var _marks: Label
 var _state: Label
 var _style: StyleBoxFlat
 var _highlight: String = ""
+var _face: Dictionary = {}
+var _use_face: bool = false
 
 
 func _ready() -> void:
@@ -21,8 +23,19 @@ func _ready() -> void:
 
 
 func bind(p_library: CardLibrary, p_card_uid: String) -> void:
+	_use_face = false
+	_face = {}
 	library = p_library
 	card_uid = p_card_uid
+	_ensure()
+	refresh()
+
+
+func bind_face(face: Dictionary) -> void:
+	_use_face = true
+	_face = face.duplicate(true)
+	library = null
+	card_uid = str(_face.get("card_uid", ""))
 	_ensure()
 	refresh()
 
@@ -60,6 +73,9 @@ func refresh() -> void:
 	_ensure()
 	if _value == null:
 		return
+	if _use_face:
+		_refresh_face()
+		return
 	if library == null or card_uid == "":
 		visible = false
 		return
@@ -93,6 +109,16 @@ func refresh() -> void:
 	_apply_style()
 
 
+func _refresh_face() -> void:
+	visible = true
+	card_uid = str(_face.get("card_uid", ""))
+	_value.text = str(_face.get("value_text", ""))
+	_marks.text = str(_face.get("mark_text", ""))
+	_state.text = str(_face.get("state_text", ""))
+	tooltip_text = str(_face.get("tooltip", ""))
+	_apply_style()
+
+
 func _gui_input(event: InputEvent) -> void:
 	if event is InputEventMouseButton and event.pressed and event.button_index == MOUSE_BUTTON_LEFT:
 		pressed.emit(card_uid)
@@ -119,9 +145,15 @@ func _ensure() -> void:
 func _apply_style() -> void:
 	if _style == null:
 		return
-	var card := library.get_card(card_uid) if library != null else null
-	var frozen := card != null and card.is_frozen(library.turn_index)
-	var ghost := card != null and card.has_mark("EN_GHOST")
+	var frozen := false
+	var ghost := false
+	if _use_face:
+		frozen = bool(_face.get("frozen", false))
+		ghost = bool(_face.get("ghost", false))
+	else:
+		var card := library.get_card(card_uid) if library != null else null
+		frozen = card != null and card.is_frozen(library.turn_index)
+		ghost = card != null and card.has_mark("EN_GHOST")
 	_style.bg_color = Color(0.11, 0.14, 0.2) if not frozen else Color(0.1, 0.16, 0.24)
 	if _highlight == "equation":
 		_style.border_color = Color(0.93, 0.78, 0.42)

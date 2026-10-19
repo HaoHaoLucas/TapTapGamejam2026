@@ -10,6 +10,7 @@ const DISPLAY := {
 var run: RunState
 var _session: CombatSession
 @onready var _battle: RunBattle = $Battle
+@onready var _inventory: RunInventory = $Inventory
 var _battle_room := ""
 var _body: VBoxContainer
 var _scroll: ScrollContainer
@@ -67,6 +68,10 @@ func _ready() -> void:
 	_scroll.add_child(_body)
 	_battle.returned_to_tower.connect(_on_return_to_tower)
 	move_child(_battle, -1)
+	if _inventory != null:
+		_inventory.bind_host(self)
+		_inventory.set_input_view(_battle)
+		move_child(_inventory, -1)
 	_start_run(str(Time.get_unix_time_from_system()))
 
 
@@ -75,6 +80,7 @@ func _start_run(seed: String) -> void:
 	_pizza_done = false
 	_selected_offer = ""
 	_selected_cards = []
+	_session = null
 	if _battle != null:
 		_battle.visible = false
 	var created := RunService.new_run(seed)
@@ -86,8 +92,12 @@ func _start_run(seed: String) -> void:
 			lines.append(str(err))
 		_status.text = "\n".join(lines)
 		_clear_body()
+		if _inventory != null:
+			_inventory.reset_run()
 		return
 	run = created.run
+	if _inventory != null:
+		_inventory.reset_run()
 	_show()
 
 
@@ -169,6 +179,8 @@ func _on_return_to_tower(outcome: String) -> void:
 		return
 	_set_battle_visible(false)
 	var phase := _session.write_back(run)
+	if _inventory != null:
+		_inventory.detach_combat()
 	_battle_room = ""
 	_session = null
 	_selected_offer = ""
@@ -645,6 +657,22 @@ func _set_battle_visible(show_battle: bool) -> void:
 	_body.visible = not show_battle
 	_header.visible = not show_battle
 	_status.visible = not show_battle
+	if _inventory != null:
+		_inventory.set_battle_clearance(show_battle)
+
+
+func inventory_sources() -> Dictionary:
+	var library: CardLibrary = null
+	var battle: CardBattle = null
+	if _session != null and _session.is_live():
+		library = _session.ctx.library
+		battle = _session.ctx.battle
+	return {"run": run, "library": library, "battle": battle}
+
+
+func set_inventory_input_locked(locked: bool) -> void:
+	if _battle != null:
+		_battle.set_external_input_blocked(locked)
 
 
 func _clear_body() -> void:
