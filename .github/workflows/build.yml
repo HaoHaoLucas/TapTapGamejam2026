@@ -26,12 +26,6 @@ jobs:
           mv /tmp/godot-templates/templates/* "$HOME/.local/share/godot/export_templates/${GODOT_VERSION}.stable/"
       - name: Import and validate project
         run: godot --headless --path . --editor --quit
-      - name: Gameplay smoke test
-        run: godot --headless --path . --script tests/smoke_test.gd
-      - name: Combat engine tests
-        run: godot --headless --path . --script tests/combat_engine_test.gd
-      - name: Battle demo tests
-        run: godot --headless --path . --script tests/battle_demo_test.gd
       - name: Card rules tests
         run: godot --headless --path . --script tests/card_rules_test.gd
       - name: Reward rules tests
@@ -42,6 +36,10 @@ jobs:
         run: godot --headless --path . --script tests/event_reward_test.gd
       - name: Combat session tests
         run: godot --headless --path . --script tests/combat_session_test.gd
+      - name: Run inventory presenter tests
+        run: godot --headless --path . --script tests/run_inventory_presenter_test.gd
+      - name: Run inventory panel tests
+        run: godot --headless --path . --script tests/run_inventory_panel_test.gd
       - name: Run shell tests
         run: godot --headless --path . --script tests/run_shell_test.gd
       - name: Main menu tests

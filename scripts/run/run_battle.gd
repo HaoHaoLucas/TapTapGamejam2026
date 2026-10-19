@@ -25,6 +25,7 @@ var _signature: String = ""
 var _action_seq: int = 0
 var _reported: bool = false
 var _ready_done: bool = false
+var _external_input_blocked: bool = false
 
 @onready var _board: Control = $Board
 @onready var _hp_label: Label = $Board/Margin/Column/TopBar/Row/Life/Row/HpValue
@@ -84,7 +85,13 @@ func _process(delta: float) -> void:
 	_note_phase()
 
 
+func set_external_input_blocked(blocked: bool) -> void:
+	_external_input_blocked = blocked
+
+
 func _input(event: InputEvent) -> void:
+	if _external_input_blocked:
+		return
 	if not visible or session == null or event is not InputEventKey or not event.pressed or event.echo:
 		return
 	var acted := true
