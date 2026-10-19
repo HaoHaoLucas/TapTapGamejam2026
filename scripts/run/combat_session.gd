@@ -44,6 +44,10 @@ func start(run: RunState) -> void:
 	ctx.battle.player_hp = clampi(player_hp, 0, ctx.battle.player_max_hp)
 
 
+func is_live() -> bool:
+	return not _closed and ctx != null and ctx.library != null
+
+
 func write_back(run: RunState) -> String:
 	if _closed:
 		return outcome

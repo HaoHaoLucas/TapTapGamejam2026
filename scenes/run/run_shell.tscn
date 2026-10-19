@@ -2,6 +2,7 @@
 
 [ext_resource type="Script" uid="uid://desr65kk7x5c6" path="res://scripts/run/run_shell.gd" id="1"]
 [ext_resource type="PackedScene" uid="uid://se2ek7juoxuj" path="res://scenes/run/run_battle.tscn" id="2"]
+[ext_resource type="PackedScene" path="res://scenes/run/run_inventory.tscn" id="3"]
 
 [node name="RunShell" type="Control" unique_id=1314082840]
 layout_mode = 3
@@ -13,4 +14,7 @@ grow_vertical = 2
 script = ExtResource("1")
 
 [node name="Battle" parent="." unique_id=1555426995 instance=ExtResource("2")]
+layout_mode = 1
+
+[node name="Inventory" parent="." instance=ExtResource("3")]
 layout_mode = 1
