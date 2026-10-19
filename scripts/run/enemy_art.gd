@@ -32,4 +32,3 @@ func show_monster(monster_id: String) -> void:
 		return
 	_current = instance as Control
 	add_child(_current)
-	_current.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)

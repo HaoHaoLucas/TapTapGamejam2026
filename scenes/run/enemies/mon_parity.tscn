@@ -2,8 +2,17 @@
 
 [ext_resource type="Texture2D" path="res://assets/怪物/MON_PARITY.PNG" id="1_art"]
 
-[node name="EnemyArtParity" type="TextureRect"]
+[node name="EnemyArtParity" type="Control"]
 layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+
+[node name="Art" type="TextureRect" parent="."]
+layout_mode = 1
 anchors_preset = 15
 anchor_right = 1.0
 anchor_bottom = 1.0

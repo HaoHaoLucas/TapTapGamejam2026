@@ -517,8 +517,14 @@
 					"sfv": 3
 				},
 				{
-					"c": "TextureRect",
+					"c": "Control",
 					"d": 7,
+					"kids": 1,
+					"mf": 2
+				},
+				{
+					"c": "TextureRect",
+					"d": 8,
 					"em": 1,
 					"kids": 0,
 					"mf": 2,
