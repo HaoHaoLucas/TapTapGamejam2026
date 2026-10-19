@@ -506,16 +506,22 @@
 					"va": 0
 				},
 				{
-					"c": "TextureRect",
+					"c": "Control",
 					"d": 6,
-					"em": 1,
-					"kids": 0,
+					"kids": 1,
 					"mf": 2,
 					"min": [
 						240.0,
 						160.0
 					],
-					"sfv": 3,
+					"sfv": 3
+				},
+				{
+					"c": "TextureRect",
+					"d": 7,
+					"em": 1,
+					"kids": 0,
+					"mf": 2,
 					"sm": 5,
 					"tex": "res://assets/battle/enemy.png"
 				},

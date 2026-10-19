@@ -2,8 +2,8 @@
 
 [ext_resource type="Script" uid="uid://ixo5h6y4lhih" path="res://scripts/run/run_battle.gd" id="1_126m8"]
 [ext_resource type="Texture2D" uid="uid://b2olidqx7vhl" path="res://assets/battle/hero.png" id="2_sb5ml"]
-[ext_resource type="Texture2D" uid="uid://bhmppwoomj26y" path="res://assets/battle/enemy.png" id="3_u3cmk"]
 [ext_resource type="Theme" uid="uid://trle8mouk54k" path="res://assets/theme/ui_theme.tres" id="4_theme"]
+[ext_resource type="Script" path="res://scripts/run/enemy_art.gd" id="5_enemyart"]
 
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_hwbvc"]
 content_margin_left = 10.0
@@ -295,14 +295,12 @@ text = "意图"
 horizontal_alignment = 1
 autowrap_mode = 3
 
-[node name="Enemy" type="TextureRect" parent="Board/Margin/Column/Stage/Enemy" unique_id=410076289]
+[node name="EnemyArt" type="Control" parent="Board/Margin/Column/Stage/Enemy" unique_id=410076289]
 custom_minimum_size = Vector2(240, 160)
 layout_mode = 2
 size_flags_vertical = 3
 mouse_filter = 2
-texture = ExtResource("3_u3cmk")
-expand_mode = 1
-stretch_mode = 5
+script = ExtResource("5_enemyart")
 
 [node name="Name" type="Label" parent="Board/Margin/Column/Stage/Enemy" unique_id=1613275970]
 layout_mode = 2

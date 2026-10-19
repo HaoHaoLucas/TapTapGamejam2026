@@ -35,6 +35,7 @@ var _ready_done: bool = false
 @onready var _enemy_name: Label = $Board/Margin/Column/Stage/Enemy/Name
 @onready var _enemy_hp_fill: ColorRect = $Board/Margin/Column/Stage/Enemy/Track/Fill
 @onready var _enemy_hp_label: Label = $Board/Margin/Column/Stage/Enemy/HpValue
+@onready var _enemy_art: Control = $Board/Margin/Column/Stage/Enemy/EnemyArt
 @onready var _round_label: Label = $Board/Margin/Column/Stage/Center/Round
 @onready var _timer_label: Label = $Board/Margin/Column/Stage/Center/Timer
 @onready var _timer_extra: Label = $Board/Margin/Column/Stage/Center/TimerExtra
@@ -131,6 +132,7 @@ func _refresh_hud() -> void:
 	var battle := _battle()
 	if battle == null:
 		_enemy_name.text = "等待这场战斗。"
+		_enemy_art.show_monster("")
 		_timer_label.text = ""
 		_timer_extra.text = ""
 		_hp_label.text = ""
@@ -140,6 +142,7 @@ func _refresh_hud() -> void:
 		return
 	var phase := str(PHASE_NAME.get(battle.phase, battle.phase))
 	_enemy_name.text = _monster_title(battle)
+	_enemy_art.show_monster(str(battle.monster_id))
 	_enemy_hp_label.text = "%d / %d" % [battle.enemy_hp, battle.enemy_max_hp]
 	_set_fill(_enemy_hp_fill, float(battle.enemy_hp) / float(maxi(1, battle.enemy_max_hp)))
 	var intent := _intent_text(battle)
