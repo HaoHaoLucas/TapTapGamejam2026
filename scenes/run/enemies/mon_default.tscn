@@ -1,8 +1,8 @@
-[gd_scene format=3]
+[gd_scene format=3 uid="uid://8wf8df72vd8m"]
 
-[ext_resource type="Texture2D" path="res://assets/battle/enemy.png" id="1_art"]
+[ext_resource type="Texture2D" uid="uid://bhmppwoomj26y" path="res://assets/battle/enemy.png" id="1_art"]
 
-[node name="EnemyArtDefault" type="Control"]
+[node name="EnemyArtDefault" type="Control" unique_id=2086605129]
 layout_mode = 3
 anchors_preset = 15
 anchor_right = 1.0
@@ -11,7 +11,7 @@ grow_horizontal = 2
 grow_vertical = 2
 mouse_filter = 2
 
-[node name="Art" type="TextureRect" parent="."]
+[node name="Art" type="TextureRect" parent="." unique_id=1534086623]
 layout_mode = 1
 anchors_preset = 15
 anchor_right = 1.0

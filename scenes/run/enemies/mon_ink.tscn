@@ -1,8 +1,8 @@
-[gd_scene format=3]
+[gd_scene format=3 uid="uid://bfsixw7lrsgfp"]
 
-[ext_resource type="Texture2D" path="res://assets/怪物/MON_INK.PNG" id="1_art"]
+[ext_resource type="Texture2D" uid="uid://vw46cmxy5f38" path="res://assets/怪物/MON_INK.PNG" id="1_art"]
 
-[node name="EnemyArtInk" type="Control"]
+[node name="EnemyArtInk" type="Control" unique_id=136854555]
 layout_mode = 3
 anchors_preset = 15
 anchor_right = 1.0
@@ -11,13 +11,12 @@ grow_horizontal = 2
 grow_vertical = 2
 mouse_filter = 2
 
-[node name="Art" type="TextureRect" parent="."]
-layout_mode = 1
-anchors_preset = 15
-anchor_right = 1.0
-anchor_bottom = 1.0
-grow_horizontal = 2
-grow_vertical = 2
+[node name="Art" type="TextureRect" parent="." unique_id=129303007]
+layout_mode = 0
+offset_left = -411.7
+offset_top = -16.7
+offset_right = 418.3
+offset_bottom = 450.3
 mouse_filter = 2
 texture = ExtResource("1_art")
 expand_mode = 1

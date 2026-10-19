@@ -1,8 +1,8 @@
-[gd_scene format=3]
+[gd_scene format=3 uid="uid://bxjefce7abk2u"]
 
-[ext_resource type="Texture2D" path="res://assets/怪物/MON_PRIEST.PNG" id="1_art"]
+[ext_resource type="Texture2D" uid="uid://g54pitepchjh" path="res://assets/怪物/MON_PRIEST.PNG" id="1_art"]
 
-[node name="EnemyArtPriest" type="Control"]
+[node name="EnemyArtPriest" type="Control" unique_id=719398577]
 layout_mode = 3
 anchors_preset = 15
 anchor_right = 1.0
@@ -11,13 +11,12 @@ grow_horizontal = 2
 grow_vertical = 2
 mouse_filter = 2
 
-[node name="Art" type="TextureRect" parent="."]
-layout_mode = 1
-anchors_preset = 15
-anchor_right = 1.0
-anchor_bottom = 1.0
-grow_horizontal = 2
-grow_vertical = 2
+[node name="Art" type="TextureRect" parent="." unique_id=941448107]
+layout_mode = 0
+offset_left = -344.6
+offset_top = 14.6
+offset_right = 485.4
+offset_bottom = 481.6
 mouse_filter = 2
 texture = ExtResource("1_art")
 expand_mode = 1

@@ -1,8 +1,8 @@
-[gd_scene format=3]
+[gd_scene format=3 uid="uid://h8olncxd1vit"]
 
-[ext_resource type="Texture2D" path="res://assets/怪物/MON_PARITY.PNG" id="1_art"]
+[ext_resource type="Texture2D" uid="uid://c6ac6pc2tgmop" path="res://assets/怪物/MON_PARITY.PNG" id="1_art"]
 
-[node name="EnemyArtParity" type="Control"]
+[node name="EnemyArtParity" type="Control" unique_id=1691951104]
 layout_mode = 3
 anchors_preset = 15
 anchor_right = 1.0
@@ -11,13 +11,12 @@ grow_horizontal = 2
 grow_vertical = 2
 mouse_filter = 2
 
-[node name="Art" type="TextureRect" parent="."]
-layout_mode = 1
-anchors_preset = 15
-anchor_right = 1.0
-anchor_bottom = 1.0
-grow_horizontal = 2
-grow_vertical = 2
+[node name="Art" type="TextureRect" parent="." unique_id=1856774630]
+layout_mode = 0
+offset_left = -482.8
+offset_top = -2.0
+offset_right = 347.2
+offset_bottom = 465.0
 mouse_filter = 2
 texture = ExtResource("1_art")
 expand_mode = 1
