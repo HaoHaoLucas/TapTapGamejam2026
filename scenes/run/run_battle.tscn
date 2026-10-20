@@ -11,6 +11,11 @@
 [ext_resource type="Texture2D" uid="uid://bye1qpcnt6y4o" path="res://assets/ui/ui/battle_hud_monster_.PNG" id="10_hpfill"]
 [ext_resource type="Texture2D" uid="uid://drxnecytetkos" path="res://assets/ui/ui/battle_log_continue.png" id="11_pauseart"]
 [ext_resource type="Texture2D" uid="uid://bft1re5xwo26d" path="res://assets/ui/ui/微信图片_20261020235754_513_2.png" id="12_battleup"]
+[ext_resource type="Texture2D" uid="uid://cb3o8mafe50us" path="res://assets/ui/ui/c840b6e5c241b029d3cfd7d169a7235b.png" id="13_ctrlbg"]
+
+[sub_resource type="StyleBoxTexture" id="StyleBoxTexture_ctrlbg"]
+texture = ExtResource("13_ctrlbg")
+
 [sub_resource type="StyleBoxEmpty" id="StyleBoxEmpty_plain_pad"]
 content_margin_left = 10.0
 content_margin_top = 8.0
@@ -331,60 +336,64 @@ theme_override_font_sizes/font_size = 13
 text = "0 / 0"
 horizontal_alignment = 1
 
-[node name="Controls" type="HBoxContainer" parent="Board/Margin/Column" unique_id=1756187848]
+[node name="ControlsFrame" type="PanelContainer" parent="Board/Margin/Column"]
+layout_mode = 2
+theme_override_styles/panel = SubResource("StyleBoxTexture_ctrlbg")
+
+[node name="Controls" type="HBoxContainer" parent="Board/Margin/Column/ControlsFrame" unique_id=1756187848]
 custom_minimum_size = Vector2(0, 132)
 layout_mode = 2
 
-[node name="Button" type="Button" parent="Board/Margin/Column/Controls" unique_id=1995097860]
+[node name="Button" type="Button" parent="Board/Margin/Column/ControlsFrame/Controls" unique_id=1995097860]
 custom_minimum_size = Vector2(150, 64)
 layout_mode = 2
 focus_mode = 0
 text = "烧掉回血
 |点数| × 10"
 
-[node name="Equation" type="PanelContainer" parent="Board/Margin/Column/Controls" unique_id=1286598502]
+[node name="Equation" type="PanelContainer" parent="Board/Margin/Column/ControlsFrame/Controls" unique_id=1286598502]
 layout_mode = 2
 size_flags_horizontal = 3
 theme_override_styles/panel = SubResource("StyleBoxFlat_twyu1")
 
-[node name="Pad" type="MarginContainer" parent="Board/Margin/Column/Controls/Equation" unique_id=471183360]
+[node name="Pad" type="MarginContainer" parent="Board/Margin/Column/ControlsFrame/Controls/Equation" unique_id=471183360]
 layout_mode = 2
 theme_override_constants/margin_left = 10
 theme_override_constants/margin_top = 6
 theme_override_constants/margin_right = 10
 theme_override_constants/margin_bottom = 6
 
-[node name="Box" type="VBoxContainer" parent="Board/Margin/Column/Controls/Equation/Pad" unique_id=1175679714]
+[node name="Box" type="VBoxContainer" parent="Board/Margin/Column/ControlsFrame/Controls/Equation/Pad" unique_id=1175679714]
 layout_mode = 2
 
-[node name="HBoxContainer" type="HBoxContainer" parent="Board/Margin/Column/Controls/Equation/Pad/Box" unique_id=2092281441]
+[node name="HBoxContainer" type="HBoxContainer" parent="Board/Margin/Column/ControlsFrame/Controls/Equation/Pad/Box" unique_id=2092281441]
 layout_mode = 2
 
-[node name="Label" type="Label" parent="Board/Margin/Column/Controls/Equation/Pad/Box/HBoxContainer" unique_id=2099595582]
+[node name="Label" type="Label" parent="Board/Margin/Column/ControlsFrame/Controls/Equation/Pad/Box/HBoxContainer" unique_id=2099595582]
 layout_mode = 2
 size_flags_horizontal = 3
 theme_override_colors/font_color = Color(0.64, 0.71, 0.65, 1)
 theme_override_font_sizes/font_size = 13
 text = "算式"
 
-[node name="Button" type="Button" parent="Board/Margin/Column/Controls/Equation/Pad/Box/HBoxContainer" unique_id=1887378537]
+[node name="Button" type="Button" parent="Board/Margin/Column/ControlsFrame/Controls/Equation/Pad/Box/HBoxContainer" unique_id=1887378537]
 custom_minimum_size = Vector2(64, 28)
 layout_mode = 2
 focus_mode = 0
 text = "清空"
 
-[node name="Scroll" type="ScrollContainer" parent="Board/Margin/Column/Controls/Equation/Pad/Box" unique_id=640855185]
+[node name="Scroll" type="ScrollContainer" parent="Board/Margin/Column/ControlsFrame/Controls/Equation/Pad/Box" unique_id=640855185]
 custom_minimum_size = Vector2(0, 116)
 layout_mode = 2
 vertical_scroll_mode = 0
 
-[node name="EqRow" type="HBoxContainer" parent="Board/Margin/Column/Controls/Equation/Pad/Box/Scroll" unique_id=884793983]
+[node name="EqRow" type="HBoxContainer" parent="Board/Margin/Column/ControlsFrame/Controls/Equation/Pad/Box/Scroll" unique_id=884793983]
 layout_mode = 2
 
-[node name="Bottom" type="HBoxContainer" parent="Board/Margin/Column/Controls/Equation/Pad/Box" unique_id=1901500261]
+[node name="Bottom" type="HBoxContainer" parent="Board/Margin/Column/ControlsFrame/Controls/Equation/Pad/Box" unique_id=1901500261]
 layout_mode = 2
 
-[node name="Preview" type="Label" parent="Board/Margin/Column/Controls/Equation/Pad/Box/Bottom" unique_id=8312836]
+[node name="Preview" type="Label" parent="Board/Margin/Column/ControlsFrame/Controls/Equation/Pad/Box/Bottom" unique_id=8312836]
 layout_mode = 2
 size_flags_horizontal = 3
 theme_override_colors/font_color = Color(0.75, 0.78, 0.7, 1)
@@ -393,14 +402,14 @@ text = "从数字开始，数字和符号交替。"
 vertical_alignment = 1
 autowrap_mode = 3
 
-[node name="Result" type="Label" parent="Board/Margin/Column/Controls/Equation/Pad/Box/Bottom" unique_id=1340554278]
+[node name="Result" type="Label" parent="Board/Margin/Column/ControlsFrame/Controls/Equation/Pad/Box/Bottom" unique_id=1340554278]
 layout_mode = 2
 theme_override_colors/font_color = Color(0.93, 0.85, 0.62, 1)
 theme_override_font_sizes/font_size = 22
 text = "—"
 vertical_alignment = 1
 
-[node name="FireButton" type="Button" parent="Board/Margin/Column/Controls" unique_id=1193882678]
+[node name="FireButton" type="Button" parent="Board/Margin/Column/ControlsFrame/Controls" unique_id=1193882678]
 custom_minimum_size = Vector2(108, 52.8)
 layout_mode = 2
 size_flags_vertical = 4
@@ -409,7 +418,7 @@ theme_override_styles/normal = SubResource("StyleBoxEmpty_artbtn")
 theme_override_styles/pressed = SubResource("StyleBoxEmpty_artbtn")
 theme_override_styles/hover = SubResource("StyleBoxEmpty_artbtn")
 
-[node name="Art" type="TextureRect" parent="Board/Margin/Column/Controls/FireButton" unique_id=2101808496]
+[node name="Art" type="TextureRect" parent="Board/Margin/Column/ControlsFrame/Controls/FireButton" unique_id=2101808496]
 layout_mode = 1
 anchors_preset = 15
 anchor_right = 1.0
@@ -420,34 +429,34 @@ mouse_filter = 2
 texture = ExtResource("7_fireart")
 expand_mode = 1
 
-[node name="Combo" type="VBoxContainer" parent="Board/Margin/Column/Controls" unique_id=1730503138]
+[node name="Combo" type="VBoxContainer" parent="Board/Margin/Column/ControlsFrame/Controls" unique_id=1730503138]
 custom_minimum_size = Vector2(150, 0)
 layout_mode = 2
 alignment = 1
 
-[node name="Label" type="Label" parent="Board/Margin/Column/Controls/Combo" unique_id=581600174]
+[node name="Label" type="Label" parent="Board/Margin/Column/ControlsFrame/Controls/Combo" unique_id=581600174]
 layout_mode = 2
 theme_override_colors/font_color = Color(0.64, 0.71, 0.65, 1)
 theme_override_font_sizes/font_size = 12
 text = "加法追击"
 
-[node name="Dots" type="HBoxContainer" parent="Board/Margin/Column/Controls/Combo" unique_id=1325787030]
+[node name="Dots" type="HBoxContainer" parent="Board/Margin/Column/ControlsFrame/Controls/Combo" unique_id=1325787030]
 layout_mode = 2
 alignment = 1
 
-[node name="A" type="Panel" parent="Board/Margin/Column/Controls/Combo/Dots" unique_id=850626639]
+[node name="A" type="Panel" parent="Board/Margin/Column/ControlsFrame/Controls/Combo/Dots" unique_id=850626639]
 modulate = Color(0.35, 0.42, 0.4, 1)
 custom_minimum_size = Vector2(16, 16)
 layout_mode = 2
 theme_override_styles/panel = SubResource("StyleBoxFlat_tv6bu")
 
-[node name="B" type="Panel" parent="Board/Margin/Column/Controls/Combo/Dots" unique_id=735533798]
+[node name="B" type="Panel" parent="Board/Margin/Column/ControlsFrame/Controls/Combo/Dots" unique_id=735533798]
 modulate = Color(0.35, 0.42, 0.4, 1)
 custom_minimum_size = Vector2(16, 16)
 layout_mode = 2
 theme_override_styles/panel = SubResource("StyleBoxFlat_bdnlp")
 
-[node name="Status" type="Label" parent="Board/Margin/Column/Controls/Combo" unique_id=307863001]
+[node name="Status" type="Label" parent="Board/Margin/Column/ControlsFrame/Controls/Combo" unique_id=307863001]
 layout_mode = 2
 theme_override_colors/font_color = Color(0.82, 0.84, 0.74, 1)
 theme_override_font_sizes/font_size = 12
@@ -456,11 +465,11 @@ text = "两次正数加法可追击
 horizontal_alignment = 1
 autowrap_mode = 3
 
-[node name="End" type="VBoxContainer" parent="Board/Margin/Column/Controls" unique_id=1534193972]
+[node name="End" type="VBoxContainer" parent="Board/Margin/Column/ControlsFrame/Controls" unique_id=1534193972]
 custom_minimum_size = Vector2(168, 0)
 layout_mode = 2
 
-[node name="Button" type="Button" parent="Board/Margin/Column/Controls/End" unique_id=852829456]
+[node name="Button" type="Button" parent="Board/Margin/Column/ControlsFrame/Controls/End" unique_id=852829456]
 custom_minimum_size = Vector2(168, 82.5)
 layout_mode = 2
 focus_mode = 0
@@ -468,7 +477,7 @@ theme_override_styles/normal = SubResource("StyleBoxEmpty_artbtn")
 theme_override_styles/pressed = SubResource("StyleBoxEmpty_artbtn")
 theme_override_styles/hover = SubResource("StyleBoxEmpty_artbtn")
 
-[node name="Art" type="TextureRect" parent="Board/Margin/Column/Controls/End/Button" unique_id=576660335]
+[node name="Art" type="TextureRect" parent="Board/Margin/Column/ControlsFrame/Controls/End/Button" unique_id=576660335]
 layout_mode = 1
 anchors_preset = 15
 anchor_right = 1.0
@@ -479,7 +488,7 @@ mouse_filter = 2
 texture = ExtResource("6_endart")
 expand_mode = 1
 
-[node name="Incoming" type="Label" parent="Board/Margin/Column/Controls/End" unique_id=617605503]
+[node name="Incoming" type="Label" parent="Board/Margin/Column/ControlsFrame/Controls/End" unique_id=617605503]
 layout_mode = 2
 theme_override_colors/font_color = Color(0.78, 0.7, 0.58, 1)
 theme_override_font_sizes/font_size = 12
@@ -620,9 +629,9 @@ focus_mode = 0
 text = "连点追击"
 
 [connection signal="pressed" from="Board/Margin/Column/TopBar/Row/PauseButton" to="." method="_toggle_pause"]
-[connection signal="pressed" from="Board/Margin/Column/Controls/Button" to="." method="_burn"]
-[connection signal="pressed" from="Board/Margin/Column/Controls/Equation/Pad/Box/HBoxContainer/Button" to="." method="_clear_selection"]
-[connection signal="pressed" from="Board/Margin/Column/Controls/FireButton" to="." method="_commit"]
-[connection signal="pressed" from="Board/Margin/Column/Controls/End/Button" to="." method="_end_turn"]
+[connection signal="pressed" from="Board/Margin/Column/ControlsFrame/Controls/Button" to="." method="_burn"]
+[connection signal="pressed" from="Board/Margin/Column/ControlsFrame/Controls/Equation/Pad/Box/HBoxContainer/Button" to="." method="_clear_selection"]
+[connection signal="pressed" from="Board/Margin/Column/ControlsFrame/Controls/FireButton" to="." method="_commit"]
+[connection signal="pressed" from="Board/Margin/Column/ControlsFrame/Controls/End/Button" to="." method="_end_turn"]
 [connection signal="gui_input" from="ComboLayer" to="." method="_on_combo_input"]
 [connection signal="pressed" from="ComboLayer/Burst/Pad/Box/Button" to="." method="_combo_click"]
