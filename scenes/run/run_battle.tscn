@@ -6,6 +6,7 @@
 [ext_resource type="Script" path="res://scripts/run/enemy_art.gd" id="5_enemyart"]
 [ext_resource type="Texture2D" uid="uid://cf48hjar707ux" path="res://assets/ui/ui/battle_log_2.png" id="6_endart"]
 [ext_resource type="Texture2D" uid="uid://hykbiixol3j5" path="res://assets/ui/ui/battle_log_1.png" id="7_fireart"]
+[ext_resource type="Texture2D" uid="uid://df6rl4865x3uc" path="res://assets/ui/ui/battle_hud_.png" id="8_drawart"]
 
 [sub_resource type="StyleBoxEmpty" id="StyleBoxEmpty_artbtn"]
 
@@ -529,6 +530,13 @@ custom_minimum_size = Vector2(96, 120)
 layout_mode = 2
 size_flags_vertical = 4
 theme_override_styles/panel = SubResource("StyleBoxFlat_n0t68")
+
+[node name="Backdrop" type="TextureRect" parent="Hand/Zone/DrawPile"]
+layout_mode = 2
+mouse_filter = 2
+texture = ExtResource("8_drawart")
+expand_mode = 1
+stretch_mode = 0
 
 [node name="DrawLabel" type="Label" parent="Hand/Zone/DrawPile" unique_id=1096032152]
 layout_mode = 2

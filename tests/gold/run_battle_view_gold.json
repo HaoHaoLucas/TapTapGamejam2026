@@ -941,13 +941,22 @@
 				{
 					"c": "PanelContainer",
 					"d": 3,
-					"kids": 1,
+					"kids": 2,
 					"min": [
 						96.0,
 						120.0
 					],
 					"sb": 824984203,
 					"sfv": 4
+				},
+				{
+					"c": "TextureRect",
+					"d": 4,
+					"em": 1,
+					"kids": 0,
+					"mf": 2,
+					"sm": 0,
+					"tex": "res://assets/ui/ui/battle_hud_.png"
 				},
 				{
 					"aw": 0,
