@@ -403,15 +403,16 @@ theme_override_font_sizes/font_size = 22
 text = "—"
 vertical_alignment = 1
 
-[node name="Button" type="Button" parent="Board/Margin/Column/Controls/Equation/Pad/Box/Bottom" unique_id=1193882678]
+[node name="FireButton" type="Button" parent="Board/Margin/Column/Controls" unique_id=1193882678]
 custom_minimum_size = Vector2(108, 52.8)
 layout_mode = 2
+size_flags_vertical = 4
 focus_mode = 0
 theme_override_styles/pressed = SubResource("StyleBoxEmpty_artbtn")
 theme_override_styles/hover = SubResource("StyleBoxEmpty_artbtn")
 theme_override_styles/normal = SubResource("StyleBoxEmpty_artbtn")
 
-[node name="Art" type="TextureRect" parent="Board/Margin/Column/Controls/Equation/Pad/Box/Bottom/Button"]
+[node name="Art" type="TextureRect" parent="Board/Margin/Column/Controls/FireButton"]
 layout_mode = 1
 anchors_preset = 15
 anchor_right = 1.0
@@ -621,7 +622,7 @@ text = "连点追击"
 [connection signal="pressed" from="Board/Margin/Column/TopBar/Row/PauseButton" to="." method="_toggle_pause"]
 [connection signal="pressed" from="Board/Margin/Column/Controls/Button" to="." method="_burn"]
 [connection signal="pressed" from="Board/Margin/Column/Controls/Equation/Pad/Box/HBoxContainer/Button" to="." method="_clear_selection"]
-[connection signal="pressed" from="Board/Margin/Column/Controls/Equation/Pad/Box/Bottom/Button" to="." method="_commit"]
+[connection signal="pressed" from="Board/Margin/Column/Controls/FireButton" to="." method="_commit"]
 [connection signal="pressed" from="Board/Margin/Column/Controls/End/Button" to="." method="_end_turn"]
 [connection signal="gui_input" from="ComboLayer" to="." method="_on_combo_input"]
 [connection signal="pressed" from="ComboLayer/Burst/Pad/Box/Button" to="." method="_combo_click"]
