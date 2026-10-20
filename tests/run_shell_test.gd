@@ -21,6 +21,7 @@ func _run() -> void:
 	await _test_battle_choice_opens_combat()
 	await _test_battle_losses()
 	_test_sacrifice_result_is_readable()
+	await _test_event_sits_under_header()
 	if _failures == 0:
 		print("PASS: a battle room opens the jam fight and writes zones back")
 	quit(1 if _failures else 0)
@@ -230,6 +231,43 @@ func _test_sacrifice_result_is_readable() -> void:
 	_check(text.contains("给剩下的牌加上了"), "Sacrifice result must name the marks that were granted")
 	_check(text.contains("加上 "), "Each granted mark must be written out, got %s" % text)
 	shell.free()
+
+
+func _test_event_sits_under_header() -> void:
+	var shell = load("res://scenes/run/run_shell.tscn").instantiate()
+	root.add_child(shell)
+	await process_frame
+	await process_frame
+	_check(shell.run != null, "Run shell must start a run")
+	if shell.run == null:
+		shell.queue_free()
+		await process_frame
+		return
+	var run: RunState = shell.run
+	var room := GameData.room("RM_SAC")
+	run.current_room = {
+		"room_uid": run.uid("R"),
+		"room_id": "RM_SAC",
+		"content_id": "EV_SAC",
+		"room_kind": str(room.get("room_kind", "EVENT")),
+		"display_key": str(room.get("display_key", "ROOM_EVENT")),
+		"scene_key": "event",
+		"status": "ENTERED",
+	}
+	run.phase = "ROOM"
+	shell._show()
+	await process_frame
+	await process_frame
+	_check(not shell._status.visible, "An event with no status line must hide the status bar")
+	_check(shell._status.text == "", "The event status line starts empty")
+	_check(shell._header.size.y > 0.0 and shell._header.size.y < 60.0, "The floor line should be one row, got %s" % shell._header.size.y)
+	var title := shell._body.get_child(0) as Label
+	_check(title != null and str(title.text) == "无言的祭祀", "The event title is the first row, got %s" % (str(title.text) if title != null else "nothing"))
+	if title != null:
+		var gap: float = title.global_position.y - (shell._header.global_position.y + shell._header.size.y)
+		_check(gap < 40.0, "The event title should sit just under the floor line, gap %s" % gap)
+	shell.queue_free()
+	await process_frame
 
 
 func _reach_choice(shell) -> bool:

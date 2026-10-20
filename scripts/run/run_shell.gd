@@ -56,7 +56,7 @@ func _start_run(seed: String) -> void:
 		var lines := PackedStringArray()
 		for err in created.get("errors", [created.get("error", "")]):
 			lines.append(str(err))
-		_status.text = "\n".join(lines)
+		_set_status("\n".join(lines))
 		_clear_body()
 		if _inventory != null:
 			_inventory.reset_run()
@@ -75,9 +75,9 @@ func _show() -> void:
 		return
 	_header.text = "第 %d 层    生命 %d/%d    牌库 %d" % [run.depth, run.hp, run.max_hp, TowerDeck.deck_cards(run).size()]
 	var pizza := _active_pizza()
-	_status.text = "" if pizza.is_empty() else "披萨在第 %d 层的 Boss 之后到。" % int(pizza.get("target_depth", 0))
+	_set_status("" if pizza.is_empty() else "披萨在第 %d 层的 Boss 之后到。" % int(pizza.get("target_depth", 0)))
 	if run.phase == "ERROR":
-		_status.text = run.last_error
+		_set_status(run.last_error)
 		return
 	if run.phase == "DEAD":
 		_show_end("你倒下了，本局结束。")
@@ -106,9 +106,9 @@ func _show_choices() -> void:
 	_selected_offer = ""
 	_selected_cards = []
 	if run.current_offers.is_empty():
-		_status.text = "前面没有路了。"
+		_set_status("前面没有路了。")
 		return
-	_status.text = "第 %d 间，选一条路。" % run.pending_slot
+	_set_status("第 %d 间，选一条路。" % run.pending_slot)
 	for offer in run.current_offers:
 		var label := str(DISPLAY.get(str(offer.get("display_key", "")), "房间"))
 		var button := _button(label)
@@ -120,7 +120,7 @@ func _show_choices() -> void:
 func _choose_offer(offer_uid: String) -> void:
 	var result := MapService.choose_room(run, offer_uid)
 	if not result.get("ok", false):
-		_status.text = str(result.get("error", "进不去。"))
+		_set_status(str(result.get("error", "进不去。")))
 		return
 	_show()
 
@@ -168,7 +168,7 @@ func _show_event() -> void:
 	var room_uid := str(run.current_room.get("room_uid", ""))
 	var view := EventService.make_view(run, room_uid)
 	if not view.get("ok", false):
-		_status.text = str(view.get("error", "这个奇遇打不开。"))
+		_set_status(str(view.get("error", "这个奇遇打不开。")))
 		return
 	var title := Label.new()
 	title.text = str(view.get("name", "奇遇"))
@@ -224,7 +224,7 @@ func _select_card(card_uid: String, multi: bool, room_uid: String) -> void:
 			_selected_cards.erase(card_uid)
 		elif _selected_cards.size() < 3:
 			_selected_cards.append(card_uid)
-		_status.text = _multi_status()
+		_set_status(_multi_status())
 		call_deferred("_show_event")
 		return
 	_selected_cards = [card_uid]
@@ -232,11 +232,11 @@ func _select_card(card_uid: String, multi: bool, room_uid: String) -> void:
 	if str(view.get("handler_id", "")) == "TRANSFORM_CARD":
 		var preview := EventService.freeze_preview(run, room_uid, card_uid)
 		if preview.get("ok", false):
-			_status.text = "会变成 %s" % str(preview.get("label", ""))
+			_set_status("会变成 %s" % str(preview.get("label", "")))
 		else:
-			_status.text = str(preview.get("error", "换不了。"))
+			_set_status(str(preview.get("error", "换不了。")))
 	else:
-		_status.text = "选好了这张牌。"
+		_set_status("选好了这张牌。")
 	call_deferred("_show_event")
 
 
@@ -246,18 +246,18 @@ func _confirm_cards(room_uid: String, handler_id: String, multi: bool) -> void:
 		payload = {"sacrifice_uids": _selected_cards.duplicate()}
 	elif handler_id == "TRANSFORM_CARD":
 		if _selected_cards.is_empty():
-			_status.text = "先选一张牌。"
+			_set_status("先选一张牌。")
 			return
 		var preview: Dictionary = EventService.make_view(run, room_uid).get("previews", {}).get(_selected_cards[0], {})
 		if preview.is_empty():
 			preview = EventService.freeze_preview(run, room_uid, _selected_cards[0])
 		if not preview.get("ok", false):
-			_status.text = str(preview.get("error", "换不了。"))
+			_set_status(str(preview.get("error", "换不了。")))
 			return
 		payload = {"target_uid": _selected_cards[0], "preview_uid": str(preview.get("preview_uid", ""))}
 	else:
 		if _selected_cards.is_empty():
-			_status.text = "先选一张牌。"
+			_set_status("先选一张牌。")
 			return
 		payload = {"target_uid": _selected_cards[0]}
 	_commit_event(room_uid, payload)
@@ -305,17 +305,17 @@ func _select_offer(offer_uid: String, handler: String) -> void:
 	if handler == "MARK_OFFER":
 		call_deferred("_show_event")
 		return
-	_status.text = "选好了。"
+	_set_status("选好了。")
 	call_deferred("_show_event")
 
 
 func _confirm_offer(room_uid: String, handler: String) -> void:
 	if _selected_offer == "":
-		_status.text = "先选一项。"
+		_set_status("先选一项。")
 		return
 	if handler == "MARK_OFFER":
 		if _selected_cards.is_empty():
-			_status.text = "再选一张牌。"
+			_set_status("再选一张牌。")
 			return
 		_commit_event(room_uid, {"offer_uid": _selected_offer, "target_uid": _selected_cards[0]})
 		return
@@ -349,7 +349,7 @@ func _commit_event(room_uid: String, payload: Dictionary) -> void:
 	var txn := run.uid("T")
 	var result := EventService.commit(run, room_uid, payload, txn)
 	if not result.get("ok", false):
-		_status.text = str(result.get("error", "没做成。"))
+		_set_status(str(result.get("error", "没做成。")))
 		call_deferred("_show_event")
 		return
 	var lines := _event_result_lines(result)
@@ -383,11 +383,11 @@ func _show_reward() -> void:
 		_selected_offer = ""
 		_selected_cards = []
 	if _selected_offer == "" and _selected_cards.is_empty():
-		_status.text = "挑一份战利品。"
+		_set_status("挑一份战利品。")
 	elif _selected_cards.is_empty():
-		_status.text = "选好了这一项。"
+		_set_status("选好了这一项。")
 	else:
-		_status.text = "选好了这张牌。"
+		_set_status("选好了这张牌。")
 	var plan := GameData.reward(str(session.get("reward_id", "")))
 	if str(plan.get("payload_kind", "")) == "MARK":
 		_show_mark_reward(session)
@@ -468,23 +468,23 @@ func _select_reward_offer(offer_uid: String, marks: bool) -> void:
 	if marks:
 		call_deferred("_show")
 		return
-	_status.text = "选好了。"
+	_set_status("选好了。")
 	call_deferred("_show")
 
 
 func _select_reward_card(card_uid: String) -> void:
 	_selected_cards = [card_uid]
-	_status.text = "选好了这张牌。"
+	_set_status("选好了这张牌。")
 	call_deferred("_show")
 
 
 func _confirm_card_reward(session_uid: String) -> void:
 	if _selected_offer == "":
-		_status.text = "先选一项。"
+		_set_status("先选一项。")
 		return
 	var result := RewardService.commit_cards(run, session_uid, _selected_offer, false, run.uid("T"))
 	if not result.get("ok", false):
-		_status.text = str(result.get("error", "没拿到牌。"))
+		_set_status(str(result.get("error", "没拿到牌。")))
 		return
 	var lines := PackedStringArray()
 	lines.append("放进牌库：")
@@ -497,15 +497,15 @@ func _confirm_card_reward(session_uid: String) -> void:
 
 func _confirm_mark_reward(session_uid: String) -> void:
 	if _selected_offer == "":
-		_status.text = "先选一项。"
+		_set_status("先选一项。")
 		return
 	if _selected_cards.is_empty():
-		_status.text = "再选一张牌。"
+		_set_status("再选一张牌。")
 		return
 	var target_uid := str(_selected_cards[0])
 	var result := RewardService.commit_mark(run, session_uid, _selected_offer, target_uid, run.uid("T"))
 	if not result.get("ok", false):
-		_status.text = str(result.get("error", "没加上去。"))
+		_set_status(str(result.get("error", "没加上去。")))
 		return
 	var lines := PackedStringArray()
 	lines.append("给 %s 加上了 %s" % [_brief(target_uid), TowerDeck.mark_line(str(result.get("enh_id", "")))])
@@ -526,7 +526,7 @@ func _finish_reward_step() -> void:
 	if _open_reward_session().is_empty() and run.phase == "REWARD":
 		var result := RunService.continue_after_rewards(run)
 		if not result.get("ok", false):
-			_status.text = str(result.get("error", "不能继续"))
+			_set_status(str(result.get("error", "不能继续")))
 	call_deferred("_show")
 
 
@@ -580,7 +580,7 @@ func _toggle_discard(offer_uid: String) -> void:
 func _claim_pizza(quest_uid: String) -> void:
 	var result := RewardService.claim_pizza(run, quest_uid, run.uid("T"), _selected_cards.duplicate())
 	if not result.get("ok", false):
-		_status.text = str(result.get("error", "不能领取"))
+		_set_status(str(result.get("error", "不能领取")))
 		return
 	_pizza_done = true
 	_selected_cards = []
@@ -616,13 +616,18 @@ func _ready_pizza() -> Dictionary:
 	return {}
 
 
+func _set_status(text: String) -> void:
+	_status.text = text
+	_status.visible = text != ""
+
+
 func _set_battle_visible(show_battle: bool) -> void:
 	if _battle == null:
 		return
 	_battle.visible = show_battle
 	_body.visible = not show_battle
 	_header.visible = not show_battle
-	_status.visible = not show_battle
+	_status.visible = not show_battle and _status.text != ""
 	if _inventory != null:
 		_inventory.set_battle_clearance(show_battle)
 
@@ -665,7 +670,7 @@ func _show_notice() -> void:
 	_set_battle_visible(false)
 	_clear_body()
 	_header.text = str(_notice.get("title", "结果"))
-	_status.text = ""
+	_set_status("")
 	for line in _notice.get("lines", []):
 		var text := str(line)
 		if text == "":
