@@ -733,13 +733,22 @@
 				{
 					"c": "Button",
 					"d": 9,
-					"kids": 0,
+					"kids": 1,
 					"min": [
 						108.0,
-						44.0
+						52.7999992370605
 					],
-					"sb": 2003203193,
-					"t": "发射  ↵"
+					"sb": 1071609195,
+					"t": ""
+				},
+				{
+					"c": "TextureRect",
+					"d": 10,
+					"em": 1,
+					"kids": 0,
+					"mf": 2,
+					"sm": 0,
+					"tex": "res://assets/ui/ui/battle_log_1.png"
 				},
 				{
 					"c": "VBoxContainer",

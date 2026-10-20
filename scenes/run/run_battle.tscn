@@ -5,8 +5,9 @@
 [ext_resource type="Theme" uid="uid://trle8mouk54k" path="res://assets/theme/ui_theme.tres" id="4_theme"]
 [ext_resource type="Script" path="res://scripts/run/enemy_art.gd" id="5_enemyart"]
 [ext_resource type="Texture2D" uid="uid://cf48hjar707ux" path="res://assets/ui/ui/battle_log_2.png" id="6_endart"]
+[ext_resource type="Texture2D" uid="uid://hykbiixol3j5" path="res://assets/ui/ui/battle_log_1.png" id="7_fireart"]
 
-[sub_resource type="StyleBoxEmpty" id="StyleBoxEmpty_endart"]
+[sub_resource type="StyleBoxEmpty" id="StyleBoxEmpty_artbtn"]
 
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_hwbvc"]
 content_margin_left = 10.0
@@ -403,10 +404,24 @@ text = "—"
 vertical_alignment = 1
 
 [node name="Button" type="Button" parent="Board/Margin/Column/Controls/Equation/Pad/Box/Bottom" unique_id=1193882678]
-custom_minimum_size = Vector2(108, 44)
+custom_minimum_size = Vector2(108, 52.8)
 layout_mode = 2
 focus_mode = 0
-text = "发射  ↵"
+theme_override_styles/pressed = SubResource("StyleBoxEmpty_artbtn")
+theme_override_styles/hover = SubResource("StyleBoxEmpty_artbtn")
+theme_override_styles/normal = SubResource("StyleBoxEmpty_artbtn")
+
+[node name="Art" type="TextureRect" parent="Board/Margin/Column/Controls/Equation/Pad/Box/Bottom/Button"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+texture = ExtResource("7_fireart")
+expand_mode = 1
+stretch_mode = 0
 
 [node name="Combo" type="VBoxContainer" parent="Board/Margin/Column/Controls" unique_id=1730503138]
 custom_minimum_size = Vector2(150, 0)
@@ -452,9 +467,9 @@ layout_mode = 2
 custom_minimum_size = Vector2(168, 82.5)
 layout_mode = 2
 focus_mode = 0
-theme_override_styles/pressed = SubResource("StyleBoxEmpty_endart")
-theme_override_styles/hover = SubResource("StyleBoxEmpty_endart")
-theme_override_styles/normal = SubResource("StyleBoxEmpty_endart")
+theme_override_styles/pressed = SubResource("StyleBoxEmpty_artbtn")
+theme_override_styles/hover = SubResource("StyleBoxEmpty_artbtn")
+theme_override_styles/normal = SubResource("StyleBoxEmpty_artbtn")
 
 [node name="Art" type="TextureRect" parent="Board/Margin/Column/Controls/End/Button"]
 layout_mode = 1

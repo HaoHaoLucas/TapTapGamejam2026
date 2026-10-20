@@ -160,8 +160,9 @@ func _compare_links(expected: Dictionary, actual: Dictionary) -> void:
 
 func _same(a: Variant, b: Variant) -> bool:
 	# gold 走过 JSON，整数会变成浮点，必须按数值比，不能按字符串比。
+	# 52.8 这种十进制不是二进制精确值，float32 → JSON → float64 回读会差 1 ULP。
 	if (a is float or a is int) and (b is float or b is int):
-		return float(a) == float(b)
+		return is_equal_approx(float(a), float(b))
 	if a is Array:
 		if not (b is Array) or (a as Array).size() != (b as Array).size():
 			return false
