@@ -36,12 +36,26 @@ jobs:
         run: godot --headless --path . --script tests/event_reward_test.gd
       - name: Combat session tests
         run: godot --headless --path . --script tests/combat_session_test.gd
+      - name: Monster rules tests
+        run: godot --headless --path . --script tests/monster_rules_test.gd
+      - name: Battle assets and deterministic restart tests
+        run: godot --headless --path . --script tests/battle_assets_integration_test.gd
+      - name: Battle presentation and interaction tests
+        run: |
+          godot --headless --path . --script tests/run_battle_presentation_test.gd
+          godot --headless --path . --script tests/run_battle_view_test.gd
+          godot --headless --path . --script tests/run_battle_click_test.gd
+          godot --headless --path . --script tests/run_battle_scene_shape_test.gd
       - name: Run inventory presenter tests
         run: godot --headless --path . --script tests/run_inventory_presenter_test.gd
       - name: Run inventory panel tests
         run: godot --headless --path . --script tests/run_inventory_panel_test.gd
       - name: Run shell tests
         run: godot --headless --path . --script tests/run_shell_test.gd
+      - name: Run menu tests
+        run: godot --headless --path . --script tests/run_menu_test.gd
+      - name: Non-combat choice layout tests
+        run: godot --headless --path . --script tests/run_choice_layout_test.gd
       - name: Main menu tests
         run: godot --headless --path . --script tests/main_menu_test.gd
       - name: Export Windows game

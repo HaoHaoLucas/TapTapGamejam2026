@@ -1,0 +1,126 @@
+[gd_scene load_steps=5 format=3]
+
+[ext_resource type="Script" path="res://scripts/run/run_menu.gd" id="1"]
+[ext_resource type="Texture2D" path="res://assets/ui/ui/battle_log_continue.png" id="2_pauseart"]
+
+[sub_resource type="StyleBoxEmpty" id="ArtButtonStyle"]
+
+[sub_resource type="StyleBoxFlat" id="PanelStyle"]
+bg_color = Color(0.055, 0.075, 0.12, 0.98)
+border_width_left = 2
+border_width_top = 2
+border_width_right = 2
+border_width_bottom = 2
+border_color = Color(0.65, 0.56, 0.35, 1)
+corner_radius_top_left = 18
+corner_radius_top_right = 18
+corner_radius_bottom_left = 18
+corner_radius_bottom_right = 18
+content_margin_left = 48.0
+content_margin_top = 36.0
+content_margin_right = 48.0
+content_margin_bottom = 36.0
+
+[node name="RunMenu" type="CanvasLayer"]
+process_mode = 3
+layer = 20
+script = ExtResource("1")
+
+[node name="MenuButton" type="Button" parent="."]
+anchors_preset = 1
+anchor_left = 1.0
+anchor_right = 1.0
+offset_left = -126.0
+offset_top = 18.6
+offset_right = -38.0
+offset_bottom = 105.4
+grow_horizontal = 0
+tooltip_text = "暂停菜单（Esc）"
+focus_mode = 0
+mouse_default_cursor_shape = 2
+theme_override_styles/normal = SubResource("ArtButtonStyle")
+theme_override_styles/hover = SubResource("ArtButtonStyle")
+theme_override_styles/pressed = SubResource("ArtButtonStyle")
+
+[node name="Art" type="TextureRect" parent="MenuButton"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+texture = ExtResource("2_pauseart")
+expand_mode = 1
+
+[node name="Overlay" type="ColorRect" parent="."]
+visible = false
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+color = Color(0.01, 0.02, 0.04, 0.8)
+
+[node name="Center" type="CenterContainer" parent="Overlay"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+
+[node name="Panel" type="PanelContainer" parent="Overlay/Center"]
+custom_minimum_size = Vector2(760, 0)
+layout_mode = 2
+theme_override_styles/panel = SubResource("PanelStyle")
+
+[node name="Column" type="VBoxContainer" parent="Overlay/Center/Panel"]
+layout_mode = 2
+theme_override_constants/separation = 22
+
+[node name="Title" type="Label" parent="Overlay/Center/Panel/Column"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.93, 0.86, 0.68, 1)
+theme_override_font_sizes/font_size = 44
+text = "游戏已暂停"
+horizontal_alignment = 1
+
+[node name="Message" type="Label" parent="Overlay/Center/Panel/Column"]
+layout_mode = 2
+text = "当前版本暂不支持存档。"
+horizontal_alignment = 1
+autowrap_mode = 3
+
+[node name="Resume" type="Button" parent="Overlay/Center/Panel/Column"]
+custom_minimum_size = Vector2(0, 72)
+layout_mode = 2
+text = "继续游戏"
+
+[node name="Restart" type="Button" parent="Overlay/Center/Panel/Column"]
+custom_minimum_size = Vector2(0, 72)
+layout_mode = 2
+text = "重开本场战斗"
+
+[node name="MainMenu" type="Button" parent="Overlay/Center/Panel/Column"]
+custom_minimum_size = Vector2(0, 72)
+layout_mode = 2
+text = "返回主菜单"
+
+[node name="Quit" type="Button" parent="Overlay/Center/Panel/Column"]
+custom_minimum_size = Vector2(0, 72)
+layout_mode = 2
+text = "退出游戏"
+
+[node name="Confirm" type="Button" parent="Overlay/Center/Panel/Column"]
+visible = false
+custom_minimum_size = Vector2(0, 72)
+layout_mode = 2
+text = "确认离开"
+
+[node name="Cancel" type="Button" parent="Overlay/Center/Panel/Column"]
+visible = false
+custom_minimum_size = Vector2(0, 72)
+layout_mode = 2
+text = "取消"

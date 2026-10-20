@@ -5,6 +5,7 @@
 [ext_resource type="Texture2D" uid="uid://c2xrv67txlsdm" path="res://assets/map_bg_1.JPG" id="3_bg"]
 [ext_resource type="PackedScene" uid="uid://cp1kujxk8vhmb" path="res://scenes/run/run_shell_layout.tscn" id="4_layout"]
 [ext_resource type="PackedScene" uid="uid://bq7kyp6vsyl37" path="res://scenes/run/run_inventory.tscn" id="5_inventory"]
+[ext_resource type="PackedScene" path="res://scenes/run/run_menu.tscn" id="6_menu"]
 
 [node name="RunShell" type="Control" unique_id=1314082840]
 layout_mode = 3
@@ -34,3 +35,5 @@ layout_mode = 1
 
 [node name="Inventory" parent="." unique_id=1225649741 instance=ExtResource("5_inventory")]
 layout_mode = 1
+
+[node name="RunMenu" parent="." instance=ExtResource("6_menu")]

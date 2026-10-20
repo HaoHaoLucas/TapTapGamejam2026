@@ -154,8 +154,9 @@ static func publish_intent(battle) -> void:
 
 static func equation_mods(battle, entity_count: int, primary_op: String, raw_result: int) -> Dictionary:
 	if battle == null or str(battle.monster_id) == "":
-		return {"tax": 0, "coefficient": 1.0}
+		return {"tax": 0, "coefficient": 1.0, "result_divisor": 1.0}
 	var tax := 0
+	var result_divisor := 1.0
 	var coefficient := 1.0
 	var turn := _player_turn(battle)
 	var beat := _beat_index(turn)
@@ -167,14 +168,17 @@ static func equation_mods(battle, entity_count: int, primary_op: String, raw_res
 			if _wants_odd(turn) != _is_odd(raw_result):
 				coefficient *= PARITY_COEFF
 		MON_INK:
-			if not bool(battle.ink_tax_used) and primary_op == _taxed_op(turn):
-				tax = INK_TAX
+			if not bool(battle.ink_tax_used):
+				if turn % 2 == 1:
+					result_divisor = 2.0
+				elif primary_op == "MUL":
+					tax = INK_TAX
 		MON_SWORD:
 			if beat == 1 and primary_op == "ADD":
 				coefficient *= SWORD_OP_COEFF
 			elif beat == 2 and primary_op == "MUL":
 				coefficient *= SWORD_OP_COEFF
-	return {"tax": tax, "coefficient": coefficient}
+	return {"tax": tax, "coefficient": coefficient, "result_divisor": result_divisor}
 
 
 static func note_legal_equation(battle, primary_op: String, raw_result: int, damage: int, had_negative_printed: bool) -> void:
@@ -182,7 +186,7 @@ static func note_legal_equation(battle, primary_op: String, raw_result: int, dam
 	if battle == null or str(battle.monster_id) == "":
 		return
 	var monster := str(battle.monster_id)
-	if monster == MON_INK and primary_op == _taxed_op(_player_turn(battle)) and not bool(battle.ink_tax_used):
+	if monster == MON_INK and (_player_turn(battle) % 2 == 1 or primary_op == "MUL") and not bool(battle.ink_tax_used):
 		battle.ink_tax_used = true
 	if monster == MON_PRIEST and had_negative_printed and damage > 0:
 		battle.priest_heal_cancelled = true
@@ -273,6 +277,8 @@ static func _write_intent(battle) -> void:
 	info["phase_mul"] = phase_mul
 	info["heal"] = heal
 	info["tax_op"] = tax_op
+	# HALVE is a monster penalty, never a playable DIV operator.
+	info["tax_mode"] = ("HALVE" if turn % 2 == 1 else "MUL_SUBTRACT") if monster == MON_INK else ""
 	info["parity"] = parity
 	battle.intent = info
 	battle.intent_damage = damage
@@ -426,7 +432,7 @@ static func _is_odd(value: int) -> bool:
 
 
 static func _taxed_op(turn: int) -> String:
-	return "ADD" if turn % 2 == 1 else "MUL"
+	return "" if turn % 2 == 1 else "MUL"
 
 
 static func _beat_index(turn: int) -> int:
@@ -516,7 +522,7 @@ static func _fallback_monster(monster_id: String) -> Dictionary:
 		MON_PARITY:
 			return {"name": "单目哥布林", "kind": "NORMAL", "base_hp": 70, "base_atk": 11, "min_floor": 1, "weight": 30}
 		MON_INK:
-			return {"name": "墨罐哥布林", "kind": "NORMAL", "base_hp": 66, "base_atk": 10, "min_floor": 1, "weight": 30}
+			return {"name": "墨税怪", "kind": "NORMAL", "base_hp": 66, "base_atk": 10, "min_floor": 1, "weight": 30}
 		MON_PRIEST:
 			return {"name": "深渊牧师", "kind": "NORMAL", "base_hp": 86, "base_atk": 10, "min_floor": 2, "weight": 20}
 		MON_THIEF:

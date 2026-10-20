@@ -7,6 +7,7 @@ signal pressed(card_uid: String)
 var library: CardLibrary
 var card_uid: String = ""
 
+var _art: CardArt
 var _value: Label
 var _marks: Label
 var _state: Label
@@ -14,10 +15,11 @@ var _style: StyleBoxFlat
 var _highlight: String = ""
 var _face: Dictionary = {}
 var _use_face: bool = false
+var _choice_presentation := false
 
 
 func _ready() -> void:
-	mouse_filter = Control.MOUSE_FILTER_STOP
+	mouse_filter = Control.MOUSE_FILTER_IGNORE if _choice_presentation else Control.MOUSE_FILTER_STOP
 	_ensure()
 	refresh()
 
@@ -57,6 +59,32 @@ func set_compact(compact: bool) -> void:
 func face_text() -> String:
 	_ensure()
 	return "" if _value == null else _value.text
+
+
+## Opt-in presentation used only by the tower's choice buttons.
+func set_choice_presentation(dimensions: Vector2, _numeric_face: bool = true) -> void:
+	_choice_presentation = true
+	_ensure()
+	custom_minimum_size = dimensions
+	mouse_filter = Control.MOUSE_FILTER_IGNORE
+	if str(_face.get("presentation", "text")) != "text":
+		return
+	_value.add_theme_font_size_override("font_size", 40)
+	_value.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	_marks.add_theme_font_size_override("font_size", 26)
+	_marks.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	_marks.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
+	_state.add_theme_font_size_override("font_size", 24)
+	_state.custom_minimum_size.y = 34
+	get_node("Margin/Body").add_theme_constant_override("separation", 12)
+	var has_icon := CardArt.MARKS.has(str(_face.get("enh_id", "")))
+	for side in ["left", "right", "top", "bottom"]:
+		get_node("Margin").add_theme_constant_override("margin_" + side, 84 if side == "top" and has_icon else 18)
+	var text_height := 0.0
+	for label in [_value, _marks, _state]:
+		var font: Font = label.get_theme_font("font")
+		text_height += maxf(label.custom_minimum_size.y, font.get_multiline_string_size(label.text, HORIZONTAL_ALIGNMENT_CENTER, dimensions.x - 60, label.get_theme_font_size("font_size")).y)
+	custom_minimum_size.y = maxf(dimensions.y, text_height + 96 + (66 if has_icon else 0))
 
 
 func mark_text() -> String:
@@ -106,6 +134,13 @@ func refresh() -> void:
 	if card.zone == CardInstance.COLLECTION and not card.collection_snapshot.is_empty():
 		flags.append("估价 %s" % card.collection_value())
 	_state.text = " ".join(flags)
+	var data := {
+		"presentation": "card", "card_kind": str(def.get("card_kind", "")),
+		"printed_value": card.printed_value(catalog), "operator_code": str(def.get("operator_code", "NONE")),
+		"enhancement_ids": card.enhancement_ids, "state_text": _state.text,
+		"frozen": card.is_frozen(library.turn_index),
+	}
+	_present(data)
 	_apply_style()
 
 
@@ -116,7 +151,16 @@ func _refresh_face() -> void:
 	_marks.text = str(_face.get("mark_text", ""))
 	_state.text = str(_face.get("state_text", ""))
 	tooltip_text = str(_face.get("tooltip", ""))
+	_present(_face)
 	_apply_style()
+
+
+func _present(data: Dictionary) -> void:
+	var illustrated := str(data.get("presentation", "text")) != "text"
+	_value.visible = not illustrated
+	_marks.visible = not illustrated
+	_state.visible = not illustrated
+	_art.show_face(data)
 
 
 func _gui_input(event: InputEvent) -> void:
@@ -131,6 +175,14 @@ func _ensure() -> void:
 	_value = get_node_or_null("Margin/Body/Value") as Label
 	_marks = get_node_or_null("Margin/Body/Marks") as Label
 	_state = get_node_or_null("Margin/Body/State") as Label
+	_art = CardArt.new()
+	_art.name = "Art"
+	_art.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	add_child(_art)
+	move_child(_art, 0)
+	# Text-only options retain readable light ink.
+	_value.add_theme_color_override("font_color", Color(0.93, 0.94, 0.97))
+	_marks.add_theme_color_override("font_color", Color(0.83, 0.86, 0.93))
 	if _style == null:
 		_style = StyleBoxFlat.new()
 		_style.set_corner_radius_all(8)
@@ -154,14 +206,17 @@ func _apply_style() -> void:
 		var card := library.get_card(card_uid) if library != null else null
 		frozen = card != null and card.is_frozen(library.turn_index)
 		ghost = card != null and card.has_mark("EN_GHOST")
-	_style.bg_color = Color(0.11, 0.14, 0.2) if not frozen else Color(0.1, 0.16, 0.24)
+	var illustrated := not _use_face or str(_face.get("presentation", "text")) != "text"
+	_style.bg_color = Color(0, 0, 0, 0) if illustrated else Color(0.11, 0.14, 0.2)
+	if frozen:
+		_style.border_color = Color(0.58, 0.85, 1.0)
 	if _highlight == "equation":
 		_style.border_color = Color(0.93, 0.78, 0.42)
 	elif _highlight == "selected":
 		_style.border_color = Color(0.45, 0.78, 0.86)
 	elif ghost:
 		_style.border_color = Color(0.62, 0.5, 0.78)
-	else:
+	elif not frozen:
 		_style.border_color = Color(0.38, 0.42, 0.5)
 	modulate = Color(1, 1, 1, 0.78) if ghost else Color(1, 1, 1, 1)
 

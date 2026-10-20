@@ -58,8 +58,8 @@ func _check_first_choice(shell) -> void:
 	_check(shell.run.current_offers.size() == 3, "The first day offers three rooms")
 	_check(shell._battle == null or not shell._battle.visible, "The fight stays hidden until a room is chosen")
 	var choices := 0
-	for child in shell._body.get_children():
-		if child is Button and (str(child.text) == "战斗" or str(child.text) == "奇遇"):
+	for child in shell._body.find_children("*", "Button", true, false):
+		if child is Button and (str(child.get_meta("choice_key", child.text)) == "战斗" or str(child.get_meta("choice_key", child.text)) == "奇遇"):
 			choices += 1
 	_check(choices == 3, "The room list shows three choices, got %s" % choices)
 
@@ -84,8 +84,8 @@ func _test_battle_choice_opens_combat() -> void:
 	shell._show()
 	await process_frame
 	var battle_button: Button = null
-	for child in shell._body.get_children():
-		if child is Button and str(child.text) == "战斗":
+	for child in shell._body.find_children("*", "Button", true, false):
+		if child is Button and str(child.get_meta("choice_key", child.text)) == "战斗":
 			battle_button = child
 			break
 	_check(battle_button != null, "A battle choice must be on screen")
@@ -154,8 +154,8 @@ func _open_battle():
 	shell._show()
 	await process_frame
 	var battle_button: Button = null
-	for child in shell._body.get_children():
-		if child is Button and str(child.text) == "战斗":
+	for child in shell._body.find_children("*", "Button", true, false):
+		if child is Button and str(child.get_meta("choice_key", child.text)) == "战斗":
 			battle_button = child
 			break
 	if battle_button == null:
@@ -260,12 +260,12 @@ func _test_event_sits_under_header() -> void:
 	await process_frame
 	_check(not shell._status.visible, "An event with no status line must hide the status bar")
 	_check(shell._status.text == "", "The event status line starts empty")
-	_check(shell._header.size.y > 0.0 and shell._header.size.y < 60.0, "The floor line should be one row, got %s" % shell._header.size.y)
-	var title := shell._body.get_child(0) as Label
-	_check(title != null and str(title.text) == "无言的祭祀", "The event title is the first row, got %s" % (str(title.text) if title != null else "nothing"))
+	_check(shell._header.size.y > 0.0 and shell._header.size.y <= shell.size.y * 0.09, "The floor line should be one row, got %s" % shell._header.size.y)
+	var title := shell._title as Label
+	_check(title != null and str(title.text) == "无言的祭祀", "The event title is in the fixed heading, got %s" % (str(title.text) if title != null else "nothing"))
 	if title != null:
 		var gap: float = title.global_position.y - (shell._header.global_position.y + shell._header.size.y)
-		_check(gap < 40.0, "The event title should sit just under the floor line, gap %s" % gap)
+		_check(gap >= 0.0 and title.get_global_rect().end.y <= shell._scroll.global_position.y, "The event title must fit between header and content")
 	shell.queue_free()
 	await process_frame
 
