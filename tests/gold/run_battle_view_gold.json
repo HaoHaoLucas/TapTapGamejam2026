@@ -838,13 +838,22 @@
 				{
 					"c": "Button",
 					"d": 6,
-					"kids": 0,
+					"kids": 1,
 					"min": [
 						168.0,
-						56.0
+						82.5
 					],
-					"sb": 2003203193,
-					"t": "结束回合\n可提前结束 · E"
+					"sb": 1071609195,
+					"t": ""
+				},
+				{
+					"c": "TextureRect",
+					"d": 7,
+					"em": 1,
+					"kids": 0,
+					"mf": 2,
+					"sm": 0,
+					"tex": "res://assets/ui/ui/battle_log_2.png"
 				},
 				{
 					"aw": 3,

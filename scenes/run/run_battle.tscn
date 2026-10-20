@@ -4,6 +4,9 @@
 [ext_resource type="Texture2D" uid="uid://b2olidqx7vhl" path="res://assets/battle/hero.png" id="2_sb5ml"]
 [ext_resource type="Theme" uid="uid://trle8mouk54k" path="res://assets/theme/ui_theme.tres" id="4_theme"]
 [ext_resource type="Script" path="res://scripts/run/enemy_art.gd" id="5_enemyart"]
+[ext_resource type="Texture2D" uid="uid://cf48hjar707ux" path="res://assets/ui/ui/battle_log_2.png" id="6_endart"]
+
+[sub_resource type="StyleBoxEmpty" id="StyleBoxEmpty_endart"]
 
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_hwbvc"]
 content_margin_left = 10.0
@@ -446,11 +449,24 @@ custom_minimum_size = Vector2(168, 0)
 layout_mode = 2
 
 [node name="Button" type="Button" parent="Board/Margin/Column/Controls/End" unique_id=852829456]
-custom_minimum_size = Vector2(168, 56)
+custom_minimum_size = Vector2(168, 82.5)
 layout_mode = 2
 focus_mode = 0
-text = "结束回合
-可提前结束 · E"
+theme_override_styles/pressed = SubResource("StyleBoxEmpty_endart")
+theme_override_styles/hover = SubResource("StyleBoxEmpty_endart")
+theme_override_styles/normal = SubResource("StyleBoxEmpty_endart")
+
+[node name="Art" type="TextureRect" parent="Board/Margin/Column/Controls/End/Button"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+texture = ExtResource("6_endart")
+expand_mode = 1
+stretch_mode = 0
 
 [node name="Incoming" type="Label" parent="Board/Margin/Column/Controls/End" unique_id=617605503]
 layout_mode = 2

@@ -71,8 +71,9 @@ func _run() -> void:
 		_fail("end-turn button is missing from the battle scene")
 		_finish()
 		return
-	if not str(end_button.text).begins_with("结束回合"):
-		_fail("end-turn control text is %s" % end_button.text)
+	var end_art := end_button.get_node_or_null("Art") as TextureRect
+	if end_art == null or end_art.texture == null or end_art.mouse_filter != Control.MOUSE_FILTER_IGNORE:
+		_fail("end-turn button should carry its art and let clicks through")
 		_finish()
 		return
 	var turn_before := int(before["turn"])
