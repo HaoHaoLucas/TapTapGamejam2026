@@ -10,18 +10,14 @@
 [ext_resource type="Texture2D" uid="uid://iqwsdi2eep64" path="res://assets/ui/ui/battle_hud_monster_bottom.PNG" id="9_hpunder"]
 [ext_resource type="Texture2D" uid="uid://bye1qpcnt6y4o" path="res://assets/ui/ui/battle_hud_monster_.PNG" id="10_hpfill"]
 [ext_resource type="Texture2D" uid="uid://drxnecytetkos" path="res://assets/ui/ui/battle_log_continue.png" id="11_pauseart"]
-
-[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_hwbvc"]
+[ext_resource type="Texture2D" uid="uid://bft1re5xwo26d" path="res://assets/ui/ui/微信图片_20261020235754_513_2.png" id="12_battleup"]
+[sub_resource type="StyleBoxEmpty" id="StyleBoxEmpty_plain_pad"]
 content_margin_left = 10.0
 content_margin_top = 8.0
 content_margin_right = 10.0
 content_margin_bottom = 8.0
-bg_color = Color(0.043, 0.086, 0.125, 0.96)
-border_width_left = 1
-border_width_top = 1
-border_width_right = 1
-border_width_bottom = 1
-border_color = Color(0.55, 0.58, 0.45, 0.35)
+
+[sub_resource type="StyleBoxEmpty" id="StyleBoxEmpty_artbtn"]
 
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_twyu1"]
 content_margin_left = 10.0
@@ -38,8 +34,6 @@ corner_radius_top_left = 7
 corner_radius_top_right = 7
 corner_radius_bottom_right = 7
 corner_radius_bottom_left = 7
-
-[sub_resource type="StyleBoxEmpty" id="StyleBoxEmpty_artbtn"]
 
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_tv6bu"]
 bg_color = Color(0.93, 0.82, 0.52, 1)
@@ -124,7 +118,14 @@ alignment = 1
 [node name="TopBar" type="PanelContainer" parent="Board/Margin/Column" unique_id=1325850780]
 custom_minimum_size = Vector2(0, 100)
 layout_mode = 2
-theme_override_styles/panel = SubResource("StyleBoxFlat_hwbvc")
+theme_override_styles/panel = SubResource("StyleBoxEmpty_plain_pad")
+
+[node name="battle_up" type="TextureRect" parent="Board/Margin/Column/TopBar" unique_id=1649469235]
+layout_mode = 2
+mouse_filter = 2
+texture = ExtResource("12_battleup")
+expand_mode = 1
+stretch_mode = 1
 
 [node name="Row" type="HBoxContainer" parent="Board/Margin/Column/TopBar" unique_id=42063625]
 layout_mode = 2
@@ -187,11 +188,11 @@ custom_minimum_size = Vector2(88, 86.8)
 layout_mode = 2
 size_flags_vertical = 4
 focus_mode = 0
+theme_override_styles/normal = SubResource("StyleBoxEmpty_artbtn")
 theme_override_styles/pressed = SubResource("StyleBoxEmpty_artbtn")
 theme_override_styles/hover = SubResource("StyleBoxEmpty_artbtn")
-theme_override_styles/normal = SubResource("StyleBoxEmpty_artbtn")
 
-[node name="Art" type="TextureRect" parent="Board/Margin/Column/TopBar/Row/PauseButton"]
+[node name="Art" type="TextureRect" parent="Board/Margin/Column/TopBar/Row/PauseButton" unique_id=380958361]
 layout_mode = 1
 anchors_preset = 15
 anchor_right = 1.0
@@ -201,7 +202,6 @@ grow_vertical = 2
 mouse_filter = 2
 texture = ExtResource("11_pauseart")
 expand_mode = 1
-stretch_mode = 0
 
 [node name="Stage" type="HBoxContainer" parent="Board/Margin/Column" unique_id=1067865202]
 custom_minimum_size = Vector2(0, 550)
