@@ -168,8 +168,6 @@ func _refresh_hud() -> void:
 	_floor_label.text = "第 %d 层    第 %d 回合    %s" % [depth, battle.turn_index, phase]
 	_round_label.text = "第 %d 回合 · %s" % [battle.turn_index, phase]
 	_paint_clock(battle)
-	if _pause_button != null:
-		_pause_button.text = "继续" if battle.paused else "暂停"
 	var library := session.ctx.library
 	var hand_count := library.pile(CardInstance.HAND).size()
 	_hand_caption.text = "手牌 %d" % hand_count
