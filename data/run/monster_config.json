@@ -3,11 +3,11 @@
   "config_version": "jam_1.2.0",
   "table": "monster_config",
   "rows": [
-    {"monster_id": "MON_RUST", "encounter_id": "ENC_RUST", "name": "锈刃哥布林", "kind": "NORMAL", "base_hp": 60, "base_atk": 10, "min_floor": 1, "weight": 40},
-    {"monster_id": "MON_PARITY", "encounter_id": "ENC_PARITY", "name": "单目哥布林", "kind": "NORMAL", "base_hp": 70, "base_atk": 11, "min_floor": 1, "weight": 30},
-    {"monster_id": "MON_INK", "encounter_id": "ENC_INK", "name": "墨罐哥布林", "kind": "NORMAL", "base_hp": 66, "base_atk": 10, "min_floor": 1, "weight": 30},
-    {"monster_id": "MON_PRIEST", "encounter_id": "ENC_PRIEST", "name": "深渊牧师", "kind": "NORMAL", "base_hp": 86, "base_atk": 10, "min_floor": 2, "weight": 20},
-    {"monster_id": "MON_THIEF", "encounter_id": "ENC_THIEF", "name": "拾荒盗贼", "kind": "NORMAL", "base_hp": 78, "base_atk": 12, "min_floor": 3, "weight": 15},
-    {"monster_id": "MON_SWORD", "encounter_id": "ENC_SWORD", "name": "守门剑士", "kind": "BOSS", "base_hp": 160, "base_atk": 16, "min_floor": 1, "weight": 100}
+	{"monster_id": "MON_RUST", "encounter_id": "ENC_RUST", "name": "锈刃哥布林", "kind": "NORMAL", "base_hp": 60, "base_atk": 10, "min_floor": 1, "weight": 40},
+	{"monster_id": "MON_PARITY", "encounter_id": "ENC_PARITY", "name": "单目哥布林", "kind": "NORMAL", "base_hp": 70, "base_atk": 11, "min_floor": 1, "weight": 30},
+	{"monster_id": "MON_INK", "encounter_id": "ENC_INK", "name": "墨罐哥布林", "kind": "NORMAL", "base_hp": 66, "base_atk": 10, "min_floor": 1, "weight": 30},
+	{"monster_id": "MON_PRIEST", "encounter_id": "ENC_PRIEST", "name": "深渊牧师", "kind": "NORMAL", "base_hp": 86, "base_atk": 10, "min_floor": 2, "weight": 20},
+	{"monster_id": "MON_THIEF", "encounter_id": "ENC_THIEF", "name": "拾荒盗贼", "kind": "NORMAL", "base_hp": 78, "base_atk": 12, "min_floor": 3, "weight": 15},
+	{"monster_id": "MON_SWORD", "encounter_id": "ENC_SWORD", "name": "守门剑士", "kind": "BOSS", "base_hp": 160, "base_atk": 16, "min_floor": 1, "weight": 100}
   ]
 }

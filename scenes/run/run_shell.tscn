@@ -3,7 +3,7 @@
 [ext_resource type="Script" uid="uid://desr65kk7x5c6" path="res://scripts/run/run_shell.gd" id="1"]
 [ext_resource type="PackedScene" uid="uid://se2ek7juoxuj" path="res://scenes/run/run_battle.tscn" id="2"]
 [ext_resource type="Texture2D" uid="uid://c2xrv67txlsdm" path="res://assets/map_bg_1.JPG" id="3_bg"]
-[ext_resource type="PackedScene" path="res://scenes/run/run_shell_layout.tscn" id="4_layout"]
+[ext_resource type="PackedScene" uid="uid://cp1kujxk8vhmb" path="res://scenes/run/run_shell_layout.tscn" id="4_layout"]
 [ext_resource type="PackedScene" path="res://scenes/run/run_inventory.tscn" id="5_inventory"]
 
 [node name="RunShell" type="Control" unique_id=1314082840]
@@ -26,11 +26,11 @@ mouse_filter = 2
 texture = ExtResource("3_bg")
 expand_mode = 1
 
-[node name="Layout" parent="." instance=ExtResource("4_layout")]
+[node name="Layout" parent="." unique_id=1121117588 instance=ExtResource("4_layout")]
 layout_mode = 1
 
 [node name="Battle" parent="." unique_id=1555426995 instance=ExtResource("2")]
 layout_mode = 1
 
-[node name="Inventory" parent="." instance=ExtResource("5_inventory")]
-layout_mode = 1
+[node name="Inventory" parent="." unique_id=1225649741 instance=ExtResource("5_inventory")]
+visible = false

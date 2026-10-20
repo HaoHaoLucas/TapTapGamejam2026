@@ -1,9 +1,9 @@
-[gd_scene format=3]
+[gd_scene format=3 uid="uid://bq7kyp6vsyl37"]
 
-[ext_resource type="Script" path="res://scripts/run/run_inventory.gd" id="1"]
+[ext_resource type="Script" uid="uid://disx14weup1hv" path="res://scripts/run/run_inventory.gd" id="1"]
 
-[node name="RunInventory" type="Control"]
-layout_mode = 1
+[node name="RunInventory" type="Control" unique_id=1826179082]
+layout_mode = 3
 anchors_preset = 15
 anchor_right = 1.0
 anchor_bottom = 1.0
@@ -12,7 +12,7 @@ grow_vertical = 2
 mouse_filter = 2
 script = ExtResource("1")
 
-[node name="InputBlocker" type="ColorRect" parent="."]
+[node name="InputBlocker" type="ColorRect" parent="." unique_id=274385109]
 visible = false
 layout_mode = 1
 anchors_preset = 15
@@ -20,10 +20,10 @@ anchor_right = 1.0
 anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
-mouse_filter = 0
 color = Color(0, 0, 0, 0)
 
-[node name="DrawerHost" type="Control" parent="."]
+[node name="DrawerHost" type="Control" parent="." unique_id=1992678591]
+visible = false
 clip_contents = true
 layout_mode = 1
 anchors_preset = 15
@@ -36,7 +36,7 @@ grow_horizontal = 2
 grow_vertical = 2
 mouse_filter = 2
 
-[node name="Slide" type="Control" parent="DrawerHost"]
+[node name="Slide" type="Control" parent="DrawerHost" unique_id=324138204]
 layout_mode = 1
 anchors_preset = 15
 anchor_right = 1.0
@@ -45,17 +45,16 @@ grow_horizontal = 2
 grow_vertical = 2
 mouse_filter = 2
 
-[node name="TabButton" type="Button" parent="DrawerHost/Slide"]
+[node name="TabButton" type="Button" parent="DrawerHost/Slide" unique_id=430752893]
+custom_minimum_size = Vector2(132, 40)
 layout_mode = 1
 offset_left = 560.0
 offset_top = -40.0
 offset_right = 692.0
-offset_bottom = 0.0
 focus_mode = 0
-custom_minimum_size = Vector2(132, 40)
 text = "背包"
 
-[node name="BagPanel" type="PanelContainer" parent="DrawerHost/Slide"]
+[node name="BagPanel" type="PanelContainer" parent="DrawerHost/Slide" unique_id=1561651254]
 layout_mode = 1
 anchors_preset = 15
 anchor_right = 1.0
@@ -64,102 +63,101 @@ offset_top = 40.0
 grow_horizontal = 2
 grow_vertical = 2
 
-[node name="Margin" type="MarginContainer" parent="DrawerHost/Slide/BagPanel"]
+[node name="Margin" type="MarginContainer" parent="DrawerHost/Slide/BagPanel" unique_id=301711292]
 layout_mode = 2
 theme_override_constants/margin_left = 4
 theme_override_constants/margin_top = 4
 theme_override_constants/margin_right = 4
 theme_override_constants/margin_bottom = 4
 
-[node name="Body" type="VBoxContainer" parent="DrawerHost/Slide/BagPanel/Margin"]
+[node name="Body" type="VBoxContainer" parent="DrawerHost/Slide/BagPanel/Margin" unique_id=1059329443]
 layout_mode = 2
 size_flags_horizontal = 3
 size_flags_vertical = 3
 theme_override_constants/separation = 8
 
-[node name="Header" type="HBoxContainer" parent="DrawerHost/Slide/BagPanel/Margin/Body"]
+[node name="Header" type="HBoxContainer" parent="DrawerHost/Slide/BagPanel/Margin/Body" unique_id=281871946]
 layout_mode = 2
 theme_override_constants/separation = 12
 
-[node name="Title" type="Label" parent="DrawerHost/Slide/BagPanel/Margin/Body/Header"]
+[node name="Title" type="Label" parent="DrawerHost/Slide/BagPanel/Margin/Body/Header" unique_id=1406817011]
 layout_mode = 2
 theme_override_font_sizes/font_size = 22
 text = "背包"
 
-[node name="PauseBadge" type="Label" parent="DrawerHost/Slide/BagPanel/Margin/Body/Header"]
+[node name="PauseBadge" type="Label" parent="DrawerHost/Slide/BagPanel/Margin/Body/Header" unique_id=1040947706]
 visible = false
 layout_mode = 2
 text = "已暂停"
 
-[node name="Spacer" type="Control" parent="DrawerHost/Slide/BagPanel/Margin/Body/Header"]
+[node name="Spacer" type="Control" parent="DrawerHost/Slide/BagPanel/Margin/Body/Header" unique_id=598597269]
 layout_mode = 2
 size_flags_horizontal = 3
 
-[node name="CloseButton" type="Button" parent="DrawerHost/Slide/BagPanel/Margin/Body/Header"]
+[node name="CloseButton" type="Button" parent="DrawerHost/Slide/BagPanel/Margin/Body/Header" unique_id=2092271067]
 layout_mode = 2
 focus_mode = 0
 text = "关闭"
 
-[node name="Split" type="HSplitContainer" parent="DrawerHost/Slide/BagPanel/Margin/Body"]
+[node name="Split" type="HSplitContainer" parent="DrawerHost/Slide/BagPanel/Margin/Body" unique_id=1980930519]
 layout_mode = 2
 size_flags_vertical = 3
-split_offset = 0
 dragger_visibility = 1
 
-[node name="Cards" type="VBoxContainer" parent="DrawerHost/Slide/BagPanel/Margin/Body/Split"]
+[node name="Cards" type="VBoxContainer" parent="DrawerHost/Slide/BagPanel/Margin/Body/Split" unique_id=945323479]
 layout_mode = 2
 size_flags_horizontal = 3
 size_flags_vertical = 3
 size_flags_stretch_ratio = 3.0
 theme_override_constants/separation = 8
 
-[node name="Stats" type="Label" parent="DrawerHost/Slide/BagPanel/Margin/Body/Split/Cards"]
+[node name="Stats" type="Label" parent="DrawerHost/Slide/BagPanel/Margin/Body/Split/Cards" unique_id=1915912261]
 layout_mode = 2
 text = "共 0 张    数字 0    符号 0    有强化 0    无强化 0"
 
-[node name="Filters" type="HBoxContainer" parent="DrawerHost/Slide/BagPanel/Margin/Body/Split/Cards"]
+[node name="Filters" type="HBoxContainer" parent="DrawerHost/Slide/BagPanel/Margin/Body/Split/Cards" unique_id=94297067]
 layout_mode = 2
 theme_override_constants/separation = 6
 
-[node name="KindAll" type="Button" parent="DrawerHost/Slide/BagPanel/Margin/Body/Split/Cards/Filters"]
+[node name="KindAll" type="Button" parent="DrawerHost/Slide/BagPanel/Margin/Body/Split/Cards/Filters" unique_id=1442284214]
 layout_mode = 2
 focus_mode = 0
 toggle_mode = true
 text = "全部"
 
-[node name="KindNum" type="Button" parent="DrawerHost/Slide/BagPanel/Margin/Body/Split/Cards/Filters"]
+[node name="KindNum" type="Button" parent="DrawerHost/Slide/BagPanel/Margin/Body/Split/Cards/Filters" unique_id=957527248]
 layout_mode = 2
 focus_mode = 0
 toggle_mode = true
 text = "数字"
 
-[node name="KindOp" type="Button" parent="DrawerHost/Slide/BagPanel/Margin/Body/Split/Cards/Filters"]
+[node name="KindOp" type="Button" parent="DrawerHost/Slide/BagPanel/Margin/Body/Split/Cards/Filters" unique_id=2036049900]
 layout_mode = 2
 focus_mode = 0
 toggle_mode = true
 text = "符号"
 
-[node name="MarkAll" type="Button" parent="DrawerHost/Slide/BagPanel/Margin/Body/Split/Cards/Filters"]
+[node name="MarkAll" type="Button" parent="DrawerHost/Slide/BagPanel/Margin/Body/Split/Cards/Filters" unique_id=554001637]
 layout_mode = 2
 focus_mode = 0
 toggle_mode = true
 text = "强化不限"
 
-[node name="MarkYes" type="Button" parent="DrawerHost/Slide/BagPanel/Margin/Body/Split/Cards/Filters"]
+[node name="MarkYes" type="Button" parent="DrawerHost/Slide/BagPanel/Margin/Body/Split/Cards/Filters" unique_id=1654072168]
 layout_mode = 2
 focus_mode = 0
 toggle_mode = true
 text = "有强化"
 
-[node name="MarkNo" type="Button" parent="DrawerHost/Slide/BagPanel/Margin/Body/Split/Cards/Filters"]
+[node name="MarkNo" type="Button" parent="DrawerHost/Slide/BagPanel/Margin/Body/Split/Cards/Filters" unique_id=1397426091]
 layout_mode = 2
 focus_mode = 0
 toggle_mode = true
 text = "无强化"
 
-[node name="SortOption" type="OptionButton" parent="DrawerHost/Slide/BagPanel/Margin/Body/Split/Cards/Filters"]
-layout_mode = 2
+[node name="SortOption" type="OptionButton" parent="DrawerHost/Slide/BagPanel/Margin/Body/Split/Cards/Filters" unique_id=1630378453]
 custom_minimum_size = Vector2(140, 0)
+layout_mode = 2
 selected = 0
 item_count = 2
 popup/item_0/text = "获得顺序"
@@ -167,97 +165,95 @@ popup/item_0/id = 0
 popup/item_1/text = "牌面数值"
 popup/item_1/id = 1
 
-[node name="CardScroll" type="ScrollContainer" parent="DrawerHost/Slide/BagPanel/Margin/Body/Split/Cards"]
+[node name="CardScroll" type="ScrollContainer" parent="DrawerHost/Slide/BagPanel/Margin/Body/Split/Cards" unique_id=934581439]
 layout_mode = 2
 size_flags_vertical = 3
 horizontal_scroll_mode = 3
 
-[node name="CardBox" type="VBoxContainer" parent="DrawerHost/Slide/BagPanel/Margin/Body/Split/Cards/CardScroll"]
+[node name="CardBox" type="VBoxContainer" parent="DrawerHost/Slide/BagPanel/Margin/Body/Split/Cards/CardScroll" unique_id=1158771983]
 layout_mode = 2
 size_flags_horizontal = 3
 theme_override_constants/separation = 10
 
-[node name="EmptyLabel" type="Label" parent="DrawerHost/Slide/BagPanel/Margin/Body/Split/Cards/CardScroll/CardBox"]
+[node name="EmptyLabel" type="Label" parent="DrawerHost/Slide/BagPanel/Margin/Body/Split/Cards/CardScroll/CardBox" unique_id=1797129191]
 layout_mode = 2
 text = "本局还没有可查看的卡牌"
 autowrap_mode = 3
 
-[node name="Grid" type="GridContainer" parent="DrawerHost/Slide/BagPanel/Margin/Body/Split/Cards/CardScroll/CardBox"]
+[node name="Grid" type="GridContainer" parent="DrawerHost/Slide/BagPanel/Margin/Body/Split/Cards/CardScroll/CardBox" unique_id=2066696749]
 layout_mode = 2
 size_flags_horizontal = 3
 theme_override_constants/h_separation = 8
 theme_override_constants/v_separation = 8
 columns = 4
 
-[node name="DetailScroll" type="ScrollContainer" parent="DrawerHost/Slide/BagPanel/Margin/Body/Split/Cards"]
+[node name="DetailScroll" type="ScrollContainer" parent="DrawerHost/Slide/BagPanel/Margin/Body/Split/Cards" unique_id=1891577040]
 layout_mode = 2
 size_flags_horizontal = 3
 horizontal_scroll_mode = 3
-vertical_scroll_mode = 1
 
-[node name="Detail" type="Label" parent="DrawerHost/Slide/BagPanel/Margin/Body/Split/Cards/DetailScroll"]
+[node name="Detail" type="Label" parent="DrawerHost/Slide/BagPanel/Margin/Body/Split/Cards/DetailScroll" unique_id=669451708]
 layout_mode = 2
 size_flags_horizontal = 3
 text = "选择一张牌查看详情"
 autowrap_mode = 3
 
-[node name="Resources" type="VBoxContainer" parent="DrawerHost/Slide/BagPanel/Margin/Body/Split"]
+[node name="Resources" type="VBoxContainer" parent="DrawerHost/Slide/BagPanel/Margin/Body/Split" unique_id=19631976]
 custom_minimum_size = Vector2(220, 0)
 layout_mode = 2
 size_flags_horizontal = 3
 size_flags_vertical = 3
-size_flags_stretch_ratio = 1.0
 theme_override_constants/separation = 6
 
-[node name="RunHeader" type="Label" parent="DrawerHost/Slide/BagPanel/Margin/Body/Split/Resources"]
+[node name="RunHeader" type="Label" parent="DrawerHost/Slide/BagPanel/Margin/Body/Split/Resources" unique_id=1280516859]
 layout_mode = 2
 text = "本局获得"
 
-[node name="RunHint" type="Label" parent="DrawerHost/Slide/BagPanel/Margin/Body/Split/Resources"]
+[node name="RunHint" type="Label" parent="DrawerHost/Slide/BagPanel/Margin/Body/Split/Resources" unique_id=2015228747]
 layout_mode = 2
 text = "本局记录，尚未永久保存"
 autowrap_mode = 3
 
-[node name="CollectionScroll" type="ScrollContainer" parent="DrawerHost/Slide/BagPanel/Margin/Body/Split/Resources"]
+[node name="CollectionScroll" type="ScrollContainer" parent="DrawerHost/Slide/BagPanel/Margin/Body/Split/Resources" unique_id=1898715974]
 layout_mode = 2
 size_flags_vertical = 3
 horizontal_scroll_mode = 3
 
-[node name="CollectionBox" type="VBoxContainer" parent="DrawerHost/Slide/BagPanel/Margin/Body/Split/Resources/CollectionScroll"]
+[node name="CollectionBox" type="VBoxContainer" parent="DrawerHost/Slide/BagPanel/Margin/Body/Split/Resources/CollectionScroll" unique_id=886682322]
 layout_mode = 2
 size_flags_horizontal = 3
 theme_override_constants/separation = 8
 
-[node name="CollectionEmpty" type="Label" parent="DrawerHost/Slide/BagPanel/Margin/Body/Split/Resources/CollectionScroll/CollectionBox"]
+[node name="CollectionEmpty" type="Label" parent="DrawerHost/Slide/BagPanel/Margin/Body/Split/Resources/CollectionScroll/CollectionBox" unique_id=1706307342]
 layout_mode = 2
 text = "本局尚未获得收藏品"
 autowrap_mode = 3
 
-[node name="CollectionList" type="VBoxContainer" parent="DrawerHost/Slide/BagPanel/Margin/Body/Split/Resources/CollectionScroll/CollectionBox"]
+[node name="CollectionList" type="VBoxContainer" parent="DrawerHost/Slide/BagPanel/Margin/Body/Split/Resources/CollectionScroll/CollectionBox" unique_id=554490861]
 layout_mode = 2
 size_flags_horizontal = 3
 theme_override_constants/separation = 8
 
-[node name="MetaHeader" type="Label" parent="DrawerHost/Slide/BagPanel/Margin/Body/Split/Resources"]
+[node name="MetaHeader" type="Label" parent="DrawerHost/Slide/BagPanel/Margin/Body/Split/Resources" unique_id=1108105087]
 layout_mode = 2
 text = "局外资源"
 
-[node name="MetaScroll" type="ScrollContainer" parent="DrawerHost/Slide/BagPanel/Margin/Body/Split/Resources"]
+[node name="MetaScroll" type="ScrollContainer" parent="DrawerHost/Slide/BagPanel/Margin/Body/Split/Resources" unique_id=1856783874]
 layout_mode = 2
 size_flags_vertical = 3
 horizontal_scroll_mode = 3
 
-[node name="MetaBox" type="VBoxContainer" parent="DrawerHost/Slide/BagPanel/Margin/Body/Split/Resources/MetaScroll"]
+[node name="MetaBox" type="VBoxContainer" parent="DrawerHost/Slide/BagPanel/Margin/Body/Split/Resources/MetaScroll" unique_id=1561100092]
 layout_mode = 2
 size_flags_horizontal = 3
 theme_override_constants/separation = 8
 
-[node name="MetaEmpty" type="Label" parent="DrawerHost/Slide/BagPanel/Margin/Body/Split/Resources/MetaScroll/MetaBox"]
+[node name="MetaEmpty" type="Label" parent="DrawerHost/Slide/BagPanel/Margin/Body/Split/Resources/MetaScroll/MetaBox" unique_id=1598995343]
 layout_mode = 2
 text = "局外资源尚未接入"
 autowrap_mode = 3
 
-[node name="MetaList" type="VBoxContainer" parent="DrawerHost/Slide/BagPanel/Margin/Body/Split/Resources/MetaScroll/MetaBox"]
+[node name="MetaList" type="VBoxContainer" parent="DrawerHost/Slide/BagPanel/Margin/Body/Split/Resources/MetaScroll/MetaBox" unique_id=382212649]
 layout_mode = 2
 size_flags_horizontal = 3
 theme_override_constants/separation = 8
