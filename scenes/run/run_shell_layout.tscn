@@ -1,38 +1,79 @@
 [gd_scene format=3 uid="uid://cp1kujxk8vhmb"]
 
-[node name="Layout" type="MarginContainer" unique_id=945442200]
+[node name="Layout" type="Control"]
+layout_mode = 3
 anchors_preset = 15
 anchor_right = 1.0
 anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
-theme_override_constants/margin_left = 28
-theme_override_constants/margin_top = 20
-theme_override_constants/margin_right = 28
-theme_override_constants/margin_bottom = 20
+mouse_filter = 2
 
-[node name="Column" type="VBoxContainer" parent="." unique_id=1480566178]
-layout_mode = 2
-theme_override_constants/separation = 12
+[node name="Shade" type="ColorRect" parent="."]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+mouse_filter = 2
+color = Color(0.025, 0.035, 0.065, 0.4)
 
-[node name="Header" type="Label" parent="Column" unique_id=632216009]
-layout_mode = 2
+[node name="Column" type="Control" parent="."]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+mouse_filter = 2
+
+[node name="Header" type="Label" parent="Column"]
+layout_mode = 1
+anchor_left = 0.05
+anchor_right = 0.95
+anchor_bottom = 0.08
 theme_override_colors/font_color = Color(0.93, 0.86, 0.68, 1)
-theme_override_font_sizes/font_size = 22
+theme_override_font_sizes/font_size = 30
+vertical_alignment = 1
 
-[node name="Status" type="Label" parent="Column" unique_id=2037233521]
+[node name="Heading" type="VBoxContainer" parent="Column"]
+layout_mode = 1
+anchor_left = 0.1
+anchor_top = 0.08
+anchor_right = 0.9
+anchor_bottom = 0.22
+theme_override_constants/separation = 8
+alignment = 1
+
+[node name="Title" type="Label" parent="Column/Heading"]
 layout_mode = 2
-theme_override_colors/font_color = Color(0.78, 0.82, 0.74, 1)
+theme_override_font_sizes/font_size = 48
+theme_override_colors/font_color = Color(0.93, 0.86, 0.68, 1)
+horizontal_alignment = 1
+
+[node name="Status" type="Label" parent="Column/Heading"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 26
+horizontal_alignment = 1
 autowrap_mode = 3
 
-[node name="Scroll" type="ScrollContainer" parent="Column" unique_id=1182856506]
-custom_minimum_size = Vector2(0, 300)
+[node name="Scroll" type="ScrollContainer" parent="Column"]
+layout_mode = 1
+anchor_left = 0.1
+anchor_top = 0.22
+anchor_right = 0.9
+anchor_bottom = 0.8
+horizontal_scroll_mode = 0
+
+[node name="Body" type="VBoxContainer" parent="Column/Scroll"]
 layout_mode = 2
 size_flags_horizontal = 3
 size_flags_vertical = 3
-horizontal_scroll_mode = 0
+theme_override_constants/separation = 24
+alignment = 1
 
-[node name="Body" type="VBoxContainer" parent="Column/Scroll" unique_id=1570274706]
-layout_mode = 2
-size_flags_horizontal = 3
-theme_override_constants/separation = 8
+[node name="Actions" type="HBoxContainer" parent="Column"]
+layout_mode = 1
+anchor_left = 0.1
+anchor_top = 0.8
+anchor_right = 0.9
+anchor_bottom = 0.94
+theme_override_constants/separation = 32
+alignment = 1

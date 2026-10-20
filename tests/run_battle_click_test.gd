@@ -55,6 +55,8 @@ func _run() -> void:
 		return
 
 	var battle: RunBattle = shell._battle
+	# Advance only the preparation presentation; the player clock stays frozen.
+	battle._process(RunBattle.PREPARE_SECONDS)
 	await _cover_control(battle.get_node_or_null(END_TURN_PATH) as Control)
 	var before := await _await_hand(battle)
 	if before.is_empty():
@@ -140,9 +142,9 @@ func _wait_battle_choice(shell: Node) -> Button:
 		var labels := PackedStringArray()
 		var body := shell.get("_body") as Node
 		if body != null:
-			for child in body.get_children():
+			for child in body.find_children("*", "Button", true, false):
 				if child is Button:
-					labels.append(str(child.text))
+					labels.append(str(child.get_meta("choice_key", child.text)))
 		_fail("no 战斗 room button on the tower. buttons=%s status=%s" % [
 			", ".join(labels),
 			str(shell.get("_status").text) if shell.get("_status") != null else "",
@@ -156,8 +158,8 @@ func _find_battle_button(shell: Node) -> Button:
 	var body := shell.get("_body") as Node
 	if body == null:
 		return null
-	for child in body.get_children():
-		if child is Button and str(child.text) == "战斗":
+	for child in body.find_children("*", "Button", true, false):
+		if child is Button and str(child.get_meta("choice_key", child.text)) == "战斗":
 			return child
 	return null
 

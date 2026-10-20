@@ -28,6 +28,7 @@ func _run() -> void:
 		_test_thief()
 		_test_sword()
 		_test_ink()
+		_test_priest()
 		_test_parity()
 	if _failures == 0:
 		print("PASS: rust 22, thief 23/24, sword intents, ink, parity")
@@ -206,11 +207,13 @@ func _test_ink() -> void:
 	var op := _make(run, "CARD_ADD", [], CardInstance.HAND)
 	var right := _make(run, "CARD_N4", [], CardInstance.HAND)
 	var preview := run.equation_service.preview([left.card_uid, op.card_uid, right.card_uid], {})
-	_check(int(preview.damage) == 10 and not battle.ink_tax_used, "Ink preview shows the tax and does not spend it")
+	_check(int(preview.damage) == 6 and int(preview.effective_result) == 3 and not battle.ink_tax_used, "Ink preview halves toward zero without spending the tax")
 	var illegal := run.equation_service.commit([left.card_uid], "ink_bad", {})
 	_check(not illegal.ok and not battle.ink_tax_used, "An illegal equation does not spend the ink tax")
 	var first := _commit(run, [left, op, right], "ink_add")
-	_check(first.ok and int(first.damage) == 10 and battle.ink_tax_used, "The first add pays the ink tax, got %s" % first)
+	_check(first.ok and int(first.damage) == 6 and battle.ink_tax_used, "The first legal equation pays division tax, got %s" % first)
+	var replay := _commit(run, [left, op, right], "ink_add")
+	_check(replay.replayed and replay.damage == first.damage, "Replaying a committed equation cannot charge tax twice")
 	var second := _commit(run, [
 		_make(run, "CARD_N3", [], CardInstance.HAND),
 		_make(run, "CARD_ADD", [], CardInstance.HAND),
@@ -226,6 +229,54 @@ func _test_ink() -> void:
 		_make(run, "CARD_N4", [], CardInstance.HAND),
 	], "ink_mul")
 	_check(battle.turn_index == 2 and multiplied.ok and int(multiplied.damage) == 20, "Turn 2 taxes the first multiply, got %s" % multiplied)
+	for values in [["CARD_N2", "CARD_N3", 5, 2], ["CARD_NM2", "CARD_NM3", -5, -2], ["CARD_N1", "CARD_NM1", 0, 0]]:
+		var edge := _fresh(81, "ink_edge_" + str(values[2]))
+		var edge_battle := _attach(edge, MonsterRules.MON_INK, 1, 1.0, 1.0)
+		edge_battle.start(0, 0, false, 100)
+		_seed_fight(edge)
+		var cards := [_make(edge, values[0], [], CardInstance.HAND), _make(edge, "CARD_ADD", [], CardInstance.HAND), _make(edge, values[1], [], CardInstance.HAND)]
+		var result := _commit(edge, cards, "edge")
+		_check(result.raw_result == values[2] and result.effective_result == values[3] and edge_battle.ink_tax_used, "Division tax truncates positive/negative/zero and consumes once: %s" % result)
+		edge_battle.advance(7.5)
+		_check(edge_battle.turn_index == 1 and edge_battle.ink_tax_used, "Delayed draw does not reset the tax")
+	var mixed := _fresh(82, "ink_mixed")
+	var mixed_battle := _attach(mixed, MonsterRules.MON_INK, 1, 1.0, 1.0)
+	mixed_battle.start(0, 0, false, 100)
+	_seed_fight(mixed)
+	var mixed_result := _commit(mixed, [_make(mixed, "CARD_N1", [], CardInstance.HAND), _make(mixed, "CARD_ADD", [], CardInstance.HAND), _make(mixed, "CARD_N2", [], CardInstance.HAND), _make(mixed, "CARD_MUL", [], CardInstance.HAND), _make(mixed, "CARD_N3", [], CardInstance.HAND)], "mixed")
+	_check(mixed_result.primary_op == "MUL" and mixed_result.raw_result == 7 and mixed_result.effective_result == 3, "Odd turn halves mixed multiplication-primary equations too")
+	mixed_battle.end_player_turn()
+	_check(not mixed_battle.ink_tax_used and mixed_battle.intent.tax_mode == "MUL_SUBTRACT", "Turn boundary resets tax and publishes multiplication mode")
+	var untaxed := _play_add(mixed, "even_add")
+	_check(untaxed.damage == 8 and not mixed_battle.ink_tax_used, "Even-turn addition does not consume multiplication tax")
+	var even_cards := [_make(mixed, "CARD_N1", [], CardInstance.HAND), _make(mixed, "CARD_ADD", [], CardInstance.HAND), _make(mixed, "CARD_N2", [], CardInstance.HAND), _make(mixed, "CARD_MUL", [], CardInstance.HAND), _make(mixed, "CARD_N3", [], CardInstance.HAND)]
+	var even_uids: Array = []
+	for card in even_cards:
+		even_uids.append(card.card_uid)
+	var even_preview := mixed.equation_service.preview(even_uids)
+	var taxed := _commit(mixed, even_cards, "even_mixed")
+	_check(taxed.primary_op == "MUL" and taxed.damage == 10 and even_preview.damage == taxed.damage and mixed_battle.ink_tax_used, "Even-turn mixed multiplication primary subtracts two, consistent with preview")
+	var snapshot := _fresh(83, "ink_flat_then_half")
+	var snapshot_battle := _attach(snapshot, MonsterRules.MON_INK, 1, 1.0, 1.0)
+	snapshot_battle.start(0, 0, false, 100)
+	var a := _make(snapshot, "CARD_N3", [], CardInstance.HAND)
+	var plus := _make(snapshot, "CARD_ADD", [], CardInstance.HAND)
+	var b := _make(snapshot, "CARD_N4", [], CardInstance.HAND)
+	var combined := snapshot.equation_service.preview([a.card_uid, plus.card_uid, b.card_uid], {"tax": 2})
+	_check(combined.effective_result == 2 and combined.damage == 4, "Flat subtraction precedes division, then normal damage scaling")
+
+
+func _test_priest() -> void:
+	var run := _fresh(84, "priest_forms")
+	var battle := _attach(run, MonsterRules.MON_PRIEST, 1, 1.0, 1.0)
+	battle.start(0, 0, false, 100)
+	_seed_fight(run)
+	_check(not battle.priest_heal_cancelled, "Priest begins ready to heal")
+	var result := _commit(run, [_make(run, "CARD_NM1", [], CardInstance.HAND), _make(run, "CARD_ADD", [], CardInstance.HAND), _make(run, "CARD_N3", [], CardInstance.HAND)], "cancel_heal")
+	_check(result.damage > 0 and battle.priest_heal_cancelled, "Damaging equation containing a negative printed card cancels healing")
+	var wounded := battle.enemy_hp
+	battle.end_player_turn()
+	_check(battle.enemy_hp == wounded and not battle.priest_heal_cancelled and battle.turn_index == 2, "Cancelled heal stays cancelled until next turn, then resets")
 
 
 func _test_parity() -> void:

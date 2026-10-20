@@ -1,0 +1,570 @@
+[
+  {
+    "source": "map_bg_1.JPG",
+    "sha256": "f6a84493d47df818703507b1ed8b8d89fe590a21fb3a7e6def1d50d99b9bc3c9",
+    "outputs": [
+      "assets/battle/imported/map_bg_1.png"
+    ],
+    "usage": "地图 1–3 层背景"
+  },
+  {
+    "source": "map_bg_2.JPG",
+    "sha256": "16cc4897cf4f3fa91455ef7803a6f53e54d46b8fd8d3994ed9a9f12d511eb229",
+    "outputs": [
+      "assets/battle/imported/map_bg_2.png"
+    ],
+    "usage": "地图 4–6 层背景"
+  },
+  {
+    "source": "map_bg_3.JPG",
+    "sha256": "2ce35ee8b37297698a7a51d25a3a2025c8e48562270ff55de6d1c76f7e986cb9",
+    "outputs": [
+      "assets/battle/imported/map_bg_3.png"
+    ],
+    "usage": "地图 7 层及以上背景"
+  },
+  {
+    "source": "主菜单/menu.PNG",
+    "sha256": "f972bd977ca48589d08de8b4a97d6f8127a6c4025dfe1364fcb57b850a47c109",
+    "outputs": [
+      "assets/ui/menu/bg_menu.jpg"
+    ],
+    "usage": "主菜单背景（保留原接入）"
+  },
+  {
+    "source": "主菜单/menu_btn_01_常态.PNG",
+    "sha256": "3248d79c32e8e6b8ae42d1e4d0b192ce2fa287fc82c6b428bb5da0c2a002c0af",
+    "outputs": [
+      "assets/ui/menu/btn_start_normal.png"
+    ],
+    "usage": "主菜单开始／新游戏／设置／退出按钮常态或悬停（保留原接入）"
+  },
+  {
+    "source": "主菜单/menu_btn_01_悬停.PNG",
+    "sha256": "26145b059e33956ecbd59cea4308df5558e238d7ce9a1317cbd644668d9b74fe",
+    "outputs": [
+      "assets/ui/menu/btn_start_hover.png"
+    ],
+    "usage": "主菜单开始／新游戏／设置／退出按钮常态或悬停（保留原接入）"
+  },
+  {
+    "source": "主菜单/menu_btn_02_常态.PNG",
+    "sha256": "5273d6e53bce352a7df5acc5b40e566d21f8c79ed9efd758b505999b7c589faf",
+    "outputs": [
+      "assets/ui/menu/btn_new_normal.png"
+    ],
+    "usage": "主菜单开始／新游戏／设置／退出按钮常态或悬停（保留原接入）"
+  },
+  {
+    "source": "主菜单/menu_btn_02_悬停.PNG",
+    "sha256": "3c34953b6fb6ad00134af2417e41caca424626f78dde46e0e40ce1847d12ce9a",
+    "outputs": [
+      "assets/ui/menu/btn_new_hover.png"
+    ],
+    "usage": "主菜单开始／新游戏／设置／退出按钮常态或悬停（保留原接入）"
+  },
+  {
+    "source": "主菜单/menu_btn_03_常态.PNG",
+    "sha256": "a095a152a74d558ed469cebb5337089690a14555ca764b05e75f6b1454b76b0b",
+    "outputs": [
+      "assets/ui/menu/btn_options_normal.png"
+    ],
+    "usage": "主菜单开始／新游戏／设置／退出按钮常态或悬停（保留原接入）"
+  },
+  {
+    "source": "主菜单/menu_btn_03_悬停.PNG",
+    "sha256": "7a38dd17e19d826011350d25ea89675b795d8f2bb2130e4a7c07a4c757d5731c",
+    "outputs": [
+      "assets/ui/menu/btn_options_hover.png"
+    ],
+    "usage": "主菜单开始／新游戏／设置／退出按钮常态或悬停（保留原接入）"
+  },
+  {
+    "source": "主菜单/menu_btn_04_常态.PNG",
+    "sha256": "a96a908a9e5dba43c297551734ffd4d8a5a9bbfab24f207578e949d1e1653883",
+    "outputs": [
+      "assets/ui/menu/btn_quit_normal.png"
+    ],
+    "usage": "主菜单开始／新游戏／设置／退出按钮常态或悬停（保留原接入）"
+  },
+  {
+    "source": "主菜单/menu_btn_04_悬停.PNG",
+    "sha256": "7c12a606d75bf2c2ac907459320598d3a7fbe349d5325bbad4aae1d7bacd3513",
+    "outputs": [
+      "assets/ui/menu/btn_quit_hover.png"
+    ],
+    "usage": "主菜单开始／新游戏／设置／退出按钮常态或悬停（保留原接入）"
+  },
+  {
+    "source": "主菜单/newgame_.PNG",
+    "sha256": "1cb6458621f0b7c1b1ad754350f4160262140cc6ff215c0761735e2e605e4dbc",
+    "outputs": [
+      "assets/ui/menu/dlg_newgame.png"
+    ],
+    "usage": "新游戏确认弹窗底板／确认取消按钮状态（保留原接入）"
+  },
+  {
+    "source": "主菜单/newgame_btn_01_常态.PNG",
+    "sha256": "8f6a30ce68b0d92e4df4ba64b9416ef80285d669819d877e212dea23129e68b8",
+    "outputs": [
+      "assets/ui/menu/btn_confirm_normal.png"
+    ],
+    "usage": "新游戏确认弹窗底板／确认取消按钮状态（保留原接入）"
+  },
+  {
+    "source": "主菜单/newgame_btn_01_悬停.PNG",
+    "sha256": "ff5e8e53de215cba9f8cfbca999ea468650190ae1dfd611b6d2644ec42650d8c",
+    "outputs": [
+      "assets/ui/menu/btn_confirm_hover.png"
+    ],
+    "usage": "新游戏确认弹窗底板／确认取消按钮状态（保留原接入）"
+  },
+  {
+    "source": "主菜单/newgame_btn_02_常态.PNG",
+    "sha256": "0aced1c78896e1e311ae26a5ba529aa40eb4b7b380cf96a665af2d818f962586",
+    "outputs": [
+      "assets/ui/menu/btn_cancel_normal.png"
+    ],
+    "usage": "新游戏确认弹窗底板／确认取消按钮状态（保留原接入）"
+  },
+  {
+    "source": "主菜单/newgame_btn_02_悬停.PNG",
+    "sha256": "83dd39047535523e07ce96b90fa3abfbbf03c51bd70d48b3ccad68c5af38f773",
+    "outputs": [
+      "assets/ui/menu/btn_cancel_hover.png"
+    ],
+    "usage": "新游戏确认弹窗底板／确认取消按钮状态（保留原接入）"
+  },
+  {
+    "source": "主菜单/setting_bg.PNG",
+    "sha256": "fc1838433c957a5754c990bfe42db75022cc28384eb72ceb6998edae5035a168",
+    "outputs": [
+      "assets/ui/menu/bg_settings.png"
+    ],
+    "usage": "设置弹窗底板（保留原接入）"
+  },
+  {
+    "source": "战斗/battle_bg1.JPG",
+    "sha256": "dd87914383e663c9c892a0fd2dc8745366f387796aff02a8c271ff9d434aa1fe",
+    "outputs": [
+      "assets/battle/imported/battle_bg1.png"
+    ],
+    "usage": "战斗 1–3 层背景"
+  },
+  {
+    "source": "战斗/battle_bg2.JPG",
+    "sha256": "1e08e46153b113fa23136c9ed04761859dfca6d59e836bb2a521203f336398eb",
+    "outputs": [
+      "assets/battle/imported/battle_bg2.png"
+    ],
+    "usage": "战斗 4–6 层背景"
+  },
+  {
+    "source": "战斗/battle_bg3.JPG",
+    "sha256": "66f3092d51c02b36753733e9645b44f8e81548b96066cb9e7cbc5d32663d3043",
+    "outputs": [
+      "assets/battle/imported/battle_bg3.png"
+    ],
+    "usage": "战斗 7 层及以上背景"
+  },
+  {
+    "source": "战斗/battle_human_.PNG",
+    "sha256": "5053eed6b70c4f1b350d756d45ee1ec57a790939c4f9db0be2aa98f0c22268bd",
+    "outputs": [
+      "assets/battle/imported/battle_human_.png"
+    ],
+    "usage": "玩家正常立绘，合成脚下阴影"
+  },
+  {
+    "source": "战斗/battle_human_die.PNG",
+    "sha256": "7a27a533bbcf6b52b8e275c40aa8f3e8fd4564a062375d9b2be5236598007cb9",
+    "outputs": [
+      "assets/battle/imported/battle_human_die.png"
+    ],
+    "usage": "击杀时对应形态的单次死亡动画（包含在 2 秒胜利展示内）"
+  },
+  {
+    "source": "战斗/battle_human_die2.PNG",
+    "sha256": "2a22a0a57dd648c76077626b6fcefac51a35785003abba64e096409ef921ce34",
+    "outputs": [
+      "assets/battle/imported/battle_human_die2.png"
+    ],
+    "usage": "HP 归零第 2 秒倒地，合成脚下阴影"
+  },
+  {
+    "source": "战斗/ui/battle_.png",
+    "sha256": "e95a42c9c1a2821980ac87054bfaabd6df28a5efa808d36fd2c3338606b43a4c",
+    "outputs": [
+      "assets/battle/imported/battle_frame_top.png",
+      "assets/battle/imported/battle_frame_bottom.png"
+    ],
+    "usage": "裁切为顶部 HUD 边框与底部手牌边框"
+  },
+  {
+    "source": "战斗/ui/battle_hud2_.png",
+    "sha256": "125dc201892f4e0a6bdd6530b3069f952f654eb640a219945def7066ea7d94d2",
+    "outputs": [
+      "assets/battle/imported/battle_hud2_.png"
+    ],
+    "usage": "算式区域纸张底板"
+  },
+  {
+    "source": "战斗/ui/battle_hud_.png",
+    "sha256": "55c5f70476334ff6f0e52c30654721cb74f15c31617cf2367fe75ddae1b61b2a",
+    "outputs": [
+      "assets/battle/imported/battle_hud_.png"
+    ],
+    "usage": "牌堆、准备／胜利浮层、暂停弹窗及战斗背包纸张底板"
+  },
+  {
+    "source": "战斗/ui/battle_hud_monster_.PNG",
+    "sha256": "766a784c0c9211e677d40a20b222bfb1954b7cc17311f62e3c75531f85fd907f",
+    "outputs": [
+      "assets/battle/imported/battle_hud_monster_.png"
+    ],
+    "usage": "怪物红色血条填充"
+  },
+  {
+    "source": "战斗/ui/battle_hud_monster_bottom.PNG",
+    "sha256": "6462eaee8e9ca45846272ef548c0aa46737f5032f506ae2a66a82da41ee46562",
+    "outputs": [
+      "assets/battle/imported/battle_hud_monster_bottom.png"
+    ],
+    "usage": "怪物血条底图"
+  },
+  {
+    "source": "战斗/ui/battle_hud_player_.PNG",
+    "sha256": "9dcc332864550ff5d4a4915d47618393b455a79ddbedd6a63b4dad492e6623e8",
+    "outputs": [
+      "assets/battle/imported/battle_hud_player_.png"
+    ],
+    "usage": "玩家黄色血条填充"
+  },
+  {
+    "source": "战斗/ui/battle_hud_player_bottom.PNG",
+    "sha256": "a0e4644f677e8124eb19fa47ad5f9ea98a78810f6ecfc5b66efdbf08ac3f35ac",
+    "outputs": [
+      "assets/battle/imported/battle_hud_player_bottom.png"
+    ],
+    "usage": "玩家血条底图"
+  },
+  {
+    "source": "战斗/ui/battle_hud_timer_.png",
+    "sha256": "d0f2f31fb9143af14a6287fa8ba1ae91b118df53e43877625caf39df078912bc",
+    "outputs": [
+      "assets/battle/imported/battle_hud_timer_.png"
+    ],
+    "usage": "准备／回合／追击计时条填充"
+  },
+  {
+    "source": "战斗/ui/battle_hud_timer_bottom.png",
+    "sha256": "6b6a3c2c4d49612cda2b258f5ca36418c6d8d792d583610e06afab1eaacbc5be",
+    "outputs": [
+      "assets/battle/imported/battle_hud_timer_bottom.png"
+    ],
+    "usage": "计时条底图"
+  },
+  {
+    "source": "战斗/ui/battle_log_1.png",
+    "sha256": "b2dfe48075c923f14abbe71de819622ec5611d298a7aeb9f8711d1f40f392d3a",
+    "outputs": [
+      "assets/battle/imported/battle_log_1.png"
+    ],
+    "usage": "发射按钮"
+  },
+  {
+    "source": "战斗/ui/battle_log_2.png",
+    "sha256": "921889fe23de9634964186bb3f37c525808fb56dcb1f4d1d98c2be576b1d5f09",
+    "outputs": [
+      "assets/battle/imported/battle_log_2.png"
+    ],
+    "usage": "结束回合按钮"
+  },
+  {
+    "source": "战斗/ui/battle_log_continue.png",
+    "sha256": "1b9a82e5b25407793962b64dcb2c5ebdb2adf9236430f4e857bbd61993d90f86",
+    "outputs": [
+      "assets/battle/imported/battle_log_continue.png"
+    ],
+    "usage": "暂停入口：实际图片为暂停双竖线"
+  },
+  {
+    "source": "战斗/ui/battle_log_exit.png",
+    "sha256": "95fc9bc9aceaf801fafd232e3d63eb784d553410a1ceafd194c966570f5e2157",
+    "outputs": [
+      "assets/battle/imported/battle_log_exit.png"
+    ],
+    "usage": "暂停菜单退出游戏图标"
+  },
+  {
+    "source": "战斗/ui/battle_log_pause.png",
+    "sha256": "ef05e1289e21eb8e7b40704a513d7a9194633427b310b64bb01fe7ed0bd0e8d4",
+    "outputs": [
+      "assets/battle/imported/battle_log_pause.png"
+    ],
+    "usage": "继续游戏：实际图片为播放三角"
+  },
+  {
+    "source": "战斗/ui/battle_log_restart.PNG",
+    "sha256": "a0a4a62f186ff7f1f3c59aaf83d3b4a4451ce603a3cf74e0d732f6c8a926a36e",
+    "outputs": [
+      "assets/battle/imported/battle_log_restart.png"
+    ],
+    "usage": "暂停菜单重开本场战斗图标"
+  },
+  {
+    "source": "战斗/ui/battle_shadow.PNG",
+    "sha256": "ca8b9c597198ba4e701dd5fdcb538f1bef20b41f8cf09f6e0066102af4dd83de",
+    "outputs": [
+      "assets/battle/imported/battle_shadow.png"
+    ],
+    "usage": "怪物脚下阴影；同时合成进三个玩家姿态"
+  },
+  {
+    "source": "战斗/怪物/MON_INK.PNG",
+    "sha256": "30bb03e163aa84a2043e6b5da5bec902e208f43bbcafdf5f7afbc8082e15e383",
+    "outputs": [
+      "assets/battle/imported/MON_INK.png"
+    ],
+    "usage": "偶数回合乘法税 × 静态形态"
+  },
+  {
+    "source": "战斗/怪物/MON_INK2.PNG",
+    "sha256": "4abcdb7bb92711254bc8ee3dacfdd9d082d40fc438c2505302264e971a9806a5",
+    "outputs": [
+      "assets/battle/imported/MON_INK2.png"
+    ],
+    "usage": "奇数回合减半税 ÷ 静态形态"
+  },
+  {
+    "source": "战斗/怪物/MON_INK2_die.GIF",
+    "sha256": "3e565548359da696d192972f2485ba24687ad9398b6ddb32ffaea6c49a3818c9",
+    "outputs": [
+      "assets/battle/imported/MON_INK2_die/00.png",
+      "assets/battle/imported/MON_INK2_die/01.png",
+      "assets/battle/imported/MON_INK2_die/02.png",
+      "assets/battle/imported/MON_INK2_die/03.png",
+      "assets/battle/imported/MON_INK2_die/04.png"
+    ],
+    "usage": "击杀时对应形态的单次死亡动画（包含在 2 秒胜利展示内）"
+  },
+  {
+    "source": "战斗/怪物/MON_INK2_enter.GIF",
+    "sha256": "4e8146ea9ff1873c2de6394a6151ab92d0ab558f26d1bf8e17b614e1e519cbd7",
+    "outputs": [
+      "assets/battle/imported/MON_INK2_enter/00.png",
+      "assets/battle/imported/MON_INK2_enter/01.png",
+      "assets/battle/imported/MON_INK2_enter/02.png",
+      "assets/battle/imported/MON_INK2_enter/03.png",
+      "assets/battle/imported/MON_INK2_enter/04.png",
+      "assets/battle/imported/MON_INK2_enter/05.png",
+      "assets/battle/imported/MON_INK2_enter/06.png"
+    ],
+    "usage": "开战 0.4 秒后单次入场"
+  },
+  {
+    "source": "战斗/怪物/MON_INK_die.GIF",
+    "sha256": "ade5736f014fa97a708c665036244dd2302ebbcd206772b5c5c9b4ef919cba16",
+    "outputs": [
+      "assets/battle/imported/MON_INK_die/00.png",
+      "assets/battle/imported/MON_INK_die/01.png",
+      "assets/battle/imported/MON_INK_die/02.png",
+      "assets/battle/imported/MON_INK_die/03.png",
+      "assets/battle/imported/MON_INK_die/04.png"
+    ],
+    "usage": "击杀时对应形态的单次死亡动画（包含在 2 秒胜利展示内）"
+  },
+  {
+    "source": "战斗/怪物/MON_INK_enter.GIF",
+    "sha256": "4277518e0ee658ffebe5fba12194872d7a4d85bd697c047d7f30cdadebd4fd68",
+    "outputs": [
+      "assets/battle/imported/MON_INK_enter/00.png",
+      "assets/battle/imported/MON_INK_enter/01.png",
+      "assets/battle/imported/MON_INK_enter/02.png",
+      "assets/battle/imported/MON_INK_enter/03.png",
+      "assets/battle/imported/MON_INK_enter/04.png",
+      "assets/battle/imported/MON_INK_enter/05.png",
+      "assets/battle/imported/MON_INK_enter/06.png"
+    ],
+    "usage": "备用入场动画：已注册；正常开战为另一形态，机制切换直接换静态图"
+  },
+  {
+    "source": "战斗/怪物/MON_PARITY.PNG",
+    "sha256": "37ad020aa2b49cce2bcf4d75113e0fb152326bba0e12052eacdf8ef155769848",
+    "outputs": [
+      "assets/battle/imported/MON_PARITY.png"
+    ],
+    "usage": "要求奇数的一眼形态"
+  },
+  {
+    "source": "战斗/怪物/MON_PARITY2.PNG",
+    "sha256": "a41645456c56b9e3a58a75e9241352c38b1b225b2663f9ac1484fe1e172b6e26",
+    "outputs": [
+      "assets/battle/imported/MON_PARITY2.png"
+    ],
+    "usage": "要求偶数的两眼形态"
+  },
+  {
+    "source": "战斗/怪物/MON_PARITY2_die.GIF",
+    "sha256": "1f0cd2d7f26d266191017d62cfc78907badd452586f0c1f14ab46c2557d88ce0",
+    "outputs": [
+      "assets/battle/imported/MON_PARITY2_die/00.png",
+      "assets/battle/imported/MON_PARITY2_die/01.png",
+      "assets/battle/imported/MON_PARITY2_die/02.png",
+      "assets/battle/imported/MON_PARITY2_die/03.png",
+      "assets/battle/imported/MON_PARITY2_die/04.png"
+    ],
+    "usage": "击杀时对应形态的单次死亡动画（包含在 2 秒胜利展示内）"
+  },
+  {
+    "source": "战斗/怪物/MON_PARITY2_enter.GIF",
+    "sha256": "e4d5e33942f3567b044c722279e357aa509582e72f639626eb11045f711fedfd",
+    "outputs": [
+      "assets/battle/imported/MON_PARITY2_enter/00.png",
+      "assets/battle/imported/MON_PARITY2_enter/01.png",
+      "assets/battle/imported/MON_PARITY2_enter/02.png",
+      "assets/battle/imported/MON_PARITY2_enter/03.png",
+      "assets/battle/imported/MON_PARITY2_enter/04.png",
+      "assets/battle/imported/MON_PARITY2_enter/05.png",
+      "assets/battle/imported/MON_PARITY2_enter/06.png"
+    ],
+    "usage": "备用入场动画：已注册；正常开战为另一形态，机制切换直接换静态图"
+  },
+  {
+    "source": "战斗/怪物/MON_PARITY_die.GIF",
+    "sha256": "72ee0fba2c19d704ad1323d836f4cbf43a92f97bc1609c6c1f41cf502e97cae5",
+    "outputs": [
+      "assets/battle/imported/MON_PARITY_die/00.png",
+      "assets/battle/imported/MON_PARITY_die/01.png",
+      "assets/battle/imported/MON_PARITY_die/02.png",
+      "assets/battle/imported/MON_PARITY_die/03.png",
+      "assets/battle/imported/MON_PARITY_die/04.png"
+    ],
+    "usage": "击杀时对应形态的单次死亡动画（包含在 2 秒胜利展示内）"
+  },
+  {
+    "source": "战斗/怪物/MON_PARITY_enter.GIF",
+    "sha256": "fa9d155d18be1b1237e953098438e4006d122d94b828707c8a2bfd02a311a941",
+    "outputs": [
+      "assets/battle/imported/MON_PARITY_enter/00.png",
+      "assets/battle/imported/MON_PARITY_enter/01.png",
+      "assets/battle/imported/MON_PARITY_enter/02.png",
+      "assets/battle/imported/MON_PARITY_enter/03.png",
+      "assets/battle/imported/MON_PARITY_enter/04.png",
+      "assets/battle/imported/MON_PARITY_enter/05.png",
+      "assets/battle/imported/MON_PARITY_enter/06.png"
+    ],
+    "usage": "开战 0.4 秒后单次入场"
+  },
+  {
+    "source": "战斗/怪物/MON_PRIEST.PNG",
+    "sha256": "2ae947ca8f9f2ec682339e997aa76f4f2d695c5fbe74768efdeae9486ac7ed72",
+    "outputs": [
+      "assets/battle/imported/MON_PRIEST.png"
+    ],
+    "usage": "治疗取消后的闭嘴形态"
+  },
+  {
+    "source": "战斗/怪物/MON_PRIEST2.PNG",
+    "sha256": "3ebb617976a497a364dac7bf2f9f9b68e17a42323394f29e8eaea828732f0a77",
+    "outputs": [
+      "assets/battle/imported/MON_PRIEST2.png"
+    ],
+    "usage": "准备治疗的张嘴形态"
+  },
+  {
+    "source": "战斗/怪物/MON_PRIEST2_die.GIF",
+    "sha256": "7ec715d2d587a9c6a4e756e7fb3849656d8e9d4d45278177676a7871ff742c6f",
+    "outputs": [
+      "assets/battle/imported/MON_PRIEST2_die/00.png",
+      "assets/battle/imported/MON_PRIEST2_die/01.png",
+      "assets/battle/imported/MON_PRIEST2_die/02.png",
+      "assets/battle/imported/MON_PRIEST2_die/03.png",
+      "assets/battle/imported/MON_PRIEST2_die/04.png"
+    ],
+    "usage": "击杀时对应形态的单次死亡动画（包含在 2 秒胜利展示内）"
+  },
+  {
+    "source": "战斗/怪物/MON_PRIEST2_enter.GIF",
+    "sha256": "77a41df8e8037666b23b251d25989e75b06bbb614d8c975e073019b897d132b9",
+    "outputs": [
+      "assets/battle/imported/MON_PRIEST2_enter/00.png",
+      "assets/battle/imported/MON_PRIEST2_enter/01.png",
+      "assets/battle/imported/MON_PRIEST2_enter/02.png",
+      "assets/battle/imported/MON_PRIEST2_enter/03.png",
+      "assets/battle/imported/MON_PRIEST2_enter/04.png",
+      "assets/battle/imported/MON_PRIEST2_enter/05.png",
+      "assets/battle/imported/MON_PRIEST2_enter/06.png"
+    ],
+    "usage": "开战 0.4 秒后单次入场"
+  },
+  {
+    "source": "战斗/怪物/MON_PRIEST_die.GIF",
+    "sha256": "b5a3bdec8690f32a549618cd7dabe86c4c5c63e6fdf923f54f08871ca4d261e5",
+    "outputs": [
+      "assets/battle/imported/MON_PRIEST_die/00.png",
+      "assets/battle/imported/MON_PRIEST_die/01.png",
+      "assets/battle/imported/MON_PRIEST_die/02.png",
+      "assets/battle/imported/MON_PRIEST_die/03.png",
+      "assets/battle/imported/MON_PRIEST_die/04.png"
+    ],
+    "usage": "击杀时对应形态的单次死亡动画（包含在 2 秒胜利展示内）"
+  },
+  {
+    "source": "战斗/怪物/MON_PRIEST_enter.GIF",
+    "sha256": "3c580caab3ff5498c245cfe0962cc1e42806ff10edfe8a97e4f445b6fe636051",
+    "outputs": [
+      "assets/battle/imported/MON_PRIEST_enter/00.png",
+      "assets/battle/imported/MON_PRIEST_enter/01.png",
+      "assets/battle/imported/MON_PRIEST_enter/02.png",
+      "assets/battle/imported/MON_PRIEST_enter/03.png",
+      "assets/battle/imported/MON_PRIEST_enter/04.png",
+      "assets/battle/imported/MON_PRIEST_enter/05.png",
+      "assets/battle/imported/MON_PRIEST_enter/06.png"
+    ],
+    "usage": "备用入场动画：已注册；正常开战为另一形态，机制切换直接换静态图"
+  },
+  {
+    "source": "战斗/怪物/MON_RUST_die.GIF",
+    "sha256": "146408df40f55679c2eb0433b49ce6e69faa9e81b647f0c50ba9b0f26c51979b",
+    "outputs": [
+      "assets/battle/imported/MON_RUST_die/00.png",
+      "assets/battle/imported/MON_RUST_die/01.png",
+      "assets/battle/imported/MON_RUST_die/02.png",
+      "assets/battle/imported/MON_RUST_die/03.png",
+      "assets/battle/imported/MON_RUST_die/04.png"
+    ],
+    "usage": "击杀时对应形态的单次死亡动画（包含在 2 秒胜利展示内）"
+  },
+  {
+    "source": "战斗/怪物/MON_RUST_enter.GIF",
+    "sha256": "322e9301c6901562242b7242727cff0e1cbc9e084029fb382642bfb5d3f8e46b",
+    "outputs": [
+      "assets/battle/imported/MON_RUST_enter/00.png",
+      "assets/battle/imported/MON_RUST_enter/01.png",
+      "assets/battle/imported/MON_RUST_enter/02.png",
+      "assets/battle/imported/MON_RUST_enter/03.png",
+      "assets/battle/imported/MON_RUST_enter/04.png",
+      "assets/battle/imported/MON_RUST_enter/05.png",
+      "assets/battle/imported/MON_RUST_enter/06.png",
+      "assets/battle/imported/MON_RUST.png"
+    ],
+    "usage": "开战 0.4 秒后单次入场；最后可见合成帧同时作为待机图"
+  },
+  {
+    "source": "战斗/怪物/怪物出现裂隙动画  比怪物出现早2帧.GIF",
+    "sha256": "bca76f063dfb2ba23ccb62a205e170d293fbe41a00419d154c060ec0e368459d",
+    "outputs": [
+      "assets/battle/imported/rift/00.png",
+      "assets/battle/imported/rift/01.png",
+      "assets/battle/imported/rift/02.png",
+      "assets/battle/imported/rift/03.png",
+      "assets/battle/imported/rift/04.png",
+      "assets/battle/imported/rift/05.png",
+      "assets/battle/imported/rift/06.png",
+      "assets/battle/imported/rift/07.png",
+      "assets/battle/imported/rift/08.png"
+    ],
+    "usage": "开战立即播放裂隙（比怪物早 0.4 秒）"
+  }
+]

@@ -1,0 +1,340 @@
+{
+  "archive": "卡牌.zip",
+  "assets": {
+    "faces/positive.png": {
+      "source": "卡牌/正/IMG_2794.PNG",
+      "sha256": "6157a7ee8ab77db3a7361d21f944cde3eb4f9132d0c2da627d397976cd470af6",
+      "processing": "original pixels"
+    },
+    "faces/negative.png": {
+      "source": "卡牌/负/IMG_2793.PNG",
+      "sha256": "8330c9931c1d60d6054a734baf9257dd2b9198b530bc89a78308db55a48bca58",
+      "processing": "original pixels"
+    },
+    "faces/neutral.png": {
+      "source": "卡牌/符号和0/IMG_2797.PNG",
+      "sha256": "419e772f62bd00f3fe923198e046d505f14026dd00e71889547ccf8d812ab05c",
+      "processing": "original pixels"
+    },
+    "faces/zero.png": {
+      "source": "卡牌/符号和0/IMG_2807.PNG",
+      "sha256": "e5362464a424688404464512e8631898e689cb62805ebd682a2a1e6047420eea",
+      "processing": "original pixels"
+    },
+    "faces/back.png": {
+      "source": "卡牌/card_back.PNG",
+      "sha256": "87917708e045cbf8cbd751894812c38cfb52364e5e3848d9005fb29fb4c4b08d",
+      "processing": "original pixels"
+    },
+    "faces/room.png": {
+      "source": "卡牌/map_room_.png",
+      "sha256": "b59f9f723085f981aeb6742bab41c73a785429b206285e9af9b5111c7f9e9a38",
+      "processing": "original pixels"
+    },
+    "glyphs/positive_1.png": {
+      "source": "卡牌/正/IMG_2788.PNG",
+      "sha256": "5346c75ca9cd81145866c7e645b5b4bd11fcd919ee6f8ebf4148d88b2d550007",
+      "processing": "alpha crop"
+    },
+    "glyphs/positive_2.png": {
+      "source": "卡牌/正/IMG_2787.PNG",
+      "sha256": "c588cd401e20b3380c2bec2c9e65914a1061f1960f42b867ff4c40a28c89dda2",
+      "processing": "alpha crop"
+    },
+    "glyphs/positive_3.png": {
+      "source": "卡牌/正/IMG_2789.PNG",
+      "sha256": "f43c04972b73ab2096a7a838582aac14740389f7c21d7c9a4f9e50f0b9242282",
+      "processing": "alpha crop"
+    },
+    "glyphs/positive_4.png": {
+      "source": "卡牌/正/IMG_2790.PNG",
+      "sha256": "c850f9f035a8be36ba7909214be9a5d73997186de5ee0aaf58956709eb7004f4",
+      "processing": "alpha crop"
+    },
+    "glyphs/positive_5.png": {
+      "source": "卡牌/正/IMG_2791.PNG",
+      "sha256": "65ea54c92872b4b2c750423a17ef02f6dfb410b7899c5ebed219cc30864ed7bc",
+      "processing": "alpha crop"
+    },
+    "glyphs/negative_1.png": {
+      "source": "卡牌/负/IMG_2806.PNG",
+      "sha256": "c428c49b44f3f31120a880e235c0d02ddbf1731e55b83ef9a7a5c5b3bbfe0dbb",
+      "processing": "alpha crop"
+    },
+    "glyphs/negative_2.png": {
+      "source": "卡牌/负/IMG_2805.PNG",
+      "sha256": "4feeb5eb579e162dd287357d53b48c200b9f2607ede1e64bfe6c0842193c630b",
+      "processing": "alpha crop"
+    },
+    "glyphs/negative_3.png": {
+      "source": "卡牌/负/IMG_2804.PNG",
+      "sha256": "0e0900376554df06ac3c8c35398b421389746b079c7cc05bd799917639d50f64",
+      "processing": "alpha crop"
+    },
+    "glyphs/negative_4.png": {
+      "source": "卡牌/负/IMG_2803.PNG",
+      "sha256": "d480471e341896d138459b0b80a72b868ab1b4e3d73af387e70a8e4a9be34af6",
+      "processing": "alpha crop"
+    },
+    "glyphs/negative_5.png": {
+      "source": "卡牌/负/IMG_2802.PNG",
+      "sha256": "2a782ddf7243d70f9ab2e09e84785cb1bd355049d82aec9582634e617aa740e5",
+      "processing": "alpha crop"
+    },
+    "glyphs/minus.png": {
+      "source": "卡牌/符号和0/IMG_2798.PNG",
+      "sha256": "ec9ec2489f74394c88e5d970bef84c803697d11c3c2536dc0a9fc513857b21c8",
+      "processing": "alpha crop"
+    },
+    "glyphs/add.png": {
+      "source": "卡牌/符号和0/IMG_2799.PNG",
+      "sha256": "65315b7a2e93624f1e47dd6743a61c582edbea45095577030b24c532229ac813",
+      "processing": "alpha crop"
+    },
+    "glyphs/mul.png": {
+      "source": "卡牌/符号和0/IMG_2800.PNG",
+      "sha256": "12512bdf4b9d47435cadffcf813a9909bbe0ada46402b4acaa840d270fb384d1",
+      "processing": "alpha crop"
+    },
+    "glyphs/divide.png": {
+      "source": "卡牌/符号和0/IMG_2801.PNG",
+      "sha256": "6af97660ae603e27366f448b9ce006851911af9871d13e11422a014336049ba6",
+      "processing": "alpha crop"
+    },
+    "marks/num1.png": {
+      "source": "卡牌/正/强化印记 - 副本/+1.png",
+      "sha256": "f77498eaaa24742fd3a0a20b57db457072279027012431f648c82d7ce05f434e",
+      "processing": "alpha crop"
+    },
+    "marks/num2.png": {
+      "source": "卡牌/正/强化印记 - 副本/+2.png",
+      "sha256": "db54c989aefda5f2ad31a4dbb6ce4d8c36d8c066a7e523aaf01c67e6536bb890",
+      "processing": "alpha crop"
+    },
+    "marks/num3.png": {
+      "source": "卡牌/正/强化印记 - 副本/+3.png",
+      "sha256": "0d1aece8ad11f5e57f4f9a4fcf837b78a478f13a6a043e8e4ae3eb4a90eb8ed9",
+      "processing": "alpha crop"
+    },
+    "marks/echo.png": {
+      "source": "卡牌/正/强化印记 - 副本/fu xian.png",
+      "sha256": "246431781c84e3e5c05bd5f6a82b72128aa121109658e0ba62304cf93312608b",
+      "processing": "alpha crop"
+    },
+    "marks/return.png": {
+      "source": "卡牌/正/强化印记 - 副本/hui shou.PNG",
+      "sha256": "660054a43005f209c03325e05fdf19d0f4921e0b2d2a4a43a6ae0893b8e3a2af",
+      "processing": "alpha crop"
+    },
+    "marks/fragile.png": {
+      "source": "卡牌/正/强化印记 - 副本/yi sui.PNG",
+      "sha256": "8b105f72b28769887428d3025f7f5f66d7fd7ea8c858ad865ec2fa797ec8b1b7",
+      "processing": "alpha crop"
+    },
+    "marks/alchemy.png": {
+      "source": "卡牌/正/强化印记 - 副本/dian jin shou.PNG",
+      "sha256": "212f9f04064baf88fc399a0e6b344d48e4a0036e59f0447a7cdddcd001ce6cdc",
+      "processing": "alpha crop"
+    },
+    "marks/slot_available.png": {
+      "source": "卡牌/正/强化印记 - 副本/card_mark_available.png",
+      "sha256": "51c1560ff0b60e78eec23d401e23dac536631f29e2f96d12a188fcddccc07962",
+      "processing": "alpha crop"
+    },
+    "marks/slot_occupied.png": {
+      "source": "卡牌/正/强化印记 - 副本/card_mark_unavailable.png",
+      "sha256": "b16f85493edb0e6553b8196a459526b0dd2891a4e1eb7e15aa7c03c6743d6921",
+      "processing": "alpha crop"
+    },
+    "glyphs/neutral_0.png": {
+      "source": "faces/zero.png",
+      "processing": "central zero pigment extraction"
+    },
+    "glyphs/positive_6.png": {
+      "source": "glyphs/positive_1.png through positive_5.png",
+      "processing": "locally drawn curved strokes; matching pigment, grain and edge palette"
+    },
+    "glyphs/positive_7.png": {
+      "source": "glyphs/positive_1.png through positive_5.png",
+      "processing": "locally drawn curved strokes; matching pigment, grain and edge palette"
+    },
+    "glyphs/positive_8.png": {
+      "source": "glyphs/positive_1.png through positive_5.png",
+      "processing": "locally drawn curved strokes; matching pigment, grain and edge palette"
+    },
+    "glyphs/positive_9.png": {
+      "source": "glyphs/positive_1.png through positive_5.png",
+      "processing": "locally drawn curved strokes; matching pigment, grain and edge palette"
+    },
+    "glyphs/positive_0.png": {
+      "source": "glyphs/neutral_0.png",
+      "processing": "palette matched"
+    },
+    "glyphs/negative_6.png": {
+      "source": "glyphs/negative_1.png through negative_5.png",
+      "processing": "locally drawn curved strokes; matching pigment, grain and edge palette"
+    },
+    "glyphs/negative_7.png": {
+      "source": "glyphs/negative_1.png through negative_5.png",
+      "processing": "locally drawn curved strokes; matching pigment, grain and edge palette"
+    },
+    "glyphs/negative_8.png": {
+      "source": "glyphs/negative_1.png through negative_5.png",
+      "processing": "locally drawn curved strokes; matching pigment, grain and edge palette"
+    },
+    "glyphs/negative_9.png": {
+      "source": "glyphs/negative_1.png through negative_5.png",
+      "processing": "locally drawn curved strokes; matching pigment, grain and edge palette"
+    },
+    "glyphs/negative_0.png": {
+      "source": "glyphs/neutral_0.png",
+      "processing": "palette matched"
+    },
+    "marks/magnet.png": {
+      "source": "marks/echo.png, marks/return.png, marks/fragile.png",
+      "processing": "locally drawn motif with matching pale gold pigment and rough edge"
+    },
+    "marks/yinyang.png": {
+      "source": "marks/echo.png, marks/return.png, marks/fragile.png",
+      "processing": "locally drawn motif with matching pale gold pigment and rough edge"
+    },
+    "marks/flammable.png": {
+      "source": "marks/echo.png, marks/return.png, marks/fragile.png",
+      "processing": "locally drawn motif with matching pale gold pigment and rough edge"
+    },
+    "marks/smolder.png": {
+      "source": "marks/echo.png, marks/return.png, marks/fragile.png",
+      "processing": "locally drawn motif with matching pale gold pigment and rough edge"
+    },
+    "marks/combo.png": {
+      "source": "marks/echo.png, marks/return.png, marks/fragile.png",
+      "processing": "locally drawn motif with matching pale gold pigment and rough edge"
+    },
+    "marks/frozen.png": {
+      "source": "marks/echo.png, marks/return.png, marks/fragile.png",
+      "processing": "locally drawn motif with matching pale gold pigment and rough edge"
+    },
+    "marks/price.png": {
+      "source": "marks/echo.png, marks/return.png, marks/fragile.png",
+      "processing": "locally drawn motif with matching pale gold pigment and rough edge"
+    },
+    "marks/ghost.png": {
+      "source": "marks/echo.png, marks/return.png, marks/fragile.png",
+      "processing": "locally drawn motif with matching pale gold pigment and rough edge"
+    },
+    "marks/vanguard.png": {
+      "source": "marks/echo.png, marks/return.png, marks/fragile.png",
+      "processing": "locally drawn motif with matching pale gold pigment and rough edge"
+    }
+  },
+  "duplicates": {
+    "卡牌/符号和0/强化印记/+1.png": {
+      "canonical": "marks/num1.png",
+      "sha256": "f77498eaaa24742fd3a0a20b57db457072279027012431f648c82d7ce05f434e"
+    },
+    "卡牌/符号和0/强化印记/+2.png": {
+      "canonical": "marks/num2.png",
+      "sha256": "db54c989aefda5f2ad31a4dbb6ce4d8c36d8c066a7e523aaf01c67e6536bb890"
+    },
+    "卡牌/符号和0/强化印记/+3.png": {
+      "canonical": "marks/num3.png",
+      "sha256": "0d1aece8ad11f5e57f4f9a4fcf837b78a478f13a6a043e8e4ae3eb4a90eb8ed9"
+    },
+    "卡牌/符号和0/强化印记/card_mark_available.png": {
+      "canonical": "marks/slot_available.png",
+      "sha256": "a32dccb218a4d868d2723a39778ecfc0a5452eb5853cfeefc014bc77cec5858f"
+    },
+    "卡牌/符号和0/强化印记/card_mark_unavailable.png": {
+      "canonical": "marks/slot_occupied.png",
+      "sha256": "173c210d902094e2b206f48fb3c74b809996ef7764680586cdc38945d9b8060e"
+    },
+    "卡牌/符号和0/强化印记/dian jin shou.PNG": {
+      "canonical": "marks/alchemy.png",
+      "sha256": "a5dd8de11775f703136c100b65ef326eade1938e43670179d7ca85f02fe5bc0a"
+    },
+    "卡牌/符号和0/强化印记/fu xian.png": {
+      "canonical": "marks/echo.png",
+      "sha256": "8560f4a04e6015fb5207ded168f5fccd32044a0bdcbb553241b6897beaffc3f1"
+    },
+    "卡牌/符号和0/强化印记/hui shou.PNG": {
+      "canonical": "marks/return.png",
+      "sha256": "8646c7827686e9b5ccc19ac6134a00d35d3189f2ca6e304c9f4d2898bc82493b"
+    },
+    "卡牌/符号和0/强化印记/yi sui.PNG": {
+      "canonical": "marks/fragile.png",
+      "sha256": "65722553dfe2550d5246f16799abfc4dbb51d26ae32afd76aea1f0f4be778599"
+    },
+    "卡牌/符号和0/强化印记 - 副本/+1.png": {
+      "canonical": "marks/num1.png",
+      "sha256": "f77498eaaa24742fd3a0a20b57db457072279027012431f648c82d7ce05f434e"
+    },
+    "卡牌/符号和0/强化印记 - 副本/+2.png": {
+      "canonical": "marks/num2.png",
+      "sha256": "db54c989aefda5f2ad31a4dbb6ce4d8c36d8c066a7e523aaf01c67e6536bb890"
+    },
+    "卡牌/符号和0/强化印记 - 副本/+3.png": {
+      "canonical": "marks/num3.png",
+      "sha256": "0d1aece8ad11f5e57f4f9a4fcf837b78a478f13a6a043e8e4ae3eb4a90eb8ed9"
+    },
+    "卡牌/符号和0/强化印记 - 副本/card_mark_available.png": {
+      "canonical": "marks/slot_available.png",
+      "sha256": "51c1560ff0b60e78eec23d401e23dac536631f29e2f96d12a188fcddccc07962"
+    },
+    "卡牌/符号和0/强化印记 - 副本/card_mark_unavailable.png": {
+      "canonical": "marks/slot_occupied.png",
+      "sha256": "b16f85493edb0e6553b8196a459526b0dd2891a4e1eb7e15aa7c03c6743d6921"
+    },
+    "卡牌/符号和0/强化印记 - 副本/dian jin shou.PNG": {
+      "canonical": "marks/alchemy.png",
+      "sha256": "212f9f04064baf88fc399a0e6b344d48e4a0036e59f0447a7cdddcd001ce6cdc"
+    },
+    "卡牌/符号和0/强化印记 - 副本/fu xian.png": {
+      "canonical": "marks/echo.png",
+      "sha256": "246431781c84e3e5c05bd5f6a82b72128aa121109658e0ba62304cf93312608b"
+    },
+    "卡牌/符号和0/强化印记 - 副本/hui shou.PNG": {
+      "canonical": "marks/return.png",
+      "sha256": "660054a43005f209c03325e05fdf19d0f4921e0b2d2a4a43a6ae0893b8e3a2af"
+    },
+    "卡牌/符号和0/强化印记 - 副本/yi sui.PNG": {
+      "canonical": "marks/fragile.png",
+      "sha256": "8b105f72b28769887428d3025f7f5f66d7fd7ea8c858ad865ec2fa797ec8b1b7"
+    },
+    "卡牌/负/强化印记/+1.png": {
+      "canonical": "marks/num1.png",
+      "sha256": "f77498eaaa24742fd3a0a20b57db457072279027012431f648c82d7ce05f434e"
+    },
+    "卡牌/负/强化印记/+2.png": {
+      "canonical": "marks/num2.png",
+      "sha256": "db54c989aefda5f2ad31a4dbb6ce4d8c36d8c066a7e523aaf01c67e6536bb890"
+    },
+    "卡牌/负/强化印记/+3.png": {
+      "canonical": "marks/num3.png",
+      "sha256": "0d1aece8ad11f5e57f4f9a4fcf837b78a478f13a6a043e8e4ae3eb4a90eb8ed9"
+    },
+    "卡牌/负/强化印记/card_mark_available.png": {
+      "canonical": "marks/slot_available.png",
+      "sha256": "a32dccb218a4d868d2723a39778ecfc0a5452eb5853cfeefc014bc77cec5858f"
+    },
+    "卡牌/负/强化印记/card_mark_unavailable.png": {
+      "canonical": "marks/slot_occupied.png",
+      "sha256": "173c210d902094e2b206f48fb3c74b809996ef7764680586cdc38945d9b8060e"
+    },
+    "卡牌/负/强化印记/dian jin shou.PNG": {
+      "canonical": "marks/alchemy.png",
+      "sha256": "a5dd8de11775f703136c100b65ef326eade1938e43670179d7ca85f02fe5bc0a"
+    },
+    "卡牌/负/强化印记/fu xian.png": {
+      "canonical": "marks/echo.png",
+      "sha256": "8560f4a04e6015fb5207ded168f5fccd32044a0bdcbb553241b6897beaffc3f1"
+    },
+    "卡牌/负/强化印记/hui shou.PNG": {
+      "canonical": "marks/return.png",
+      "sha256": "8646c7827686e9b5ccc19ac6134a00d35d3189f2ca6e304c9f4d2898bc82493b"
+    },
+    "卡牌/负/强化印记/yi sui.PNG": {
+      "canonical": "marks/fragile.png",
+      "sha256": "65722553dfe2550d5246f16799abfc4dbb51d26ae32afd76aea1f0f4be778599"
+    }
+  }
+}

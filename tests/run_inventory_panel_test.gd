@@ -25,6 +25,7 @@ func _run() -> void:
 	await _test_shell_input_and_new_run()
 	await _test_layout_and_sidebar()
 	await _test_shell_battle_bag_visible()
+	await _test_scaled_grid_and_states()
 	if _failures == 0:
 		print("PASS: run inventory drawer, pause, input, and layout")
 	else:
@@ -233,8 +234,7 @@ func _test_layout_and_sidebar() -> void:
 		TowerDeck.create_card(run, "CARD_N1", [], run.depth, "")
 	var scene_text := FileAccess.get_file_as_string("res://scenes/run/run_inventory.tscn")
 	_check(not scene_text.contains("销毁") and not scene_text.contains("使用"), "The bag scene has no destroy or use action")
-	# 战斗屏按 1920×1080 设计分辨率排版（Board/Margin 固定尺寸），而 stretch 是
-	# canvas_items + expand ⇒ 真实画布不会小于 1920×1080；这里只跑可能出现的形状。
+	# Raw canvas geometry; actual canvas_items + keep window scaling is checked below.
 	for size in [Vector2i(1920, 1080), Vector2i(2560, 1080), Vector2i(1920, 1440)]:
 		root.content_scale_mode = Window.CONTENT_SCALE_MODE_DISABLED
 		root.size = size
@@ -263,7 +263,7 @@ func _test_layout_and_sidebar() -> void:
 		var panel: Control = inventory.get_node("DrawerHost/Slide/BagPanel")
 		var host_rect := host.get_global_rect()
 		var panel_rect := panel.get_global_rect()
-		var timer: Control = battle.get_node("Board/Margin/Column/Stage/Center/Timer")
+		var timer: Control = battle.get_node("Board/Margin/Column/TopBar/Clock/Timer")
 		var hand: Control = battle.get_node("Hand")
 		var timer_rect := timer.get_global_rect()
 		var hand_rect := hand.get_global_rect()
@@ -282,14 +282,8 @@ func _test_layout_and_sidebar() -> void:
 		var split := inventory.get_node("DrawerHost/Slide/BagPanel/Margin/Body/Split") as HSplitContainer
 		var cards: Control = split.get_node("Cards")
 		var resources: Control = split.get_node("Resources")
-		_check(split.size.x > 1.0 and resources.size.x > 1.0, "%s keeps the resource column" % size)
-		if split.size.x > 1.0:
-			var ratio := cards.size.x / split.size.x
-			_check(absf(ratio - 0.75) < 0.08, "%s card column is about 75 percent, got %s" % [size, ratio])
-		var sidebar := _node_text(resources)
-		_check(sidebar.contains("局外资源尚未接入"), "%s shows the disconnected meta state" % size)
-		_check(sidebar.contains("本局记录，尚未永久保存"), "%s marks collections as a run record" % size)
-		_check(not sidebar.contains("金币"), "%s does not invent a currency" % size)
+		_check(not resources.visible, "%s hides unfinished collection and meta UI" % size)
+		_check(absf(cards.size.x - split.size.x) <= 1.0, "%s cards reclaim the hidden sidebar width" % size)
 		var first := inventory._grid.get_child(0) as CardView
 		_check(first != null, "%s has a card to select" % size)
 		inventory._card_scroll.scroll_vertical = 0
@@ -324,7 +318,9 @@ func _test_layout_and_sidebar() -> void:
 		_check(detail_rect.end.y > visible_top + 8.0, "%s last detail line is inside the viewport, text_bottom=%s visible_top=%s" % [size, detail_rect.end.y, visible_top])
 		_check(detail_view.end.y <= host_rect.end.y + 1.0, "%s detail viewport fits the drawer, view=%s host=%s" % [size, detail_view, host_rect])
 		var content := inventory._card_scroll.get_child(0) as Control
-		_check(content.get_combined_minimum_size().y > inventory._card_scroll.size.y, "%s card area can scroll" % size)
+		var bar := inventory._card_scroll.get_v_scroll_bar()
+		_check(bar.max_value - bar.page <= 1.0 or bar.visible, "%s overflowing cards have a scrollbar" % size)
+		_check(content.size.y >= inventory._grid.size.y, "%s scroll content contains all rows" % size)
 		stage.queue_free()
 		await process_frame
 	root.content_scale_mode = Window.CONTENT_SCALE_MODE_DISABLED
@@ -386,12 +382,174 @@ func _test_shell_battle_bag_visible() -> void:
 		var detail_rect := inventory._detail_scroll.get_global_rect()
 		_check(_overlap_height(detail_rect, host_rect) > 16.0, "%s shows the detail area, rect=%s host=%s" % [size, detail_rect, host_rect])
 		var resources: Control = inventory.get_node("DrawerHost/Slide/BagPanel/Margin/Body/Split/Resources")
-		var resource_rect := resources.get_global_rect()
-		_check(resource_rect.size.x > 80.0 and _overlap_height(resource_rect, host_rect) > 16.0, "%s shows the resource column, rect=%s" % [size, resource_rect])
-		var timer: Control = shell._battle.get_node("Board/Margin/Column/Stage/Center/Timer")
+		_check(not resources.visible, "%s keeps unfinished resources hidden" % size)
+		var timer: Control = shell._battle.get_node("Board/Margin/Column/TopBar/Clock/Timer")
 		_check(panel_rect.position.y >= timer.get_global_rect().end.y - 1.0, "%s panel stays below the countdown" % size)
 		shell.queue_free()
 		await process_frame
+
+
+func _test_scaled_grid_and_states() -> void:
+	root.content_scale_mode = Window.CONTENT_SCALE_MODE_CANVAS_ITEMS
+	root.content_scale_size = Vector2i(1920, 1080)
+	root.content_scale_aspect = Window.CONTENT_SCALE_ASPECT_KEEP
+	var capture_dir := ""
+	for arg in OS.get_cmdline_user_args():
+		if arg.begins_with("--capture-inventory="):
+			capture_dir = arg.trim_prefix("--capture-inventory=")
+	if capture_dir != "":
+		DirAccess.make_dir_recursive_absolute(capture_dir)
+	for window_size in [Vector2i(1280, 720), Vector2i(1920, 1080), Vector2i(2560, 1080), Vector2i(1920, 1440)]:
+		root.size = window_size
+		await process_frame
+		var shell = load("res://scenes/run/run_shell.tscn").instantiate()
+		root.add_child(shell)
+		await process_frame
+		var run: RunState = shell.run
+		var target: CardInstance = null
+		for card in run.card_instances:
+			if str(GameData.card(card.def_id).get("card_kind", "")) == "NUM":
+				target = card
+				break
+		_check(target != null, "Scaled layout has a numeric card")
+		_check(TowerDeck.apply_mark(run, target.card_uid, "EN_RETURN").get("ok", false), "Scaled layout applies return")
+		_check(TowerDeck.apply_mark(run, target.card_uid, "EN_FRAGILE").get("ok", false), "Scaled layout applies fragile")
+		while run.card_instances.size() < 100:
+			TowerDeck.create_card(run, "CARD_N1", [], run.depth, "")
+		_enter(run, "RM_RUST")
+		shell._show_battle()
+		var bag: RunInventory = shell._inventory
+		bag.slide_seconds = 0.0
+		bag.request_open()
+		await _layout_frames()
+		_check(bag._grid.get_child_count() == 100, "%s lists all 100 cards" % window_size)
+		_check_grid_bounds(bag, str(window_size))
+		var columns := bag._grid.columns
+		await _layout_frames()
+		_check(columns == bag._grid.columns, "%s column count settles" % window_size)
+		bag._card_scroll.scroll_vertical = 100000
+		await _layout_frames()
+		var last := bag._grid.get_child(99) as Control
+		var scroll_rect := bag._card_scroll.get_global_rect()
+		_check(last.get_global_rect().end.y <= scroll_rect.end.y + 1.0, "%s final card row can be read" % window_size)
+		var kept_scroll := bag._card_scroll.scroll_vertical
+		bag._on_card_pressed(target.card_uid)
+		await _layout_frames()
+		_check(bag._card_scroll.scroll_vertical == kept_scroll, "%s selection keeps grid scroll" % window_size)
+		_check(bag._detail_scroll.scroll_vertical == 0, "%s selection starts detail at top" % window_size)
+		_check(bag._detail.text.contains("15% 的几率碎掉"), "%s long mark description is retained" % window_size)
+		bag._card_scroll.scroll_vertical = 0
+		await _capture_inventory(capture_dir, "battle_%dx%d" % [window_size.x, window_size.y])
+		bag.set_meta_provider(ManyMeta.new())
+		await _layout_frames()
+		var resources := bag._meta_list.get_parent().get_parent() as ScrollContainer
+		_check(not resources.is_visible_in_tree(), "Even a connected provider keeps unfinished resource UI hidden")
+		bag.set_meta_provider(null)
+		_check(bag._meta_empty.visible and bag._meta_empty.text == MetaResourceProvider.DISCONNECTED_TEXT, "Disconnect restores truthful resource hint")
+		# Shrink below one toolbar line to exercise whole-group wrapping without changing window scaling.
+		var toolbar: HFlowContainer = bag.get_node("DrawerHost/Slide/BagPanel/Margin/Body/Filters")
+		var toolbar_probe := toolbar.duplicate() as HFlowContainer
+		root.add_child(toolbar_probe)
+		toolbar_probe.size = Vector2(390, 0)
+		await _layout_frames()
+		_check(toolbar_probe.get_child(2).position.y > toolbar_probe.get_child(0).position.y, "Toolbar wraps groups at narrow widths")
+		for group in toolbar_probe.get_children():
+			_check(group.position.x >= 0 and group.position.x + group.size.x <= toolbar_probe.size.x + 1, "Wrapped filter group fits its row")
+		toolbar_probe.free()
+		var first_view := bag._grid.get_child(0) as CardView
+		await _click_inventory_control(first_view)
+		_check(bag._selected_uid == first_view.card_uid, "%s card responds to viewport clicks" % window_size)
+		await _click_inventory_control(bag._mark_yes)
+		_check(bag._mark_yes.button_pressed and bag._grid.get_child_count() == 1, "%s filter responds to viewport clicks" % window_size)
+		await _click_inventory_control(bag._close)
+		_check(not bag.blocks_input(), "%s close button responds to viewport clicks" % window_size)
+		shell.free()
+		await process_frame
+	# Empty and filtered-out states use the same viewport and keep the detail area available.
+	root.size = Vector2i(1280, 720)
+	var empty_run := _run_for("bag-empty-layout")
+	empty_run.card_instances.clear()
+	var empty_bag := _inventory()
+	empty_bag.set_sources(empty_run)
+	root.add_child(empty_bag)
+	empty_bag.slide_seconds = 0.0
+	empty_bag.request_open()
+	await _layout_frames()
+	_check(empty_bag._empty.visible and empty_bag._grid.get_child_count() == 0, "Empty bag has an explicit placeholder")
+	_check(empty_bag._detail.text == "选择一张牌查看详情", "Empty bag has a detail placeholder")
+	await _capture_inventory(capture_dir, "roam_empty_1280x720")
+	TowerDeck.create_card(empty_run, "CARD_N1", [], empty_run.depth, "")
+	empty_bag._reload(false)
+	empty_bag._set_marks(RunInventoryPresenter.MARKS_PRESENT)
+	await _layout_frames()
+	_check(empty_bag._empty.visible and empty_bag._empty.text == "没有符合筛选的卡牌", "No-match filter explains the empty grid")
+	await _capture_inventory(capture_dir, "roam_filtered_1280x720")
+	empty_bag._set_marks(RunInventoryPresenter.MARKS_ALL)
+	_check(empty_bag._grid.get_child_count() == 1, "Clearing filter restores cards")
+	empty_bag.free()
+	await process_frame
+	root.content_scale_mode = Window.CONTENT_SCALE_MODE_DISABLED
+	root.content_scale_size = Vector2i.ZERO
+	root.size = Vector2i(1440, 900)
+
+
+func _layout_frames() -> void:
+	for _i in 8:
+		await process_frame
+
+
+func _click_inventory_control(control: Control) -> void:
+	var point := control.get_global_rect().get_center()
+	var motion := InputEventMouseMotion.new()
+	motion.position = point
+	motion.global_position = point
+	root.push_input(motion, true)
+	await process_frame
+	for pressed in [true, false]:
+		var event := InputEventMouseButton.new()
+		event.position = point
+		event.global_position = point
+		event.button_index = MOUSE_BUTTON_LEFT
+		event.pressed = pressed
+		root.push_input(event, true)
+		await process_frame
+	await _layout_frames()
+
+
+func _check_grid_bounds(bag: RunInventory, context: String) -> void:
+	var viewport := bag._card_scroll.get_global_rect()
+	var bar := bag._card_scroll.get_v_scroll_bar()
+	var right := viewport.end.x - (bar.size.x if bar.visible else 0.0)
+	for child in bag._grid.get_children():
+		var rect := (child as Control).get_global_rect()
+		_check(rect.position.x >= viewport.position.x - 1 and rect.end.x <= right + 1, "%s every card fits the scroll viewport, rect=%s right=%s" % [context, rect, right])
+	var panel := bag._panel.get_global_rect()
+	var detail := bag._detail_scroll.get_global_rect()
+	_check(detail.position.x >= viewport.end.x and detail.end.x <= panel.end.x + 1, "%s detail column fits beside grid" % context)
+	_check(is_equal_approx(detail.size.x, 260.0), "%s keeps 260px detail width" % context)
+	var resources := bag._meta_list.get_parent().get_parent() as Control
+	_check(not resources.is_visible_in_tree(), "%s unfinished resource area stays hidden" % context)
+	_check(panel.encloses(bag._close.get_global_rect()), "%s close button remains accessible" % context)
+	_check(bag._panel.size.y + 1 >= bag._panel.get_combined_minimum_size().y, "%s body fits available drawer height" % context)
+
+
+func _capture_inventory(directory: String, label: String) -> void:
+	if directory == "":
+		return
+	await RenderingServer.frame_post_draw
+	var error := root.get_texture().get_image().save_png(directory.path_join(label + ".png"))
+	_check(error == OK, "Captured %s" % label)
+
+
+class ManyMeta extends MetaResourceProvider:
+	func is_available() -> bool:
+		return true
+
+	func list_resources() -> Array:
+		var rows: Array = []
+		for i in 20:
+			rows.append({"id": str(i), "name": "碎片 %d" % i, "count": i + 1, "description": "资源说明：用于检查长列表能够滚动到最后一项。"})
+		return rows
 
 
 func _overlap_height(a: Rect2, b: Rect2) -> float:
