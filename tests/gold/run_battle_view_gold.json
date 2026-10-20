@@ -67,7 +67,7 @@
 				"_combo_status": "两次正数加法可追击\n乘法会打断",
 				"_discard_label": "弃牌堆\n0",
 				"_draw_label": "抽牌堆\n10",
-				"_enemy_hp_fill": 1.0,
+				"_enemy_hp_bar": 1.0,
 				"_enemy_hp_label": "60 / 60",
 				"_enemy_name": "锈刃哥布林",
 				"_eq_box": 0,
@@ -75,7 +75,7 @@
 				"_floor_label": "第 1 层    第 1 回合    玩家行动",
 				"_hand_box": 5,
 				"_hand_caption": "手牌 5",
-				"_hp_fill": 1.0,
+				"_hp_bar": 1.0,
 				"_hp_label": "100 / 100",
 				"_incoming": "攻击 10",
 				"_intent_label": "攻击 10",
@@ -228,32 +228,15 @@
 					"va": 0
 				},
 				{
-					"c": "ColorRect",
-					"col": [
-						0.12,
-						0.18,
-						0.2,
-						1.0
-					],
+					"c": "TextureProgressBar",
 					"d": 7,
-					"kids": 1,
+					"kids": 0,
+					"mf": 2,
 					"min": [
 						160.0,
-						8.0
+						20.0
 					],
 					"sfh": 3
-				},
-				{
-					"c": "ColorRect",
-					"col": [
-						0.72,
-						0.42,
-						0.38,
-						1.0
-					],
-					"d": 8,
-					"kids": 0,
-					"mf": 2
 				},
 				{
 					"aw": 0,
@@ -550,32 +533,15 @@
 					"va": 0
 				},
 				{
-					"c": "ColorRect",
-					"col": [
-						0.12,
-						0.18,
-						0.2,
-						1.0
-					],
+					"c": "TextureProgressBar",
 					"d": 6,
-					"kids": 1,
+					"kids": 0,
+					"mf": 2,
 					"min": [
 						160.0,
-						8.0
+						20.0
 					],
 					"sfh": 3
-				},
-				{
-					"c": "ColorRect",
-					"col": [
-						0.72,
-						0.38,
-						0.36,
-						1.0
-					],
-					"d": 7,
-					"kids": 0,
-					"mf": 2
 				},
 				{
 					"aw": 0,
@@ -946,7 +912,7 @@
 						96.0,
 						120.0
 					],
-					"sb": 824984203,
+					"sb": 2751825585,
 					"sfv": 4
 				},
 				{
@@ -1198,7 +1164,7 @@
 				"_combo_status": "两次正数加法可追击\n乘法会打断",
 				"_discard_label": "弃牌堆\n0",
 				"_draw_label": "抽牌堆\n10",
-				"_enemy_hp_fill": 1.0,
+				"_enemy_hp_bar": 1.0,
 				"_enemy_hp_label": "60 / 60",
 				"_enemy_name": "锈刃哥布林",
 				"_eq_box": 3,
@@ -1206,7 +1172,7 @@
 				"_floor_label": "第 1 层    第 1 回合    玩家行动",
 				"_hand_box": 5,
 				"_hand_caption": "手牌 5",
-				"_hp_fill": 1.0,
+				"_hp_bar": 1.0,
 				"_hp_label": "100 / 100",
 				"_incoming": "攻击 10",
 				"_intent_label": "攻击 10",
@@ -1256,7 +1222,7 @@
 				"_combo_status": "两次正数加法可追击\n乘法会打断",
 				"_discard_label": "弃牌堆\n3",
 				"_draw_label": "抽牌堆\n10",
-				"_enemy_hp_fill": 1.0,
+				"_enemy_hp_bar": 1.0,
 				"_enemy_hp_label": "60 / 60",
 				"_enemy_name": "锈刃哥布林",
 				"_eq_box": 0,
@@ -1264,7 +1230,7 @@
 				"_floor_label": "第 1 层    第 1 回合    玩家行动",
 				"_hand_box": 2,
 				"_hand_caption": "手牌 2",
-				"_hp_fill": 1.0,
+				"_hp_bar": 1.0,
 				"_hp_label": "100 / 100",
 				"_incoming": "攻击 10",
 				"_intent_label": "攻击 10",
@@ -1308,7 +1274,7 @@
 				"_combo_status": "两次正数加法可追击\n乘法会打断",
 				"_discard_label": "弃牌堆\n3",
 				"_draw_label": "抽牌堆\n10",
-				"_enemy_hp_fill": 1.0,
+				"_enemy_hp_bar": 1.0,
 				"_enemy_hp_label": "60 / 60",
 				"_enemy_name": "锈刃哥布林",
 				"_eq_box": 0,
@@ -1316,7 +1282,7 @@
 				"_floor_label": "第 1 层    第 1 回合    玩家行动",
 				"_hand_box": 1,
 				"_hand_caption": "手牌 1",
-				"_hp_fill": 1.0,
+				"_hp_bar": 1.0,
 				"_hp_label": "100 / 100",
 				"_incoming": "攻击 10",
 				"_intent_label": "攻击 10",
@@ -1390,7 +1356,7 @@
 				"_combo_status": "两次正数加法可追击\n乘法会打断",
 				"_discard_label": "弃牌堆\n3",
 				"_draw_label": "抽牌堆\n5",
-				"_enemy_hp_fill": 1.0,
+				"_enemy_hp_bar": 1.0,
 				"_enemy_hp_label": "60 / 60",
 				"_enemy_name": "锈刃哥布林",
 				"_eq_box": 0,
@@ -1398,7 +1364,7 @@
 				"_floor_label": "第 1 层    第 2 回合    玩家行动",
 				"_hand_box": 6,
 				"_hand_caption": "手牌 6",
-				"_hp_fill": 0.9,
+				"_hp_bar": 0.9,
 				"_hp_label": "90 / 100",
 				"_incoming": "攻击 10",
 				"_intent_label": "攻击 10",

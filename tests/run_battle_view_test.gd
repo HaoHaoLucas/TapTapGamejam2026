@@ -226,12 +226,12 @@ func _capture(view: RunBattle, full: bool = false) -> Dictionary:
 func _readouts(view: RunBattle) -> Dictionary:
 	return {
 		"_hp_label": view._hp_label.text,
-		"_hp_fill": _ratio(view._hp_fill),
+		"_hp_bar": _ratio(view._hp_bar),
 		"_floor_label": view._floor_label.text,
 		"_pause_button": view._pause_button.text,
 		"_intent_label": view._intent_label.text,
 		"_enemy_name": view._enemy_name.text,
-		"_enemy_hp_fill": _ratio(view._enemy_hp_fill),
+		"_enemy_hp_bar": _ratio(view._enemy_hp_bar),
 		"_enemy_hp_label": view._enemy_hp_label.text,
 		"_round_label": view._round_label.text,
 		"_timer_label": view._timer_label.text,
@@ -405,10 +405,10 @@ func _collect_links_of(node: Node, out: Array) -> void:
 		_collect_links_of(child, out)
 
 
-func _ratio(fill: ColorRect) -> float:
-	if fill == null:
+func _ratio(bar: TextureProgressBar) -> float:
+	if bar == null:
 		return -1.0
-	return roundf(fill.anchor_right * 10000.0) / 10000.0
+	return roundf(bar.value / maxf(bar.max_value, 1.0) * 10000.0) / 10000.0
 
 
 func _color(value: Color) -> Array:

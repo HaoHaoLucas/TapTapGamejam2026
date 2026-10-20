@@ -3,12 +3,12 @@
 [ext_resource type="Script" uid="uid://ixo5h6y4lhih" path="res://scripts/run/run_battle.gd" id="1_126m8"]
 [ext_resource type="Texture2D" uid="uid://b2olidqx7vhl" path="res://assets/battle/hero.png" id="2_sb5ml"]
 [ext_resource type="Theme" uid="uid://trle8mouk54k" path="res://assets/theme/ui_theme.tres" id="4_theme"]
-[ext_resource type="Script" path="res://scripts/run/enemy_art.gd" id="5_enemyart"]
+[ext_resource type="Script" uid="uid://dkkx7afmimb66" path="res://scripts/run/enemy_art.gd" id="5_enemyart"]
 [ext_resource type="Texture2D" uid="uid://cf48hjar707ux" path="res://assets/ui/ui/battle_log_2.png" id="6_endart"]
 [ext_resource type="Texture2D" uid="uid://hykbiixol3j5" path="res://assets/ui/ui/battle_log_1.png" id="7_fireart"]
 [ext_resource type="Texture2D" uid="uid://df6rl4865x3uc" path="res://assets/ui/ui/battle_hud_.png" id="8_drawart"]
-
-[sub_resource type="StyleBoxEmpty" id="StyleBoxEmpty_artbtn"]
+[ext_resource type="Texture2D" uid="uid://iqwsdi2eep64" path="res://assets/ui/ui/battle_hud_monster_bottom.PNG" id="9_hpunder"]
+[ext_resource type="Texture2D" uid="uid://bye1qpcnt6y4o" path="res://assets/ui/ui/battle_hud_monster_.PNG" id="10_hpfill"]
 
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_hwbvc"]
 content_margin_left = 10.0
@@ -38,6 +38,8 @@ corner_radius_top_right = 7
 corner_radius_bottom_right = 7
 corner_radius_bottom_left = 7
 
+[sub_resource type="StyleBoxEmpty" id="StyleBoxEmpty_artbtn"]
+
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_tv6bu"]
 bg_color = Color(0.93, 0.82, 0.52, 1)
 corner_radius_top_left = 8
@@ -51,22 +53,6 @@ corner_radius_top_left = 8
 corner_radius_top_right = 8
 corner_radius_bottom_right = 8
 corner_radius_bottom_left = 8
-
-[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_n0t68"]
-content_margin_left = 10.0
-content_margin_top = 8.0
-content_margin_right = 10.0
-content_margin_bottom = 8.0
-bg_color = Color(0.17, 0.26, 0.255, 1)
-border_width_left = 1
-border_width_top = 1
-border_width_right = 1
-border_width_bottom = 1
-border_color = Color(0.55, 0.58, 0.42, 0.53)
-corner_radius_top_left = 4
-corner_radius_top_right = 4
-corner_radius_bottom_right = 4
-corner_radius_bottom_left = 4
 
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_yteae"]
 content_margin_left = 10.0
@@ -178,18 +164,15 @@ theme_override_colors/font_color = Color(0.91, 0.86, 0.72, 1)
 theme_override_font_sizes/font_size = 16
 text = "0 / 0"
 
-[node name="Track" type="ColorRect" parent="Board/Margin/Column/TopBar/Row/Life" unique_id=730308835]
-custom_minimum_size = Vector2(160, 8)
+[node name="Bar" type="TextureProgressBar" parent="Board/Margin/Column/TopBar/Row/Life" unique_id=730308835]
+custom_minimum_size = Vector2(160, 20)
 layout_mode = 2
 size_flags_horizontal = 3
-color = Color(0.12, 0.18, 0.2, 1)
-
-[node name="Fill" type="ColorRect" parent="Board/Margin/Column/TopBar/Row/Life/Track" unique_id=1364207143]
-layout_mode = 0
-anchor_right = 1.0
-anchor_bottom = 1.0
 mouse_filter = 2
-color = Color(0.72, 0.42, 0.38, 1)
+max_value = 1.0
+step = 0.0
+texture_under = ExtResource("9_hpunder")
+texture_progress = ExtResource("10_hpfill")
 
 [node name="Floor" type="Label" parent="Board/Margin/Column/TopBar/Row" unique_id=1448241918]
 layout_mode = 2
@@ -302,9 +285,9 @@ autowrap_mode = 3
 
 [node name="EnemyArt" type="Control" parent="Board/Margin/Column/Stage/Enemy" unique_id=410076289]
 custom_minimum_size = Vector2(240, 160)
+clip_contents = true
 layout_mode = 2
 size_flags_vertical = 3
-clip_contents = true
 mouse_filter = 2
 script = ExtResource("5_enemyart")
 
@@ -315,18 +298,15 @@ theme_override_font_sizes/font_size = 16
 text = "敌人"
 horizontal_alignment = 1
 
-[node name="Track" type="ColorRect" parent="Board/Margin/Column/Stage/Enemy" unique_id=2133754381]
-custom_minimum_size = Vector2(160, 8)
+[node name="Bar" type="TextureProgressBar" parent="Board/Margin/Column/Stage/Enemy" unique_id=2133754381]
+custom_minimum_size = Vector2(160, 20)
 layout_mode = 2
 size_flags_horizontal = 3
-color = Color(0.12, 0.18, 0.2, 1)
-
-[node name="Fill" type="ColorRect" parent="Board/Margin/Column/Stage/Enemy/Track" unique_id=217792662]
-layout_mode = 0
-anchor_right = 1.0
-anchor_bottom = 1.0
 mouse_filter = 2
-color = Color(0.72, 0.38, 0.36, 1)
+max_value = 1.0
+step = 0.0
+texture_under = ExtResource("9_hpunder")
+texture_progress = ExtResource("10_hpfill")
 
 [node name="HpValue" type="Label" parent="Board/Margin/Column/Stage/Enemy" unique_id=1730940113]
 layout_mode = 2
@@ -409,11 +389,11 @@ custom_minimum_size = Vector2(108, 52.8)
 layout_mode = 2
 size_flags_vertical = 4
 focus_mode = 0
+theme_override_styles/normal = SubResource("StyleBoxEmpty_artbtn")
 theme_override_styles/pressed = SubResource("StyleBoxEmpty_artbtn")
 theme_override_styles/hover = SubResource("StyleBoxEmpty_artbtn")
-theme_override_styles/normal = SubResource("StyleBoxEmpty_artbtn")
 
-[node name="Art" type="TextureRect" parent="Board/Margin/Column/Controls/FireButton"]
+[node name="Art" type="TextureRect" parent="Board/Margin/Column/Controls/FireButton" unique_id=2101808496]
 layout_mode = 1
 anchors_preset = 15
 anchor_right = 1.0
@@ -423,7 +403,6 @@ grow_vertical = 2
 mouse_filter = 2
 texture = ExtResource("7_fireart")
 expand_mode = 1
-stretch_mode = 0
 
 [node name="Combo" type="VBoxContainer" parent="Board/Margin/Column/Controls" unique_id=1730503138]
 custom_minimum_size = Vector2(150, 0)
@@ -469,11 +448,11 @@ layout_mode = 2
 custom_minimum_size = Vector2(168, 82.5)
 layout_mode = 2
 focus_mode = 0
+theme_override_styles/normal = SubResource("StyleBoxEmpty_artbtn")
 theme_override_styles/pressed = SubResource("StyleBoxEmpty_artbtn")
 theme_override_styles/hover = SubResource("StyleBoxEmpty_artbtn")
-theme_override_styles/normal = SubResource("StyleBoxEmpty_artbtn")
 
-[node name="Art" type="TextureRect" parent="Board/Margin/Column/Controls/End/Button"]
+[node name="Art" type="TextureRect" parent="Board/Margin/Column/Controls/End/Button" unique_id=576660335]
 layout_mode = 1
 anchors_preset = 15
 anchor_right = 1.0
@@ -483,7 +462,6 @@ grow_vertical = 2
 mouse_filter = 2
 texture = ExtResource("6_endart")
 expand_mode = 1
-stretch_mode = 0
 
 [node name="Incoming" type="Label" parent="Board/Margin/Column/Controls/End" unique_id=617605503]
 layout_mode = 2
@@ -529,14 +507,12 @@ layout_mode = 2
 custom_minimum_size = Vector2(96, 120)
 layout_mode = 2
 size_flags_vertical = 4
-theme_override_styles/panel = SubResource("StyleBoxFlat_n0t68")
 
-[node name="Backdrop" type="TextureRect" parent="Hand/Zone/DrawPile"]
+[node name="Backdrop" type="TextureRect" parent="Hand/Zone/DrawPile" unique_id=1626769572]
 layout_mode = 2
 mouse_filter = 2
 texture = ExtResource("8_drawart")
 expand_mode = 1
-stretch_mode = 0
 
 [node name="DrawLabel" type="Label" parent="Hand/Zone/DrawPile" unique_id=1096032152]
 layout_mode = 2

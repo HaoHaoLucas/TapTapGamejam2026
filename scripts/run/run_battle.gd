@@ -29,12 +29,12 @@ var _external_input_blocked: bool = false
 
 @onready var _board: Control = $Board
 @onready var _hp_label: Label = $Board/Margin/Column/TopBar/Row/Life/Row/HpValue
-@onready var _hp_fill: ColorRect = $Board/Margin/Column/TopBar/Row/Life/Track/Fill
+@onready var _hp_bar: TextureProgressBar = $Board/Margin/Column/TopBar/Row/Life/Bar
 @onready var _floor_label: Label = $Board/Margin/Column/TopBar/Row/Floor
 @onready var _pause_button: Button = $Board/Margin/Column/TopBar/Row/PauseButton
 @onready var _intent_label: Label = $Board/Margin/Column/Stage/Enemy/Intent
 @onready var _enemy_name: Label = $Board/Margin/Column/Stage/Enemy/Name
-@onready var _enemy_hp_fill: ColorRect = $Board/Margin/Column/Stage/Enemy/Track/Fill
+@onready var _enemy_hp_bar: TextureProgressBar = $Board/Margin/Column/Stage/Enemy/Bar
 @onready var _enemy_hp_label: Label = $Board/Margin/Column/Stage/Enemy/HpValue
 @onready var _enemy_art: Control = $Board/Margin/Column/Stage/Enemy/EnemyArt
 @onready var _round_label: Label = $Board/Margin/Column/Stage/Center/Round
@@ -151,7 +151,7 @@ func _refresh_hud() -> void:
 	_enemy_name.text = _monster_title(battle)
 	_enemy_art.show_monster(str(battle.monster_id))
 	_enemy_hp_label.text = "%d / %d" % [battle.enemy_hp, battle.enemy_max_hp]
-	_set_fill(_enemy_hp_fill, float(battle.enemy_hp) / float(maxi(1, battle.enemy_max_hp)))
+	_set_bar(_enemy_hp_bar, battle.enemy_hp, battle.enemy_max_hp)
 	var intent := _intent_text(battle)
 	var stolen := 0
 	if session != null and session.ctx != null:
@@ -161,7 +161,7 @@ func _refresh_hud() -> void:
 	_intent_label.text = intent
 	_incoming.text = intent
 	_hp_label.text = "%d / %d" % [battle.player_hp, battle.player_max_hp]
-	_set_fill(_hp_fill, float(battle.player_hp) / float(maxi(1, battle.player_max_hp)))
+	_set_bar(_hp_bar, battle.player_hp, battle.player_max_hp)
 	var depth := 1
 	if session != null and session.ctx != null:
 		depth = int(session.ctx.depth)
@@ -537,17 +537,11 @@ func _phase() -> String:
 	return "" if battle == null else str(battle.phase)
 
 
-func _set_fill(fill: ColorRect, ratio: float) -> void:
-	if fill == null:
+func _set_bar(bar: TextureProgressBar, value: int, max_value: int) -> void:
+	if bar == null:
 		return
-	fill.anchor_left = 0.0
-	fill.anchor_top = 0.0
-	fill.anchor_bottom = 1.0
-	fill.anchor_right = clampf(ratio, 0.0, 1.0)
-	fill.offset_left = 0.0
-	fill.offset_top = 0.0
-	fill.offset_right = 0.0
-	fill.offset_bottom = 0.0
+	bar.max_value = maxf(1.0, float(max_value))
+	bar.value = clampf(float(value), 0.0, bar.max_value)
 
 
 func _set_log(text: String) -> void:
