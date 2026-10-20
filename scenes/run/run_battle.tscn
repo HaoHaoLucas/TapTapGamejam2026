@@ -9,12 +9,10 @@
 [ext_resource type="Texture2D" uid="uid://df6rl4865x3uc" path="res://assets/ui/ui/battle_hud_.png" id="8_drawart"]
 [ext_resource type="Texture2D" uid="uid://iqwsdi2eep64" path="res://assets/ui/ui/battle_hud_monster_bottom.PNG" id="9_hpunder"]
 [ext_resource type="Texture2D" uid="uid://bye1qpcnt6y4o" path="res://assets/ui/ui/battle_hud_monster_.PNG" id="10_hpfill"]
+[ext_resource type="Texture2D" uid="uid://dordno8g5bifl" path="res://assets/ui/ui/battle_shadow.PNG" id="10_twyu1"]
 [ext_resource type="Texture2D" uid="uid://drxnecytetkos" path="res://assets/ui/ui/battle_log_continue.png" id="11_pauseart"]
 [ext_resource type="Texture2D" uid="uid://bft1re5xwo26d" path="res://assets/ui/ui/微信图片_20261020235754_513_2.png" id="12_battleup"]
 [ext_resource type="Texture2D" uid="uid://cb3o8mafe50us" path="res://assets/ui/ui/c840b6e5c241b029d3cfd7d169a7235b.png" id="13_ctrlbg"]
-
-[sub_resource type="StyleBoxTexture" id="StyleBoxTexture_ctrlbg"]
-texture = ExtResource("13_ctrlbg")
 
 [sub_resource type="StyleBoxEmpty" id="StyleBoxEmpty_plain_pad"]
 content_margin_left = 10.0
@@ -24,21 +22,12 @@ content_margin_bottom = 8.0
 
 [sub_resource type="StyleBoxEmpty" id="StyleBoxEmpty_artbtn"]
 
-[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_twyu1"]
-content_margin_left = 10.0
-content_margin_top = 8.0
-content_margin_right = 10.0
-content_margin_bottom = 8.0
-bg_color = Color(0.125, 0.2, 0.22, 0.94)
-border_width_left = 1
-border_width_top = 1
-border_width_right = 1
-border_width_bottom = 1
-border_color = Color(0.71, 0.63, 0.42, 0.53)
-corner_radius_top_left = 7
-corner_radius_top_right = 7
-corner_radius_bottom_right = 7
-corner_radius_bottom_left = 7
+[sub_resource type="StyleBoxTexture" id="StyleBoxTexture_ctrlbg"]
+texture = ExtResource("13_ctrlbg")
+
+[sub_resource type="StyleBoxEmpty" id="StyleBoxEmpty_irt5y"]
+
+[sub_resource type="StyleBoxEmpty" id="StyleBoxEmpty_eg0p3"]
 
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_tv6bu"]
 bg_color = Color(0.93, 0.82, 0.52, 1)
@@ -336,7 +325,8 @@ theme_override_font_sizes/font_size = 13
 text = "0 / 0"
 horizontal_alignment = 1
 
-[node name="ControlsFrame" type="PanelContainer" parent="Board/Margin/Column"]
+[node name="ControlsFrame" type="PanelContainer" parent="Board/Margin/Column" unique_id=2037095307]
+custom_minimum_size = Vector2(1920, 0)
 layout_mode = 2
 theme_override_styles/panel = SubResource("StyleBoxTexture_ctrlbg")
 
@@ -345,16 +335,34 @@ custom_minimum_size = Vector2(0, 132)
 layout_mode = 2
 
 [node name="Button" type="Button" parent="Board/Margin/Column/ControlsFrame/Controls" unique_id=1995097860]
-custom_minimum_size = Vector2(150, 64)
+custom_minimum_size = Vector2(320, 64)
 layout_mode = 2
 focus_mode = 0
+theme_override_styles/normal = SubResource("StyleBoxEmpty_irt5y")
 text = "烧掉回血
 |点数| × 10"
 
+[node name="TextureRect" type="TextureRect" parent="Board/Margin/Column/ControlsFrame/Controls/Button" unique_id=984919320]
+show_behind_parent = true
+layout_mode = 1
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -121.0
+offset_top = -67.5
+offset_right = 121.0
+offset_bottom = 67.5
+grow_horizontal = 2
+grow_vertical = 2
+texture = ExtResource("10_twyu1")
+
 [node name="Equation" type="PanelContainer" parent="Board/Margin/Column/ControlsFrame/Controls" unique_id=1286598502]
+custom_minimum_size = Vector2(880, 0)
 layout_mode = 2
 size_flags_horizontal = 3
-theme_override_styles/panel = SubResource("StyleBoxFlat_twyu1")
+theme_override_styles/panel = SubResource("StyleBoxEmpty_eg0p3")
 
 [node name="Pad" type="MarginContainer" parent="Board/Margin/Column/ControlsFrame/Controls/Equation" unique_id=471183360]
 layout_mode = 2
@@ -465,13 +473,17 @@ text = "两次正数加法可追击
 horizontal_alignment = 1
 autowrap_mode = 3
 
-[node name="End" type="VBoxContainer" parent="Board/Margin/Column/ControlsFrame/Controls" unique_id=1534193972]
-custom_minimum_size = Vector2(168, 0)
+[node name="End" type="Control" parent="Board/Margin/Column/ControlsFrame/Controls" unique_id=1968486982]
+custom_minimum_size = Vector2(192, 0)
 layout_mode = 2
 
 [node name="Button" type="Button" parent="Board/Margin/Column/ControlsFrame/Controls/End" unique_id=852829456]
 custom_minimum_size = Vector2(168, 82.5)
-layout_mode = 2
+layout_mode = 0
+offset_left = -3.0
+offset_top = 38.0
+offset_right = 165.0
+offset_bottom = 121.0
 focus_mode = 0
 theme_override_styles/normal = SubResource("StyleBoxEmpty_artbtn")
 theme_override_styles/pressed = SubResource("StyleBoxEmpty_artbtn")
@@ -489,7 +501,10 @@ texture = ExtResource("6_endart")
 expand_mode = 1
 
 [node name="Incoming" type="Label" parent="Board/Margin/Column/ControlsFrame/Controls/End" unique_id=617605503]
-layout_mode = 2
+layout_mode = 0
+offset_top = 87.0
+offset_right = 168.0
+offset_bottom = 104.0
 theme_override_colors/font_color = Color(0.78, 0.7, 0.58, 1)
 theme_override_font_sizes/font_size = 12
 horizontal_alignment = 1
