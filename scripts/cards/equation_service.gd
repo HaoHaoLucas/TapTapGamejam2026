@@ -171,19 +171,22 @@ func _evaluate(ordered_uids: Array, combat_snapshot: Dictionary) -> Dictionary:
 			})
 	var raw := _eval_expr(operands, op_codes)
 	var tax := int(combat_snapshot.get("tax", 0))
+	var result_divisor := maxf(1.0, float(combat_snapshot.get("result_divisor", 1.0)))
 	var coefficient := float(combat_snapshot.get("damage_coefficient", 1.0))
 	if ctx.battle != null:
 		var mods: Dictionary = MonsterRules.equation_mods(ctx.battle, cards.size(), primary, raw)
 		tax += int(mods.get("tax", 0))
+		result_divisor *= maxf(1.0, float(mods.get("result_divisor", 1.0)))
 		coefficient *= float(mods.get("coefficient", 1.0))
 	var yinyang := _yinyang(cards)
-	var dealt := _damage(raw, tax, coefficient, yinyang)
+	var dealt := _damage(raw, tax, coefficient, yinyang, result_divisor)
 	result.ok = true
 	result.reason_code = "OK"
 	result["primary_op"] = primary
 	result["operands"] = operands
 	result["raw_result"] = raw
 	result["tax"] = tax
+	result["result_divisor"] = result_divisor
 	result["damage_coefficient"] = coefficient
 	result["yinyang"] = yinyang
 	result["effective_result"] = dealt.effective_result
@@ -272,9 +275,10 @@ func _yinyang(cards: Array) -> bool:
 	return distinct.size() >= int(ctx.catalog.enh("EN_YINYANG").params.distinct_cards)
 
 
-func _damage(raw: int, tax: int, coefficient: float, yinyang: bool) -> Dictionary:
+func _damage(raw: int, tax: int, coefficient: float, yinyang: bool, result_divisor: float = 1.0) -> Dictionary:
 	var ctx := _ctx()
-	var after := raw - tax
+	# Convert only after division: int truncates toward zero, including negatives.
+	var after := int(float(raw - tax) / maxf(1.0, result_divisor))
 	var scaled := float(maxi(0, after)) * float(ctx.catalog.rule().damage_scale)
 	if yinyang:
 		scaled *= float(ctx.catalog.enh("EN_YINYANG").params.damage_mult)

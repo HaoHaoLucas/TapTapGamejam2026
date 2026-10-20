@@ -159,6 +159,9 @@ static func _card_snapshot(card: CardInstance, acquired_index: int, library: Car
 	if frozen:
 		flags.append("冻结")
 	var face := {
+		"presentation": "card", "def_id": card.def_id, "card_kind": kind,
+		"printed_value": printed, "operator_code": str(def.get("operator_code", "NONE")),
+		"enhancement_ids": ids.duplicate(),
 		"card_uid": card.card_uid,
 		"value_text": value_text,
 		"mark_text": "\n".join(name_lines),

@@ -11,6 +11,8 @@
 [ext_resource type="Texture2D" uid="uid://bye1qpcnt6y4o" path="res://assets/ui/ui/battle_hud_monster_.PNG" id="10_hpfill"]
 [ext_resource type="Texture2D" uid="uid://drxnecytetkos" path="res://assets/ui/ui/battle_log_continue.png" id="11_pauseart"]
 [ext_resource type="Texture2D" uid="uid://bft1re5xwo26d" path="res://assets/ui/ui/微信图片_20261020235754_513_2.png" id="12_battleup"]
+[ext_resource type="Texture2D" path="res://assets/cards/faces/back.png" id="13_cardback"]
+
 [sub_resource type="StyleBoxEmpty" id="StyleBoxEmpty_plain_pad"]
 content_margin_left = 10.0
 content_margin_top = 8.0
@@ -111,7 +113,7 @@ theme_override_constants/margin_right = 28
 theme_override_constants/margin_bottom = 10
 
 [node name="Column" type="VBoxContainer" parent="Board/Margin" unique_id=619172931]
-custom_maximum_size = Vector2(1920, 810)
+custom_maximum_size = Vector2(1920, 850)
 layout_mode = 2
 alignment = 1
 
@@ -146,36 +148,6 @@ theme_override_colors/font_color = Color(0.706, 0.725, 0.655, 1)
 theme_override_font_sizes/font_size = 12
 text = "限时对战"
 
-[node name="Life" type="VBoxContainer" parent="Board/Margin/Column/TopBar/Row" unique_id=1830247661]
-custom_minimum_size = Vector2(220, 0)
-layout_mode = 2
-size_flags_vertical = 4
-
-[node name="Row" type="HBoxContainer" parent="Board/Margin/Column/TopBar/Row/Life" unique_id=597982264]
-layout_mode = 2
-
-[node name="Label" type="Label" parent="Board/Margin/Column/TopBar/Row/Life/Row" unique_id=962717858]
-layout_mode = 2
-theme_override_colors/font_color = Color(0.62, 0.7, 0.66, 1)
-theme_override_font_sizes/font_size = 13
-text = "生命"
-
-[node name="HpValue" type="Label" parent="Board/Margin/Column/TopBar/Row/Life/Row" unique_id=1315107675]
-layout_mode = 2
-theme_override_colors/font_color = Color(0.91, 0.86, 0.72, 1)
-theme_override_font_sizes/font_size = 16
-text = "0 / 0"
-
-[node name="Bar" type="TextureProgressBar" parent="Board/Margin/Column/TopBar/Row/Life" unique_id=730308835]
-custom_minimum_size = Vector2(160, 20)
-layout_mode = 2
-size_flags_horizontal = 3
-mouse_filter = 2
-max_value = 1.0
-step = 0.0
-texture_under = ExtResource("9_hpunder")
-texture_progress = ExtResource("10_hpfill")
-
 [node name="Floor" type="Label" parent="Board/Margin/Column/TopBar/Row" unique_id=1448241918]
 layout_mode = 2
 size_flags_horizontal = 3
@@ -203,14 +175,36 @@ mouse_filter = 2
 texture = ExtResource("11_pauseart")
 expand_mode = 1
 
+[node name="Clock" type="VBoxContainer" parent="Board/Margin/Column/TopBar"]
+custom_minimum_size = Vector2(200, 0)
+layout_mode = 2
+size_flags_horizontal = 4
+size_flags_vertical = 4
+theme_override_constants/separation = 0
+mouse_filter = 2
+
+[node name="Timer" type="Label" parent="Board/Margin/Column/TopBar/Clock" unique_id=1636104247]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.91, 0.86, 0.72, 1)
+theme_override_font_sizes/font_size = 36
+text = "10.0"
+horizontal_alignment = 1
+
+[node name="TimerExtra" type="Label" parent="Board/Margin/Column/TopBar/Clock" unique_id=1238649240]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.7, 0.76, 0.68, 1)
+theme_override_font_sizes/font_size = 13
+text = "7.5 秒再抽 1 张"
+horizontal_alignment = 1
+
 [node name="Stage" type="HBoxContainer" parent="Board/Margin/Column" unique_id=1067865202]
-custom_minimum_size = Vector2(0, 550)
+custom_minimum_size = Vector2(0, 450)
 custom_maximum_size = Vector2(1920, -1)
 layout_mode = 2
 alignment = 1
 
-[node name="Player" type="VBoxContainer" parent="Board/Margin/Column/Stage" unique_id=2130634560]
-custom_minimum_size = Vector2(300, 0)
+[node name="Player" type="Control" parent="Board/Margin/Column/Stage" unique_id=2130634560]
+custom_minimum_size = Vector2(360, 0)
 layout_mode = 2
 size_flags_vertical = 3
 
@@ -223,6 +217,37 @@ texture = ExtResource("2_sb5ml")
 expand_mode = 1
 stretch_mode = 5
 
+[node name="Life" type="VBoxContainer" parent="Board/Margin/Column/Stage/Player/TextureRect" unique_id=1830247661]
+custom_minimum_size = Vector2(240, 0)
+layout_mode = 0
+size_flags_horizontal = 4
+
+[node name="Row" type="HBoxContainer" parent="Board/Margin/Column/Stage/Player/TextureRect/Life" unique_id=597982264]
+layout_mode = 2
+alignment = 1
+
+[node name="Label" type="Label" parent="Board/Margin/Column/Stage/Player/TextureRect/Life/Row" unique_id=962717858]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.62, 0.7, 0.66, 1)
+theme_override_font_sizes/font_size = 13
+text = "生命"
+
+[node name="HpValue" type="Label" parent="Board/Margin/Column/Stage/Player/TextureRect/Life/Row" unique_id=1315107675]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.91, 0.86, 0.72, 1)
+theme_override_font_sizes/font_size = 16
+text = "0 / 0"
+
+[node name="Bar" type="TextureProgressBar" parent="Board/Margin/Column/Stage/Player/TextureRect/Life" unique_id=730308835]
+custom_minimum_size = Vector2(160, 20)
+layout_mode = 2
+size_flags_horizontal = 3
+mouse_filter = 2
+max_value = 1.0
+step = 0.0
+texture_under = ExtResource("9_hpunder")
+texture_progress = ExtResource("10_hpfill")
+
 [node name="Label" type="Label" parent="Board/Margin/Column/Stage/Player" unique_id=1325178126]
 layout_mode = 2
 theme_override_colors/font_color = Color(0.784, 0.8, 0.718, 1)
@@ -231,8 +256,8 @@ text = "实验员"
 horizontal_alignment = 1
 
 [node name="Center" type="VBoxContainer" parent="Board/Margin/Column/Stage" unique_id=1689372805]
-custom_minimum_size = Vector2(420, 550)
-custom_maximum_size = Vector2(810, 550)
+custom_minimum_size = Vector2(420, 450)
+custom_maximum_size = Vector2(810, 450)
 layout_mode = 2
 size_flags_horizontal = 3
 size_flags_vertical = 3
@@ -258,20 +283,6 @@ theme_override_font_sizes/font_size = 13
 text = "第 1 回合"
 horizontal_alignment = 1
 
-[node name="Timer" type="Label" parent="Board/Margin/Column/Stage/Center" unique_id=1636104247]
-layout_mode = 2
-theme_override_colors/font_color = Color(0.91, 0.86, 0.72, 1)
-theme_override_font_sizes/font_size = 48
-text = "10.0"
-horizontal_alignment = 1
-
-[node name="TimerExtra" type="Label" parent="Board/Margin/Column/Stage/Center" unique_id=1238649240]
-layout_mode = 2
-theme_override_colors/font_color = Color(0.7, 0.76, 0.68, 1)
-theme_override_font_sizes/font_size = 13
-text = "7.5 秒再抽 1 张"
-horizontal_alignment = 1
-
 [node name="Log" type="Label" parent="Board/Margin/Column/Stage/Center" unique_id=1612844915]
 layout_mode = 2
 theme_override_colors/font_color = Color(0.933, 0.835, 0.651, 1)
@@ -286,8 +297,34 @@ theme_override_font_sizes/font_size = 13
 horizontal_alignment = 1
 autowrap_mode = 3
 
-[node name="Enemy" type="VBoxContainer" parent="Board/Margin/Column/Stage" unique_id=848476468]
-custom_minimum_size = Vector2(280, 0)
+[node name="Preparation" type="PanelContainer" parent="Board/Margin/Column/Stage/Center"]
+layout_mode = 2
+
+[node name="Box" type="VBoxContainer" parent="Board/Margin/Column/Stage/Center/Preparation"]
+layout_mode = 2
+theme_override_constants/separation = 14
+
+[node name="Name" type="Label" parent="Board/Margin/Column/Stage/Center/Preparation/Box"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 32
+horizontal_alignment = 1
+autowrap_mode = 3
+
+[node name="Trait" type="Label" parent="Board/Margin/Column/Stage/Center/Preparation/Box"]
+layout_mode = 2
+mouse_filter = 1
+theme_override_font_sizes/font_size = 24
+horizontal_alignment = 1
+autowrap_mode = 3
+
+[node name="Intent" type="Label" parent="Board/Margin/Column/Stage/Center/Preparation/Box"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 20
+horizontal_alignment = 1
+autowrap_mode = 3
+
+[node name="Enemy" type="Control" parent="Board/Margin/Column/Stage" unique_id=848476468]
+custom_minimum_size = Vector2(360, 0)
 layout_mode = 2
 size_flags_vertical = 3
 
@@ -301,20 +338,25 @@ autowrap_mode = 3
 
 [node name="EnemyArt" type="Control" parent="Board/Margin/Column/Stage/Enemy" unique_id=410076289]
 custom_minimum_size = Vector2(240, 160)
-clip_contents = true
+clip_contents = false
 layout_mode = 2
 size_flags_vertical = 3
 mouse_filter = 2
 script = ExtResource("5_enemyart")
 
-[node name="Name" type="Label" parent="Board/Margin/Column/Stage/Enemy" unique_id=1613275970]
+[node name="Health" type="VBoxContainer" parent="Board/Margin/Column/Stage/Enemy/EnemyArt"]
+layout_mode = 0
+custom_minimum_size = Vector2(240, 0)
+mouse_filter = 2
+
+[node name="HpValue" type="Label" parent="Board/Margin/Column/Stage/Enemy/EnemyArt/Health" unique_id=1730940113]
 layout_mode = 2
-theme_override_colors/font_color = Color(0.82, 0.84, 0.74, 1)
-theme_override_font_sizes/font_size = 16
-text = "敌人"
+theme_override_colors/font_color = Color(0.86, 0.84, 0.72, 1)
+theme_override_font_sizes/font_size = 13
+text = "0 / 0"
 horizontal_alignment = 1
 
-[node name="Bar" type="TextureProgressBar" parent="Board/Margin/Column/Stage/Enemy" unique_id=2133754381]
+[node name="Bar" type="TextureProgressBar" parent="Board/Margin/Column/Stage/Enemy/EnemyArt/Health" unique_id=2133754381]
 custom_minimum_size = Vector2(160, 20)
 layout_mode = 2
 size_flags_horizontal = 3
@@ -324,12 +366,19 @@ step = 0.0
 texture_under = ExtResource("9_hpunder")
 texture_progress = ExtResource("10_hpfill")
 
-[node name="HpValue" type="Label" parent="Board/Margin/Column/Stage/Enemy" unique_id=1730940113]
+[node name="Name" type="Label" parent="Board/Margin/Column/Stage/Enemy" unique_id=1613275970]
 layout_mode = 2
-theme_override_colors/font_color = Color(0.86, 0.84, 0.72, 1)
-theme_override_font_sizes/font_size = 13
-text = "0 / 0"
+theme_override_colors/font_color = Color(0.82, 0.84, 0.74, 1)
+theme_override_font_sizes/font_size = 16
+text = "敌人"
 horizontal_alignment = 1
+
+[node name="Trait" type="Label" parent="Board/Margin/Column/Stage/Enemy"]
+layout_mode = 2
+mouse_filter = 1
+theme_override_font_sizes/font_size = 20
+horizontal_alignment = 1
+autowrap_mode = 3
 
 [node name="Controls" type="HBoxContainer" parent="Board/Margin/Column" unique_id=1756187848]
 custom_minimum_size = Vector2(0, 132)
@@ -492,9 +541,9 @@ anchors_preset = 12
 anchor_top = 1.0
 anchor_right = 1.0
 anchor_bottom = 1.0
-offset_left = 28.0
-offset_top = -229.0
-offset_right = -28.0
+offset_left = 220.0
+offset_top = -219.0
+offset_right = -220.0
 offset_bottom = -10.0
 grow_horizontal = 2
 grow_vertical = 0
@@ -518,30 +567,35 @@ horizontal_alignment = 2
 
 [node name="Zone" type="HBoxContainer" parent="Hand" unique_id=510336635]
 layout_mode = 2
+theme_override_constants/separation = 28
 
 [node name="DrawPile" type="PanelContainer" parent="Hand/Zone" unique_id=580534522]
-custom_minimum_size = Vector2(96, 120)
+custom_minimum_size = Vector2(116, 176)
 layout_mode = 2
 size_flags_vertical = 4
 
 [node name="Backdrop" type="TextureRect" parent="Hand/Zone/DrawPile" unique_id=1626769572]
+custom_minimum_size = Vector2(108, 144)
 layout_mode = 2
+size_flags_horizontal = 4
+size_flags_vertical = 0
 mouse_filter = 2
-texture = ExtResource("8_drawart")
+texture = ExtResource("13_cardback")
 expand_mode = 1
+stretch_mode = 5
 
 [node name="DrawLabel" type="Label" parent="Hand/Zone/DrawPile" unique_id=1096032152]
 layout_mode = 2
+size_flags_vertical = 1
 theme_override_colors/font_color = Color(0.86, 0.84, 0.72, 1)
 theme_override_font_sizes/font_size = 14
-text = "抽牌堆
-0"
+text = "抽牌堆 0"
 horizontal_alignment = 1
-vertical_alignment = 1
+vertical_alignment = 2
 
 [node name="Scroll" type="ScrollContainer" parent="Hand/Zone" unique_id=1113347889]
 custom_minimum_size = Vector2(0, 176)
-clip_contents = false
+clip_contents = true
 layout_mode = 2
 size_flags_horizontal = 3
 vertical_scroll_mode = 0
@@ -552,19 +606,29 @@ size_flags_horizontal = 3
 alignment = 1
 
 [node name="DiscardPile" type="PanelContainer" parent="Hand/Zone" unique_id=171769267]
-custom_minimum_size = Vector2(96, 120)
+custom_minimum_size = Vector2(116, 176)
 layout_mode = 2
 size_flags_vertical = 4
 theme_override_styles/panel = SubResource("StyleBoxFlat_yteae")
 
+[node name="Backdrop" type="TextureRect" parent="Hand/Zone/DiscardPile"]
+custom_minimum_size = Vector2(108, 144)
+layout_mode = 2
+size_flags_horizontal = 4
+size_flags_vertical = 0
+mouse_filter = 2
+texture = ExtResource("13_cardback")
+expand_mode = 1
+stretch_mode = 5
+
 [node name="DiscardLabel" type="Label" parent="Hand/Zone/DiscardPile" unique_id=1854609528]
 layout_mode = 2
+size_flags_vertical = 1
 theme_override_colors/font_color = Color(0.86, 0.84, 0.72, 1)
 theme_override_font_sizes/font_size = 14
-text = "弃牌堆
-0"
+text = "弃牌堆 0"
 horizontal_alignment = 1
-vertical_alignment = 1
+vertical_alignment = 2
 
 [node name="Label" type="Label" parent="Hand" unique_id=2092388912]
 layout_mode = 2
@@ -587,6 +651,10 @@ anchor_left = 0.5
 anchor_top = 0.5
 anchor_right = 0.5
 anchor_bottom = 0.5
+offset_left = -200.0
+offset_top = -100.0
+offset_right = 200.0
+offset_bottom = 100.0
 theme_override_styles/panel = SubResource("StyleBoxFlat_wldi0")
 
 [node name="Pad" type="MarginContainer" parent="ComboLayer/Burst" unique_id=1043852114]
@@ -618,6 +686,46 @@ custom_minimum_size = Vector2(0, 44)
 layout_mode = 2
 focus_mode = 0
 text = "连点追击"
+
+[node name="VictoryLayer" type="ColorRect" parent="."]
+visible = false
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+color = Color(0.045, 0.055, 0.1, 0.6)
+
+[node name="Center" type="CenterContainer" parent="VictoryLayer"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+
+[node name="Panel" type="PanelContainer" parent="VictoryLayer/Center"]
+custom_minimum_size = Vector2(640, 220)
+layout_mode = 2
+
+[node name="Box" type="VBoxContainer" parent="VictoryLayer/Center/Panel"]
+layout_mode = 2
+theme_override_constants/separation = 20
+alignment = 1
+
+[node name="Title" type="Label" parent="VictoryLayer/Center/Panel/Box"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 64
+text = "战斗胜利"
+horizontal_alignment = 1
+
+[node name="Next" type="Label" parent="VictoryLayer/Center/Panel/Box"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 22
+text = "即将进入奖励"
+horizontal_alignment = 1
 
 [connection signal="pressed" from="Board/Margin/Column/TopBar/Row/PauseButton" to="." method="_toggle_pause"]
 [connection signal="pressed" from="Board/Margin/Column/Controls/Button" to="." method="_burn"]

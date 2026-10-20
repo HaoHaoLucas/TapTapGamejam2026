@@ -1,0 +1,293 @@
+{
+  "MON_INK2_die": {
+    "frames": [
+      "res://assets/battle/imported/MON_INK2_die/00.png",
+      "res://assets/battle/imported/MON_INK2_die/01.png",
+      "res://assets/battle/imported/MON_INK2_die/02.png",
+      "res://assets/battle/imported/MON_INK2_die/03.png",
+      "res://assets/battle/imported/MON_INK2_die/04.png"
+    ],
+    "durations": [
+      0.2,
+      0.2,
+      0.2,
+      0.2,
+      0.2
+    ],
+    "loop": false
+  },
+  "MON_INK2_enter": {
+    "frames": [
+      "res://assets/battle/imported/MON_INK2_enter/00.png",
+      "res://assets/battle/imported/MON_INK2_enter/01.png",
+      "res://assets/battle/imported/MON_INK2_enter/02.png",
+      "res://assets/battle/imported/MON_INK2_enter/03.png",
+      "res://assets/battle/imported/MON_INK2_enter/04.png",
+      "res://assets/battle/imported/MON_INK2_enter/05.png",
+      "res://assets/battle/imported/MON_INK2_enter/06.png"
+    ],
+    "durations": [
+      0.2,
+      0.2,
+      0.2,
+      0.2,
+      0.2,
+      0.2,
+      0.2
+    ],
+    "loop": false
+  },
+  "MON_INK_die": {
+    "frames": [
+      "res://assets/battle/imported/MON_INK_die/00.png",
+      "res://assets/battle/imported/MON_INK_die/01.png",
+      "res://assets/battle/imported/MON_INK_die/02.png",
+      "res://assets/battle/imported/MON_INK_die/03.png",
+      "res://assets/battle/imported/MON_INK_die/04.png"
+    ],
+    "durations": [
+      0.2,
+      0.2,
+      0.2,
+      0.2,
+      0.2
+    ],
+    "loop": false
+  },
+  "MON_INK_enter": {
+    "frames": [
+      "res://assets/battle/imported/MON_INK_enter/00.png",
+      "res://assets/battle/imported/MON_INK_enter/01.png",
+      "res://assets/battle/imported/MON_INK_enter/02.png",
+      "res://assets/battle/imported/MON_INK_enter/03.png",
+      "res://assets/battle/imported/MON_INK_enter/04.png",
+      "res://assets/battle/imported/MON_INK_enter/05.png",
+      "res://assets/battle/imported/MON_INK_enter/06.png"
+    ],
+    "durations": [
+      0.2,
+      0.2,
+      0.2,
+      0.2,
+      0.2,
+      0.2,
+      0.2
+    ],
+    "loop": false
+  },
+  "MON_PARITY2_die": {
+    "frames": [
+      "res://assets/battle/imported/MON_PARITY2_die/00.png",
+      "res://assets/battle/imported/MON_PARITY2_die/01.png",
+      "res://assets/battle/imported/MON_PARITY2_die/02.png",
+      "res://assets/battle/imported/MON_PARITY2_die/03.png",
+      "res://assets/battle/imported/MON_PARITY2_die/04.png"
+    ],
+    "durations": [
+      0.2,
+      0.2,
+      0.2,
+      0.2,
+      0.2
+    ],
+    "loop": false
+  },
+  "MON_PARITY2_enter": {
+    "frames": [
+      "res://assets/battle/imported/MON_PARITY2_enter/00.png",
+      "res://assets/battle/imported/MON_PARITY2_enter/01.png",
+      "res://assets/battle/imported/MON_PARITY2_enter/02.png",
+      "res://assets/battle/imported/MON_PARITY2_enter/03.png",
+      "res://assets/battle/imported/MON_PARITY2_enter/04.png",
+      "res://assets/battle/imported/MON_PARITY2_enter/05.png",
+      "res://assets/battle/imported/MON_PARITY2_enter/06.png"
+    ],
+    "durations": [
+      0.2,
+      0.2,
+      0.2,
+      0.2,
+      0.2,
+      0.2,
+      0.2
+    ],
+    "loop": false
+  },
+  "MON_PARITY_die": {
+    "frames": [
+      "res://assets/battle/imported/MON_PARITY_die/00.png",
+      "res://assets/battle/imported/MON_PARITY_die/01.png",
+      "res://assets/battle/imported/MON_PARITY_die/02.png",
+      "res://assets/battle/imported/MON_PARITY_die/03.png",
+      "res://assets/battle/imported/MON_PARITY_die/04.png"
+    ],
+    "durations": [
+      0.2,
+      0.2,
+      0.2,
+      0.2,
+      0.2
+    ],
+    "loop": false
+  },
+  "MON_PARITY_enter": {
+    "frames": [
+      "res://assets/battle/imported/MON_PARITY_enter/00.png",
+      "res://assets/battle/imported/MON_PARITY_enter/01.png",
+      "res://assets/battle/imported/MON_PARITY_enter/02.png",
+      "res://assets/battle/imported/MON_PARITY_enter/03.png",
+      "res://assets/battle/imported/MON_PARITY_enter/04.png",
+      "res://assets/battle/imported/MON_PARITY_enter/05.png",
+      "res://assets/battle/imported/MON_PARITY_enter/06.png"
+    ],
+    "durations": [
+      0.2,
+      0.2,
+      0.2,
+      0.2,
+      0.2,
+      0.2,
+      0.2
+    ],
+    "loop": false
+  },
+  "MON_PRIEST2_die": {
+    "frames": [
+      "res://assets/battle/imported/MON_PRIEST2_die/00.png",
+      "res://assets/battle/imported/MON_PRIEST2_die/01.png",
+      "res://assets/battle/imported/MON_PRIEST2_die/02.png",
+      "res://assets/battle/imported/MON_PRIEST2_die/03.png",
+      "res://assets/battle/imported/MON_PRIEST2_die/04.png"
+    ],
+    "durations": [
+      0.2,
+      0.2,
+      0.2,
+      0.2,
+      0.2
+    ],
+    "loop": false
+  },
+  "MON_PRIEST2_enter": {
+    "frames": [
+      "res://assets/battle/imported/MON_PRIEST2_enter/00.png",
+      "res://assets/battle/imported/MON_PRIEST2_enter/01.png",
+      "res://assets/battle/imported/MON_PRIEST2_enter/02.png",
+      "res://assets/battle/imported/MON_PRIEST2_enter/03.png",
+      "res://assets/battle/imported/MON_PRIEST2_enter/04.png",
+      "res://assets/battle/imported/MON_PRIEST2_enter/05.png",
+      "res://assets/battle/imported/MON_PRIEST2_enter/06.png"
+    ],
+    "durations": [
+      0.2,
+      0.2,
+      0.2,
+      0.2,
+      0.2,
+      0.2,
+      0.2
+    ],
+    "loop": false
+  },
+  "MON_PRIEST_die": {
+    "frames": [
+      "res://assets/battle/imported/MON_PRIEST_die/00.png",
+      "res://assets/battle/imported/MON_PRIEST_die/01.png",
+      "res://assets/battle/imported/MON_PRIEST_die/02.png",
+      "res://assets/battle/imported/MON_PRIEST_die/03.png",
+      "res://assets/battle/imported/MON_PRIEST_die/04.png"
+    ],
+    "durations": [
+      0.2,
+      0.2,
+      0.2,
+      0.2,
+      0.2
+    ],
+    "loop": false
+  },
+  "MON_PRIEST_enter": {
+    "frames": [
+      "res://assets/battle/imported/MON_PRIEST_enter/00.png",
+      "res://assets/battle/imported/MON_PRIEST_enter/01.png",
+      "res://assets/battle/imported/MON_PRIEST_enter/02.png",
+      "res://assets/battle/imported/MON_PRIEST_enter/03.png",
+      "res://assets/battle/imported/MON_PRIEST_enter/04.png",
+      "res://assets/battle/imported/MON_PRIEST_enter/05.png",
+      "res://assets/battle/imported/MON_PRIEST_enter/06.png"
+    ],
+    "durations": [
+      0.2,
+      0.2,
+      0.2,
+      0.2,
+      0.2,
+      0.2,
+      0.2
+    ],
+    "loop": false
+  },
+  "MON_RUST_die": {
+    "frames": [
+      "res://assets/battle/imported/MON_RUST_die/00.png",
+      "res://assets/battle/imported/MON_RUST_die/01.png",
+      "res://assets/battle/imported/MON_RUST_die/02.png",
+      "res://assets/battle/imported/MON_RUST_die/03.png",
+      "res://assets/battle/imported/MON_RUST_die/04.png"
+    ],
+    "durations": [
+      0.2,
+      0.2,
+      0.2,
+      0.2,
+      0.2
+    ],
+    "loop": false
+  },
+  "MON_RUST_enter": {
+    "frames": [
+      "res://assets/battle/imported/MON_RUST_enter/00.png",
+      "res://assets/battle/imported/MON_RUST_enter/01.png",
+      "res://assets/battle/imported/MON_RUST_enter/02.png",
+      "res://assets/battle/imported/MON_RUST_enter/03.png",
+      "res://assets/battle/imported/MON_RUST_enter/04.png",
+      "res://assets/battle/imported/MON_RUST_enter/05.png",
+      "res://assets/battle/imported/MON_RUST_enter/06.png"
+    ],
+    "durations": [
+      0.2,
+      0.2,
+      0.2,
+      0.2,
+      0.2,
+      0.2,
+      0.2
+    ],
+    "loop": false
+  },
+  "rift": {
+    "frames": [
+      "res://assets/battle/imported/rift/00.png",
+      "res://assets/battle/imported/rift/01.png",
+      "res://assets/battle/imported/rift/02.png",
+      "res://assets/battle/imported/rift/03.png",
+      "res://assets/battle/imported/rift/04.png",
+      "res://assets/battle/imported/rift/05.png",
+      "res://assets/battle/imported/rift/06.png",
+      "res://assets/battle/imported/rift/07.png",
+      "res://assets/battle/imported/rift/08.png"
+    ],
+    "durations": [
+      0.2,
+      0.2,
+      0.2,
+      0.2,
+      0.2,
+      0.2,
+      0.2,
+      0.2,
+      0.2
+    ],
+    "loop": false
+  }
+}

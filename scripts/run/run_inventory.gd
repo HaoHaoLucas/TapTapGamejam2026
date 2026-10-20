@@ -2,9 +2,11 @@ class_name RunInventory
 extends Control
 ## Read-only run bag. It lists cards and collections; it does not move, destroy, or spend them.
 
+const BATTLE_CHROME := preload("res://scripts/run/battle_chrome.gd")
+
 const CARD_SCENE := preload("res://scenes/cards/card_view.tscn")
 
-@export var battle_anchor_top := 0.42
+@export var battle_anchor_top := 0.40
 @export var battle_bottom_reserve := 230.0
 @export var roam_anchor_top := 0.16
 @export_range(0.55, 0.85, 0.01) var card_column_ratio := 0.75
@@ -35,9 +37,13 @@ var _pause_claim := false
 var _pause_was_set := false
 var _claimed_battle_id := 0
 var _battle_clearance := false
+var _roam_theme: Theme
+var _roam_panel_style: StyleBox
+var _roam_label_colors: Dictionary = {}
 var _slide_tween: Tween
 var _hover_tween: Tween
 var _split_pending := false
+var _columns_pending := false
 var _applying_anchors := false
 
 @onready var _blocker: ColorRect = $InputBlocker
@@ -48,25 +54,25 @@ var _applying_anchors := false
 @onready var _pause_badge: Label = $DrawerHost/Slide/BagPanel/Margin/Body/Header/PauseBadge
 @onready var _close: Button = $DrawerHost/Slide/BagPanel/Margin/Body/Header/CloseButton
 @onready var _split: HSplitContainer = $DrawerHost/Slide/BagPanel/Margin/Body/Split
-@onready var _stats: Label = $DrawerHost/Slide/BagPanel/Margin/Body/Split/Cards/Stats
-@onready var _kind_all: Button = $DrawerHost/Slide/BagPanel/Margin/Body/Split/Cards/Filters/KindAll
-@onready var _kind_num: Button = $DrawerHost/Slide/BagPanel/Margin/Body/Split/Cards/Filters/KindNum
-@onready var _kind_op: Button = $DrawerHost/Slide/BagPanel/Margin/Body/Split/Cards/Filters/KindOp
-@onready var _mark_all: Button = $DrawerHost/Slide/BagPanel/Margin/Body/Split/Cards/Filters/MarkAll
-@onready var _mark_yes: Button = $DrawerHost/Slide/BagPanel/Margin/Body/Split/Cards/Filters/MarkYes
-@onready var _mark_no: Button = $DrawerHost/Slide/BagPanel/Margin/Body/Split/Cards/Filters/MarkNo
-@onready var _sort_option: OptionButton = $DrawerHost/Slide/BagPanel/Margin/Body/Split/Cards/Filters/SortOption
-@onready var _card_scroll: ScrollContainer = $DrawerHost/Slide/BagPanel/Margin/Body/Split/Cards/CardScroll
-@onready var _empty: Label = $DrawerHost/Slide/BagPanel/Margin/Body/Split/Cards/CardScroll/CardBox/EmptyLabel
-@onready var _grid: GridContainer = $DrawerHost/Slide/BagPanel/Margin/Body/Split/Cards/CardScroll/CardBox/Grid
-@onready var _detail_scroll: ScrollContainer = $DrawerHost/Slide/BagPanel/Margin/Body/Split/Cards/DetailScroll
-@onready var _detail: Label = $DrawerHost/Slide/BagPanel/Margin/Body/Split/Cards/DetailScroll/Detail
-@onready var _run_hint: Label = $DrawerHost/Slide/BagPanel/Margin/Body/Split/Resources/RunHint
-@onready var _collection_empty: Label = $DrawerHost/Slide/BagPanel/Margin/Body/Split/Resources/CollectionScroll/CollectionBox/CollectionEmpty
-@onready var _collection_list: VBoxContainer = $DrawerHost/Slide/BagPanel/Margin/Body/Split/Resources/CollectionScroll/CollectionBox/CollectionList
-@onready var _meta_header: Label = $DrawerHost/Slide/BagPanel/Margin/Body/Split/Resources/MetaHeader
-@onready var _meta_empty: Label = $DrawerHost/Slide/BagPanel/Margin/Body/Split/Resources/MetaScroll/MetaBox/MetaEmpty
-@onready var _meta_list: VBoxContainer = $DrawerHost/Slide/BagPanel/Margin/Body/Split/Resources/MetaScroll/MetaBox/MetaList
+@onready var _stats: Label = $DrawerHost/Slide/BagPanel/Margin/Body/Header/Stats
+@onready var _kind_all: Button = $DrawerHost/Slide/BagPanel/Margin/Body/Filters/KindGroup/KindAll
+@onready var _kind_num: Button = $DrawerHost/Slide/BagPanel/Margin/Body/Filters/KindGroup/KindNum
+@onready var _kind_op: Button = $DrawerHost/Slide/BagPanel/Margin/Body/Filters/KindGroup/KindOp
+@onready var _mark_all: Button = $DrawerHost/Slide/BagPanel/Margin/Body/Filters/MarkGroup/MarkAll
+@onready var _mark_yes: Button = $DrawerHost/Slide/BagPanel/Margin/Body/Filters/MarkGroup/MarkYes
+@onready var _mark_no: Button = $DrawerHost/Slide/BagPanel/Margin/Body/Filters/MarkGroup/MarkNo
+@onready var _sort_option: OptionButton = $DrawerHost/Slide/BagPanel/Margin/Body/Filters/SortGroup/SortOption
+@onready var _card_scroll: ScrollContainer = $DrawerHost/Slide/BagPanel/Margin/Body/Split/Cards/Browse/CardScroll
+@onready var _empty: Label = $DrawerHost/Slide/BagPanel/Margin/Body/Split/Cards/Browse/CardScroll/CardBox/EmptyLabel
+@onready var _grid: GridContainer = $DrawerHost/Slide/BagPanel/Margin/Body/Split/Cards/Browse/CardScroll/CardBox/Grid
+@onready var _detail_scroll: ScrollContainer = $DrawerHost/Slide/BagPanel/Margin/Body/Split/Cards/Browse/DetailScroll
+@onready var _detail: Label = $DrawerHost/Slide/BagPanel/Margin/Body/Split/Cards/Browse/DetailScroll/DetailBox/Detail
+@onready var _run_hint: Label = $DrawerHost/Slide/BagPanel/Margin/Body/Split/Resources/ResourceBox/RunHint
+@onready var _collection_empty: Label = $DrawerHost/Slide/BagPanel/Margin/Body/Split/Resources/ResourceBox/CollectionEmpty
+@onready var _collection_list: VBoxContainer = $DrawerHost/Slide/BagPanel/Margin/Body/Split/Resources/ResourceBox/CollectionList
+@onready var _meta_header: Label = $DrawerHost/Slide/BagPanel/Margin/Body/Split/Resources/ResourceBox/MetaHeader
+@onready var _meta_empty: Label = $DrawerHost/Slide/BagPanel/Margin/Body/Split/Resources/ResourceBox/MetaEmpty
+@onready var _meta_list: VBoxContainer = $DrawerHost/Slide/BagPanel/Margin/Body/Split/Resources/ResourceBox/MetaList
 @onready var _tab: Button = $DrawerHost/Slide/TabButton
 
 
@@ -81,6 +87,7 @@ func _ready() -> void:
 	_unlock(_panel)
 	_unlock(_tab)
 	_apply_chrome()
+	_apply_filter_chrome()
 	_configure_filters()
 	_tab.pressed.connect(_on_tab_pressed)
 	_tab.mouse_entered.connect(_on_tab_entered)
@@ -92,6 +99,8 @@ func _ready() -> void:
 	_drawer_host.resized.connect(_on_drawer_resized)
 	_split.resized.connect(_apply_split)
 	_card_scroll.resized.connect(_update_columns)
+	_card_scroll.get_v_scroll_bar().visibility_changed.connect(_update_columns)
+	_grid.minimum_size_changed.connect(_update_columns)
 	_pause_badge.visible = false
 	_detail.text = "选择一张牌查看详情"
 	_run_hint.text = RunInventoryPresenter.RUN_RECORD_NOTE
@@ -157,7 +166,9 @@ func set_meta_provider(provider: MetaResourceProvider) -> void:
 
 
 func set_battle_clearance(enabled: bool) -> void:
-	_battle_clearance = enabled
+	if _battle_clearance != enabled:
+		_battle_clearance = enabled
+		_apply_battle_chrome(enabled)
 	_apply_host_anchors()
 
 
@@ -433,6 +444,7 @@ func _paint_stats() -> void:
 		int(counts.get("enhanced", 0)),
 		int(counts.get("plain", 0)),
 	]
+	_stats.tooltip_text = _stats.text
 
 
 func _paint_selection() -> void:
@@ -510,8 +522,9 @@ func _paint_meta() -> void:
 	var provider := _meta if _meta != null else MetaResourceProvider.new()
 	if not provider.is_available():
 		if _meta_header != null:
-			_meta_header.text = MetaResourceProvider.DISCONNECTED_TEXT
-		_meta_empty.visible = false
+			_meta_header.text = "局外资源"
+		_meta_empty.text = MetaResourceProvider.DISCONNECTED_TEXT
+		_meta_empty.visible = true
 		return
 	if _meta_header != null:
 		_meta_header.text = "局外资源"
@@ -717,7 +730,9 @@ func _layout_slide() -> void:
 	if _drawer_host == null or _slide == null or _tab == null or _panel == null:
 		return
 	var host_size := _drawer_host.size
-	var tab_size := _tab.custom_minimum_size
+	# Paper styling can exceed the nominal tab size; reserve the rendered height
+	# so the drawer's clipping rectangle cannot cut off its label/hit target.
+	var tab_size := _tab.get_combined_minimum_size()
 	if tab_size.x < 1.0:
 		tab_size.x = 132.0
 	if tab_size.y < 1.0:
@@ -729,37 +744,46 @@ func _layout_slide() -> void:
 	_panel.position = Vector2(0, tab_size.y)
 	var panel_height := maxf(0.0, host_size.y - tab_size.y)
 	_panel.custom_minimum_size = Vector2(0, 0)
-	_reserve_detail_height(panel_height)
+	_reserve_detail_column()
 	_panel.size = Vector2(host_size.x, panel_height)
 
 
-func _reserve_detail_height(panel_height: float) -> void:
-	if _detail_scroll == null or _panel == null or panel_height < 1.0:
+func _reserve_detail_column() -> void:
+	if _detail_scroll == null:
 		return
-	var current := _detail_scroll.custom_minimum_size.y
-	var base := _panel.get_combined_minimum_size().y - current
-	var room := panel_height - base
-	var want := 0.0
-	if room >= 128.0:
-		want = minf(clampf(room * 0.42, 72.0, 168.0), room - 56.0)
-	elif room > 48.0:
-		want = room * 0.45
-	if absf(current - want) <= 1.0:
+	var width := 260.0
+	var current := _detail_scroll.custom_minimum_size
+	if absf(current.x - width) <= 1.0 and current.y <= 1.0:
 		return
-	_detail_scroll.custom_minimum_size.y = want
+	_detail_scroll.custom_minimum_size = Vector2(width, 0.0)
 
 
 func _update_columns() -> void:
-	if _grid == null or _card_scroll == null:
+	if _columns_pending or _grid == null or _card_scroll == null:
+		return
+	_columns_pending = true
+	call_deferred("_apply_columns")
+
+
+func _apply_columns() -> void:
+	_columns_pending = false
+	if not is_inside_tree() or _card_scroll.size.x <= 0.0:
 		return
 	var separation := _grid.get_theme_constant("h_separation")
-	var card_w := 92.0
-	var width := _card_scroll.size.x
-	if _split != null and _split.size.x > 1.0:
-		width = _split.size.x * card_column_ratio - 36.0
-	var columns := int((width + separation) / (card_w + separation))
-	_grid.columns = maxi(1, columns)
-	call_deferred("_apply_split")
+	var card_width := 0.0
+	for child in _grid.get_children():
+		var card := child as Control
+		if card != null:
+			card_width = maxf(card_width, card.get_combined_minimum_size().x)
+	if card_width <= 0.0:
+		return
+	var width := _card_scroll.size.x - _card_scroll.get_theme_stylebox("panel").get_minimum_size().x
+	var bar := _card_scroll.get_v_scroll_bar()
+	if bar.visible:
+		width -= bar.size.x
+	var columns := maxi(1, int((width + separation) / (card_width + separation)))
+	if _grid.columns != columns:
+		_grid.columns = columns
 
 
 func _apply_panel_visibility() -> void:
@@ -812,10 +836,10 @@ func _apply_chrome() -> void:
 	style.border_color = Color(0.93, 0.78, 0.42, 0.9)
 	style.set_border_width_all(2)
 	style.set_corner_radius_all(12)
-	style.content_margin_left = 14
-	style.content_margin_right = 14
+	style.content_margin_left = 10
+	style.content_margin_right = 10
 	style.content_margin_top = 10
-	style.content_margin_bottom = 12
+	style.content_margin_bottom = 10
 	_panel.add_theme_stylebox_override("panel", style)
 
 
@@ -825,6 +849,30 @@ func _unlock(control: Control) -> void:
 	control.anchor_bottom = 0.0
 
 
+func _apply_filter_chrome() -> void:
+	var ink := BATTLE_CHROME.INK if _battle_clearance else Color(0.9, 0.92, 0.88)
+	var accent := BATTLE_CHROME.INK if _battle_clearance else Color(0.93, 0.78, 0.42)
+	for button in [_kind_all, _kind_num, _kind_op, _mark_all, _mark_yes, _mark_no]:
+		for state in ["normal", "hover", "pressed", "hover_pressed"]:
+			var style := StyleBoxFlat.new()
+			var selected: bool = state == "pressed" or state == "hover_pressed"
+			style.bg_color = Color(0.77, 0.79, 0.86) if _battle_clearance else Color(0.12, 0.16, 0.22)
+			if selected:
+				style.bg_color = Color(0.66, 0.69, 0.78) if _battle_clearance else Color(0.25, 0.23, 0.17)
+			elif state == "hover":
+				style.bg_color = style.bg_color.lightened(0.08)
+			style.border_color = accent if selected else Color(ink, 0.25)
+			style.set_border_width_all(2 if selected else 1)
+			style.set_corner_radius_all(5)
+			style.content_margin_left = 10
+			style.content_margin_right = 10
+			style.content_margin_top = 5
+			style.content_margin_bottom = 5
+			button.add_theme_stylebox_override(state, style)
+		for state in ["font_color", "font_hover_color", "font_pressed_color", "font_hover_pressed_color"]:
+			button.add_theme_color_override(state, ink)
+
+
 func _wipe(node: Node) -> void:
 	var doomed: Array = []
 	for child in node.get_children():
@@ -832,3 +880,25 @@ func _wipe(node: Node) -> void:
 	for child in doomed:
 		node.remove_child(child)
 		child.queue_free()
+
+
+func _apply_battle_chrome(enabled: bool) -> void:
+	if enabled:
+		_roam_theme = theme
+		_roam_panel_style = _panel.get_theme_stylebox("panel")
+		_roam_label_colors.clear()
+		for node in find_children("*", "Label", true, false):
+			_roam_label_colors[node] = node.get_theme_color("font_color")
+		theme = BATTLE_CHROME.make_theme(18, 4.0)
+		_panel.add_theme_stylebox_override("panel", BATTLE_CHROME.paper(Color.WHITE, 10.0))
+		BATTLE_CHROME.ink_labels(_panel)
+	else:
+		if _roam_theme != null:
+			theme = _roam_theme
+		if _roam_panel_style != null:
+			_panel.add_theme_stylebox_override("panel", _roam_panel_style)
+		for node in _roam_label_colors:
+			if is_instance_valid(node):
+				node.add_theme_color_override("font_color", _roam_label_colors[node])
+		_roam_label_colors.clear()
+	_apply_filter_chrome()

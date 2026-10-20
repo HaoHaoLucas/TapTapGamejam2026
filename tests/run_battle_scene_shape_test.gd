@@ -145,8 +145,6 @@ func _test_mounted_under_run_shell() -> void:
 	var shell_text := _read("res://scenes/run/run_shell.tscn")
 	_check(shell_text.contains("instance=ExtResource"), "run_shell.tscn 里战斗屏应是场景实例")
 	_check(shell_text.contains("run_battle.tscn"), "run_shell.tscn 里应引用 run_battle.tscn")
-	var shell_script := _read("res://scripts/run/run_shell.gd")
-	_check(not shell_script.contains(".instantiate("), "run_shell.gd 不该再自己 instantiate 战斗屏")
 
 	var shell: Control = (load("res://scenes/run/run_shell.tscn") as PackedScene).instantiate() as Control
 	root.add_child(shell)
@@ -155,6 +153,7 @@ func _test_mounted_under_run_shell() -> void:
 	if battle == null:
 		shell.queue_free()
 		return
+	_check(battle == shell.get_node("Battle") and battle.scene_file_path == "res://scenes/run/run_battle.tscn", "战斗屏必须复用场景中挂载的实例；允许动态创建选择卡面")
 	_check(battle.name == "Battle", "战斗屏实例节点名应为 Battle，实际 %s" % str(battle.name))
 	_check(battle.get_parent() == shell, "战斗屏应挂在跑图壳下，实际挂在 %s" % str(battle.get_parent().name))
 	_check(not battle.visible, "战斗屏开局必须隐藏")
@@ -162,12 +161,12 @@ func _test_mounted_under_run_shell() -> void:
 	_check(inventory != null, "背包应挂在跑图壳上")
 	if inventory != null:
 		_check(inventory.get_parent() == shell, "背包应挂在跑图壳下")
-		_check(inventory.get_index() == shell.get_child_count() - 1, "背包应是最后一个子节点")
+		_check(shell.get_node("RunMenu").get_index() > inventory.get_index(), "暂停菜单应在背包之上")
 		_check(battle.get_index() == inventory.get_index() - 1, "战斗屏应紧挨在背包下面，实际 battle %s inventory %s" % [battle.get_index(), inventory.get_index()])
 	_check(shell.get_child(0) is TextureRect, "全屏背景应压在 index 0，实际是 %s" % shell.get_child(0).get_class())
 	var bg := shell.get_child(0) as TextureRect
 	var bg_path := "" if bg == null or bg.texture == null else bg.texture.resource_path
-	_check(bg_path.ends_with("map_bg_1.JPG"), "index 0 应是 map_bg_1.JPG，实际 %s" % bg_path)
+	_check(bg_path.ends_with("map_bg_1.png"), "第一档地图应使用已导入的 map_bg_1.png，实际 %s" % bg_path)
 	shell.queue_free()
 
 
