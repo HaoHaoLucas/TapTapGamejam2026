@@ -23,7 +23,6 @@ grow_vertical = 2
 color = Color(0, 0, 0, 0)
 
 [node name="DrawerHost" type="Control" parent="." unique_id=1992678591]
-visible = false
 clip_contents = true
 layout_mode = 1
 anchors_preset = 15

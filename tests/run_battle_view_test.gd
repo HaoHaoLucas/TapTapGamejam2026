@@ -228,7 +228,6 @@ func _readouts(view: RunBattle) -> Dictionary:
 		"_hp_label": view._hp_label.text,
 		"_hp_bar": _ratio(view._hp_bar),
 		"_floor_label": view._floor_label.text,
-		"_pause_button": view._pause_button.text,
 		"_intent_label": view._intent_label.text,
 		"_enemy_name": view._enemy_name.text,
 		"_enemy_hp_bar": _ratio(view._enemy_hp_bar),

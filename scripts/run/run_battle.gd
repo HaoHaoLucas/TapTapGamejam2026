@@ -31,7 +31,6 @@ var _external_input_blocked: bool = false
 @onready var _hp_label: Label = $Board/Margin/Column/TopBar/Row/Life/Row/HpValue
 @onready var _hp_bar: TextureProgressBar = $Board/Margin/Column/TopBar/Row/Life/Bar
 @onready var _floor_label: Label = $Board/Margin/Column/TopBar/Row/Floor
-@onready var _pause_button: Button = $Board/Margin/Column/TopBar/Row/PauseButton
 @onready var _intent_label: Label = $Board/Margin/Column/Stage/Enemy/Intent
 @onready var _enemy_name: Label = $Board/Margin/Column/Stage/Enemy/Name
 @onready var _enemy_hp_bar: TextureProgressBar = $Board/Margin/Column/Stage/Enemy/Bar
